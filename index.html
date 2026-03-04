@@ -78,9 +78,9 @@
     <nav class="flex justify-center bg-gray-800 border-b border-gray-700 overflow-x-auto whitespace-nowrap">
         <button onclick="switchTab('gacha')" id="tab-gacha" class="px-6 py-3 font-semibold tab-active hover:bg-gray-700 transition">Roleta (Gacha)</button>
         <button onclick="switchTab('album')" id="tab-album" class="px-6 py-3 font-semibold tab-inactive hover:bg-gray-700 transition">Meu Álbum</button>
-        <button onclick="switchTab('explore')" id="tab-explore" class="px-6 py-3 font-semibold tab-inactive hover:bg-gray-700 transition text-yellow-400 border-b-2 border-transparent">Comunidade 🔍</button>
+        <button onclick="switchTab('explore')" id="tab-explore" class="px-6 py-3 font-semibold tab-inactive hover:bg-gray-700 transition text-yellow-600 border-b-2 border-transparent">Comunidade 🔍</button>
         <!-- Aba Admin (Oculta por padrão) -->
-        <button onclick="switchTab('admin')" id="tab-admin" class="hidden px-6 py-3 font-semibold tab-inactive hover:bg-gray-700 transition text-red-400 border-b-2 border-transparent">⚙️ Criar Cartas</button>
+        <button onclick="switchTab('admin')" id="tab-admin" class="hidden px-6 py-3 font-semibold tab-inactive hover:bg-gray-700 transition text-red-600 border-b-2 border-transparent">⚙️ Criar Cartas</button>
     </nav>
 
     <!-- Modal de Login/Registro -->
@@ -90,13 +90,9 @@
             <h2 id="modal-title" class="text-2xl font-bold text-center mb-6">Entrar</h2>
             
             <form id="auth-form" class="space-y-4" onsubmit="submitAuth(event)">
-                <div id="group-nickname" class="hidden">
-                    <label class="block text-sm font-medium text-gray-300 mb-1">Nick no Jogo</label>
-                    <input type="text" id="auth-nick" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500" placeholder="Ex: Auriosh">
-                </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-300 mb-1">E-mail</label>
-                    <input type="email" id="auth-email" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500" required>
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Usuário (Nick no Jogo)</label>
+                    <input type="text" id="auth-username" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500" placeholder="Ex: Auriosh" required>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-300 mb-1">Senha</label>
@@ -217,42 +213,58 @@
         </section>
 
         <!-- ABA: ADMIN (CRIAR CARTAS) -->
-        <section id="section-admin" class="w-full max-w-2xl hidden flex-col gap-6">
+        <section id="section-admin" class="w-full max-w-4xl hidden flex-col gap-6">
             <div class="bg-gray-800 p-8 rounded-xl border border-red-900 shadow-2xl">
                 <h2 class="text-2xl font-bold text-red-400 mb-2 border-b border-gray-700 pb-2">Painel do Administrador</h2>
                 <p class="text-gray-400 text-sm mb-6">Crie novas cartas. Certifique-se de que a imagem já foi enviada para a pasta <code>assets/cards/</code> no GitHub.</p>
                 
-                <form id="admin-form" class="space-y-4" onsubmit="createNewCard(event)">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-1">Nome da Carta</label>
-                        <input type="text" id="admin-name" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white" required placeholder="Ex: Masiel Bolado">
+                <div class="flex flex-col md:flex-row gap-8">
+                    <!-- Formulário da Carta -->
+                    <form id="admin-form" class="space-y-4 flex-1" onsubmit="createNewCard(event)">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-1">Nome da Carta</label>
+                            <input type="text" id="admin-name" oninput="updateAdminPreview()" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white" required placeholder="Ex: Masiel Bolado">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-1">Raridade (Tier)</label>
+                            <select id="admin-tier" onchange="updateAdminPreview()" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white">
+                                <option value="D">D - Comum (50%)</option>
+                                <option value="C">C - Incomum (30%)</option>
+                                <option value="B">B - Raro (13%)</option>
+                                <option value="A">A - Épico (5%)</option>
+                                <option value="S">S - Lendário (1.8%)</option>
+                                <option value="SS">SS - Mítico (0.2%)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-1">Descrição</label>
+                            <input type="text" id="admin-desc" oninput="updateAdminPreview()" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white" required placeholder="Ex: Um momento histórico do servidor.">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-1">Escolha a Imagem (Arquivos no GitHub)</label>
+                            <div id="github-images-loading" class="text-yellow-400 text-sm animate-pulse">Buscando imagens no GitHub...</div>
+                            <div id="github-images-grid" class="grid grid-cols-3 sm:grid-cols-4 gap-2 max-h-40 overflow-y-auto p-2 bg-gray-900 border border-gray-600 rounded-lg">
+                                <!-- Imagens injetadas via JS -->
+                            </div>
+                            <p id="github-images-empty" class="text-sm text-gray-400 hidden mt-2">Nenhuma nova imagem disponível. Suba imagens na pasta assets/cards/ no GitHub!</p>
+                        </div>
+                        
+                        <button type="submit" id="admin-submit" class="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-3 rounded-lg transition mt-4 shadow-lg shadow-red-900/50">
+                            CRIAR CARTA E ADICIONAR AO JOGO
+                        </button>
+                        <p id="admin-msg" class="text-center font-bold text-sm hidden mt-2"></p>
+                    </form>
+
+                    <!-- Preview ao Vivo da Carta -->
+                    <div class="flex flex-col items-center w-full md:w-64 border-t md:border-t-0 md:border-l border-gray-700 pt-6 md:pt-0 md:pl-8">
+                        <h3 class="text-gray-400 text-sm font-bold mb-4">Pré-visualização</h3>
+                        <div class="w-48 h-72">
+                            <div id="admin-preview-container" class="w-full h-full shadow-2xl transition transform">
+                                <!-- A carta será gerada aqui pelo JS -->
+                            </div>
+                        </div>
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-1">Raridade (Tier)</label>
-                        <select id="admin-tier" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white">
-                            <option value="D">D - Comum (50%)</option>
-                            <option value="C">C - Incomum (30%)</option>
-                            <option value="B">B - Raro (13%)</option>
-                            <option value="A">A - Épico (5%)</option>
-                            <option value="S">S - Lendário (1.8%)</option>
-                            <option value="SS">SS - Mítico (0.2%)</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-1">Descrição</label>
-                        <input type="text" id="admin-desc" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white" required placeholder="Ex: Um momento histórico do servidor.">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-1">Nome do Arquivo da Imagem (com extensão)</label>
-                        <input type="text" id="admin-img" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white" required placeholder="Ex: masiel.png ou igao.gif">
-                        <p class="text-xs text-yellow-500 mt-1">O arquivo deve estar no repositório GitHub (assets/cards/)</p>
-                    </div>
-                    
-                    <button type="submit" id="admin-submit" class="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-3 rounded-lg transition mt-4 shadow-lg shadow-red-900/50">
-                        CRIAR CARTA E ADICIONAR AO JOGO
-                    </button>
-                    <p id="admin-msg" class="text-center font-bold text-sm hidden mt-2"></p>
-                </form>
+                </div>
             </div>
             
             <div class="bg-gray-800 p-6 rounded-xl border border-gray-700">
@@ -300,6 +312,8 @@
         let cardDatabase = [];
         // Base URL do GitHub para buscar as imagens do seu repositório
         const GITHUB_RAW_URL = "https://raw.githubusercontent.com/aurioshlookin/NinCardMemeCollectionBR/main/assets/cards/";
+        
+        let selectedAdminImage = ""; // Armazena a imagem selecionada na aba Admin
 
         // --- INICIALIZAR CATÁLOGO (TEMPO REAL) ---
         unsubCards = onSnapshot(collection(db, "cards"), (snapshot) => {
@@ -331,6 +345,11 @@
 
             // Atualiza álbum atual se estiver logado
             if (currentUser) renderAlbumHTML('album-grid', userData.inventory);
+
+            // Atualiza a galeria do admin se for admin
+            if (userData.role === 'admin' && window.loadGitHubImages) {
+                window.loadGitHubImages();
+            }
         });
 
         // --- AUTH & MODAL ---
@@ -345,11 +364,9 @@
             if (mode === 'register') {
                 document.getElementById('modal-title').innerText = 'Criar Conta';
                 document.getElementById('auth-submit-btn').innerText = 'Cadastrar';
-                document.getElementById('group-nickname').classList.remove('hidden');
             } else {
                 document.getElementById('modal-title').innerText = 'Entrar';
                 document.getElementById('auth-submit-btn').innerText = 'Login';
-                document.getElementById('group-nickname').classList.add('hidden');
             }
         };
 
@@ -357,34 +374,45 @@
 
         window.submitAuth = async (e) => {
             e.preventDefault();
-            const email = document.getElementById('auth-email').value;
+            const username = document.getElementById('auth-username').value.trim();
             const pass = document.getElementById('auth-password').value;
             const errorEl = document.getElementById('auth-error');
             
+            // Tratamento invisível para o Firebase (Cria um e-mail falso usando o nick limpo)
+            const safeUsername = username.toLowerCase().replace(/[^a-z0-9]/g, '');
+            if(safeUsername.length < 3) {
+                errorEl.innerText = "Seu usuário deve ter pelo menos 3 letras, sem espaços ou caracteres especiais.";
+                errorEl.classList.remove('hidden');
+                return;
+            }
+            const fakeEmail = `${safeUsername}@nincard.com`;
+            
             try {
                 if (authMode === 'register') {
-                    const nick = document.getElementById('auth-nick').value;
-                    if(!nick) throw new Error("Preencha o Nickname!");
+                    const userCredential = await createUserWithEmailAndPassword(auth, fakeEmail, pass);
+                    await updateProfile(userCredential.user, { displayName: username });
                     
-                    const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
-                    await updateProfile(userCredential.user, { displayName: nick });
-                    
-                    // Promoção automática de admin ao registrar
-                    const userRole = email.toLowerCase() === 'igorprodrigues@outlook.com.br' ? 'admin' : 'player';
+                    // Promoção automática de admin ao registrar (auriosh)
+                    const userRole = safeUsername === 'auriosh' ? 'admin' : 'player';
 
                     await setDoc(doc(db, "users", userCredential.user.uid), {
-                        displayName: nick,
-                        displayNameLower: nick.toLowerCase(),
+                        displayName: username,
+                        displayNameLower: username.toLowerCase(),
                         pullsAvailable: 3,
                         inventory: {},
                         role: userRole
                     });
                 } else {
-                    await signInWithEmailAndPassword(auth, email, pass);
+                    await signInWithEmailAndPassword(auth, fakeEmail, pass);
                 }
                 closeModal();
             } catch (error) {
-                errorEl.innerText = error.message.replace('Firebase: ', '');
+                // Mensagens amigáveis para falhas comuns
+                let errorMsg = error.message.replace('Firebase: ', '');
+                if (error.code === 'auth/email-already-in-use') errorMsg = "Este usuário já está em uso!";
+                if (error.code === 'auth/invalid-credential') errorMsg = "Usuário ou senha incorretos!";
+                
+                errorEl.innerText = errorMsg;
                 errorEl.classList.remove('hidden');
             }
         };
@@ -420,7 +448,7 @@
                         userData = docSnap.data();
 
                         // SE JÁ CADASTROU E LOGOU AGORA, PROMOVE A ADMIN AUTOMATICAMENTE:
-                        if (user.email === 'igorprodrigues@outlook.com.br' && userData.role !== 'admin') {
+                        if (user.email === 'auriosh@nincard.com' && userData.role !== 'admin') {
                             await updateDoc(doc(db, "users", user.uid), { role: 'admin' });
                             userData.role = 'admin'; // Força atualização local na hora
                         }
@@ -428,7 +456,7 @@
                         updateGachaUI();
                         renderAlbumHTML('album-grid', userData.inventory);
 
-                        // MOSTRAR ABA ADMIN SE FOR ADMIN
+                        // MOSTRAR ABA ADMIN SE FOR ADMIN (Sem apagar o hidden, manipulando classList de forma segura)
                         if (userData.role === 'admin') {
                             document.getElementById('tab-admin').classList.remove('hidden');
                         } else {
@@ -462,57 +490,33 @@
                 if(!btn) return;
 
                 if (t === tabName) {
-                    sec.classList.remove('hidden'); sec.classList.add('flex');
-                    let activeClass = 'px-6 py-3 font-semibold tab-active hover:bg-gray-700 transition';
-                    if(t === 'explore') activeClass += ' text-yellow-400 border-yellow-400';
-                    if(t === 'admin') activeClass += ' text-red-400 border-red-400';
-                    btn.className = activeClass;
+                    sec.classList.remove('hidden'); 
+                    sec.classList.add('flex');
+                    
+                    // Ajuste seguro de classes (Para não quebrar a classe 'hidden' da aba Admin)
+                    btn.classList.remove('tab-inactive', 'text-yellow-600', 'text-red-600', 'border-transparent');
+                    btn.classList.add('tab-active');
+                    if(t === 'explore') btn.classList.add('text-yellow-400', 'border-yellow-400');
+                    if(t === 'admin') btn.classList.add('text-red-400', 'border-red-400');
+
                     if (tabName === 'explore') loadAllPlayers(); 
+                    if (tabName === 'admin') {
+                        if (window.loadGitHubImages) window.loadGitHubImages(); 
+                        if (window.updateAdminPreview) window.updateAdminPreview(); // Atualiza a carta preview ao abrir
+                    }
                 } else {
-                    sec.classList.add('hidden'); sec.classList.remove('flex');
-                    let inactiveClass = 'px-6 py-3 font-semibold tab-inactive hover:bg-gray-700 transition';
-                    if(t === 'explore') inactiveClass += ' text-yellow-600 border-transparent';
-                    if(t === 'admin') inactiveClass += ' text-red-600 border-transparent';
-                    btn.className = inactiveClass;
+                    sec.classList.add('hidden'); 
+                    sec.classList.remove('flex');
+                    
+                    btn.classList.remove('tab-active', 'text-yellow-400', 'border-yellow-400', 'text-red-400', 'border-red-400');
+                    btn.classList.add('tab-inactive', 'border-transparent');
+                    if(t === 'explore') btn.classList.add('text-yellow-600');
+                    if(t === 'admin') btn.classList.add('text-red-600');
                 }
             });
         };
 
-        // --- ADMIN: CRIAR CARTA ---
-        window.createNewCard = async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('admin-submit');
-            const msg = document.getElementById('admin-msg');
-            btn.disabled = true;
-            btn.innerText = "Criando...";
-
-            try {
-                const newCard = {
-                    name: document.getElementById('admin-name').value,
-                    tier: document.getElementById('admin-tier').value,
-                    desc: document.getElementById('admin-desc').value,
-                    img: document.getElementById('admin-img').value.trim(),
-                    createdAt: serverTimestamp()
-                };
-
-                await addDoc(collection(db, "cards"), newCard);
-                
-                msg.innerText = "Carta criada com sucesso! Já está no jogo.";
-                msg.className = "text-center font-bold text-sm mt-2 text-green-400";
-                msg.classList.remove('hidden');
-                document.getElementById('admin-form').reset();
-            } catch (err) {
-                console.error(err);
-                msg.innerText = "Erro ao criar: " + err.message;
-                msg.className = "text-center font-bold text-sm mt-2 text-red-400";
-                msg.classList.remove('hidden');
-            } finally {
-                btn.disabled = false;
-                btn.innerText = "CRIAR CARTA E ADICIONAR AO JOGO";
-                setTimeout(() => msg.classList.add('hidden'), 5000);
-            }
-        };
-
+        // --- ADMIN: LER IMAGENS DO GITHUB ---
         window.loadGitHubImages = async () => {
             const loading = document.getElementById('github-images-loading');
             const grid = document.getElementById('github-images-grid');
@@ -524,15 +528,14 @@
             selectedAdminImage = "";
 
             try {
-                // Fetch the contents of the assets/cards folder via GitHub API
                 const response = await fetch('https://api.github.com/repos/aurioshlookin/NinCardMemeCollectionBR/contents/assets/cards');
                 if (!response.ok) throw new Error("Erro ao buscar no GitHub API");
                 const files = await response.json();
 
-                // Pegar imagens que já estão no banco do Firebase
+                // Pega as imagens que já viraram cartas
                 const usedImages = cardDatabase.map(c => c.img);
 
-                // Filtrar apenas arquivos de imagem que NÃO estão no banco
+                // Filtra as que estão sobrando e que são imagens
                 const availableImages = files.filter(f =>
                     f.type === 'file' &&
                     f.name.match(/\.(png|jpg|jpeg|gif)$/i) &&
@@ -546,6 +549,7 @@
                     return;
                 }
 
+                // Cria o mosaico para escolher
                 availableImages.forEach(file => {
                     const imgDiv = document.createElement('div');
                     imgDiv.className = "cursor-pointer rounded border-2 border-transparent hover:border-blue-400 transition overflow-hidden h-24 bg-gray-800 relative group";
@@ -559,7 +563,7 @@
 
             } catch (err) {
                 console.error("GitHub Fetch Error:", err);
-                loading.innerText = "Erro ao carregar imagens. O repositório está acessível?";
+                loading.innerText = "Erro ao carregar imagens. Tem certeza que a pasta 'assets/cards' existe no repositório?";
                 loading.classList.replace('text-yellow-400', 'text-red-400');
             }
         };
@@ -575,6 +579,69 @@
             
             element.classList.remove('border-transparent');
             element.classList.add('border-green-500', 'ring-2', 'ring-green-400');
+
+            updateAdminPreview(); // Atualiza a pré-visualização ao clicar na imagem
+        };
+
+        // --- ADMIN: PRÉ-VISUALIZAÇÃO DA CARTA ---
+        window.updateAdminPreview = () => {
+            const tempCard = {
+                id: 'preview',
+                name: document.getElementById('admin-name').value || 'Nome da Carta',
+                tier: document.getElementById('admin-tier').value || 'D',
+                desc: document.getElementById('admin-desc').value || 'Descrição da carta irá aparecer aqui...',
+                img: selectedAdminImage || ''
+            };
+            
+            // Usamos isAlbum = true para renderizar a carta plana (sem o 3D flip wrapper do Gacha)
+            renderCardHTML('admin-preview-container', tempCard, false, true, {});
+        };
+
+        // --- ADMIN: CRIAR CARTA ---
+        window.createNewCard = async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('admin-submit');
+            const msg = document.getElementById('admin-msg');
+            
+            if (!selectedAdminImage) {
+                msg.innerText = "Erro: Selecione uma imagem da galeria acima clicando nela!";
+                msg.className = "text-center font-bold text-sm mt-2 text-red-400";
+                msg.classList.remove('hidden');
+                setTimeout(() => msg.classList.add('hidden'), 3000);
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = "Criando...";
+
+            try {
+                const newCard = {
+                    name: document.getElementById('admin-name').value,
+                    tier: document.getElementById('admin-tier').value,
+                    desc: document.getElementById('admin-desc').value,
+                    img: selectedAdminImage,
+                    createdAt: serverTimestamp()
+                };
+
+                await addDoc(collection(db, "cards"), newCard);
+                
+                msg.innerText = "Carta criada com sucesso! Já está no jogo.";
+                msg.className = "text-center font-bold text-sm mt-2 text-green-400";
+                msg.classList.remove('hidden');
+                document.getElementById('admin-form').reset();
+                selectedAdminImage = ""; // Limpa seleção
+                window.updateAdminPreview(); // Reseta o preview visualmente
+                window.loadGitHubImages(); // Atualiza a galeria removendo a imagem que já foi usada
+            } catch (err) {
+                console.error(err);
+                msg.innerText = "Erro ao criar: " + err.message;
+                msg.className = "text-center font-bold text-sm mt-2 text-red-400";
+                msg.classList.remove('hidden');
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "CRIAR CARTA E ADICIONAR AO JOGO";
+                setTimeout(() => msg.classList.add('hidden'), 5000);
+            }
         };
 
         // --- COMUNIDADE E RANKING ---
