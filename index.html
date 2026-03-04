@@ -202,7 +202,7 @@
             <div id="gacha-content" class="hidden w-full flex-col items-center gap-8">
                 <div class="text-center space-y-2">
                     <h2 class="text-3xl font-bold">Abra seu Pacote!</h2>
-                    <p class="text-gray-400">Cada pacote traz <span class="text-blue-400 font-bold">5 cartas</span>. Escolha <span class="text-green-400 font-bold">2</span> para a sua coleção!</p>
+                    <p class="text-gray-400">Cada pacote traz <span class="text-blue-400 font-bold">8 cartas</span>. Escolha <span class="text-green-400 font-bold">2</span> para a sua coleção!</p>
                 </div>
 
                 <div id="gacha-area" class="relative flex justify-center items-center min-h-[400px] w-full">
@@ -215,6 +215,18 @@
                             <span class="block text-sm text-blue-200 font-bold tracking-widest uppercase">Booster Pack</span>
                         </div>
                     </div>
+                    
+                    <!-- Container de Temporizador Grande -->
+                    <div id="out-of-pulls-container" class="hidden flex-col items-center justify-center bg-gray-800 p-8 rounded-xl border-2 border-dashed border-gray-600 w-full max-w-md mx-auto shadow-2xl">
+                        <div class="text-6xl mb-4 opacity-50">⏳</div>
+                        <h3 class="text-2xl font-bold text-gray-300 mb-2">Sem Pacotes!</h3>
+                        <p class="text-gray-400 text-center mb-6">Sua energia acabou. Aguarde a recarga para voltar a abrir pacotes e expandir seu álbum.</p>
+                        <div class="bg-gray-900 px-8 py-4 rounded-lg border border-gray-700 text-center shadow-inner">
+                            <span class="block text-xs text-gray-500 uppercase font-bold mb-1">Próximo pacote em:</span>
+                            <span id="large-pull-timer" class="text-4xl font-black text-yellow-400 tracking-wider">--:--:--</span>
+                        </div>
+                    </div>
+
                     <div id="revealed-cards" class="flex flex-wrap justify-center gap-2 sm:gap-4 md:gap-8 hidden w-full"></div>
                 </div>
 
@@ -599,15 +611,24 @@
                 }
 
                 if (userData.pullsAvailable < 3 && userData.lastPullTimestamp) {
-                    document.getElementById('pull-timer-container').classList.remove('hidden');
+                    const timerContainer = document.getElementById('pull-timer-container');
+                    const timerText = document.getElementById('pull-timer');
+                    const largeTimer = document.getElementById('large-pull-timer');
+
+                    if (timerContainer) timerContainer.classList.remove('hidden');
+                    
                     const timeLeft = EIGHT_HOURS - ((Date.now() - userData.lastPullTimestamp) % EIGHT_HOURS);
                     const h = Math.floor(timeLeft / (1000 * 60 * 60)).toString().padStart(2, '0');
                     const m = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60)).toString().padStart(2, '0');
                     const s = Math.floor((timeLeft % (1000 * 60)) / 1000).toString().padStart(2, '0');
-                    document.getElementById('pull-timer').innerText = `${h}h ${m}m ${s}s`;
+                    
+                    const timeString = `${h}h ${m}m ${s}s`;
+                    if (timerText) timerText.innerText = timeString;
+                    if (largeTimer) largeTimer.innerText = timeString;
                 }
             } else {
-                document.getElementById('pull-timer-container').classList.add('hidden');
+                const timerContainer = document.getElementById('pull-timer-container');
+                if (timerContainer) timerContainer.classList.add('hidden');
             }
         }, 1000);
 
@@ -769,7 +790,6 @@
             if(!currentUser) return;
             const today = new Date().toDateString();
             
-            // Limit UI Único (1 Troca concluída por dia)
             const tradesToday = userData.lastTradeDate === today ? (userData.tradesToday || 0) : 0;
             const hasActiveTrade = allOpenTrades.some(t => t.fromUserId === currentUser.uid);
             
@@ -1172,34 +1192,41 @@
             await updateDoc(userRef, updateData);
 
             // Preenche o array só com placeholders para impedir hacks visuais
-            currentPackCards = new Array(5).fill(null);
+            currentPackCards = new Array(8).fill(null);
             selectedCardsIndices = [];
 
             const pack = document.getElementById('booster-pack');
-            pack.classList.add('shaking');
-            setTimeout(() => { pack.classList.remove('shaking'); pack.classList.add('tearing'); }, 400);
+            if (pack) {
+                pack.classList.add('shaking');
+                setTimeout(() => { pack.classList.remove('shaking'); pack.classList.add('tearing'); }, 400);
+            }
 
             setTimeout(() => {
-                pack.classList.add('hidden'); pack.classList.remove('tearing');
+                if (pack) {
+                    pack.classList.add('hidden'); pack.classList.remove('tearing');
+                }
                 const revealedContainer = document.getElementById('revealed-cards');
-                revealedContainer.innerHTML = '';
-                revealedContainer.classList.remove('hidden');
+                if(revealedContainer) {
+                    revealedContainer.innerHTML = '';
+                    revealedContainer.classList.remove('hidden');
 
-                // Renderiza cartas vazias (viradas para trás)
-                for(let index=0; index<5; index++) {
-                    revealedContainer.innerHTML += `
-                        <div class="card-container w-24 h-36 sm:w-32 sm:h-48 md:w-40 md:h-60 cursor-pointer transform transition hover:scale-105" id="gacha-card-${index}" onclick="window.revealSingleCard(${index})">
-                            <div class="card-inner shadow-2xl rounded-xl" id="gacha-card-inner-${index}">
-                                <div class="card-back text-3xl sm:text-4xl hover:shadow-blue-500/50 transition duration-300">❓</div>
-                                <div class="card-front p-1 sm:p-2 flex flex-col" id="gacha-card-front-${index}"></div>
-                            </div>
-                        </div>`;
+                    // Renderiza 8 cartas vazias (viradas para trás)
+                    for(let index=0; index<8; index++) {
+                        revealedContainer.innerHTML += `
+                            <div class="card-container w-24 h-36 sm:w-32 sm:h-48 md:w-40 md:h-60 cursor-pointer transform transition hover:scale-105" id="gacha-card-${index}" onclick="window.revealSingleCard(${index})">
+                                <div class="card-inner shadow-2xl rounded-xl" id="gacha-card-inner-${index}">
+                                    <div class="card-back text-3xl sm:text-4xl hover:shadow-blue-500/50 transition duration-300">❓</div>
+                                    <div class="card-front p-1 sm:p-2 flex flex-col" id="gacha-card-front-${index}"></div>
+                                </div>
+                            </div>`;
+                    }
                 }
             }, 1200);
         };
 
         window.revealSingleCard = async (index) => {
-            if (selectedCardsIndices.length >= 2 || document.getElementById(`gacha-card-inner-${index}`).classList.contains('flipped')) return;
+            const innerContainer = document.getElementById(`gacha-card-inner-${index}`);
+            if (!innerContainer || selectedCardsIndices.length >= 2 || innerContainer.classList.contains('flipped')) return;
 
             // GERA A CARTA APENAS AGORA!
             const cardData = getRandomCard();
@@ -1211,10 +1238,10 @@
             await updateDoc(doc(db, "users", currentUser.uid), { inventory: newInventory });
 
             window.renderCardHTML(`gacha-card-front-${index}`, cardData, false, false, newInventory);
-            document.getElementById(`gacha-card-inner-${index}`).classList.add('flipped');
+            innerContainer.classList.add('flipped');
             
             const cardContainer = document.getElementById(`gacha-card-${index}`);
-            cardContainer.classList.remove('hover:scale-105');
+            if (cardContainer) cardContainer.classList.remove('hover:scale-105');
             
             // EFEITOS DE BRILHO E DESTAQUE POR RARIDADE
             const ringColors = {
@@ -1226,43 +1253,72 @@
                 'SS': 'ring-red-500'
             };
             
-            cardContainer.classList.add(`reveal-${cardData.tier}`, 'ring-4', ringColors[cardData.tier]);
+            if (cardContainer) {
+                cardContainer.classList.add(`reveal-${cardData.tier}`, 'ring-4', ringColors[cardData.tier]);
+            }
             
             if (selectedCardsIndices.length === 2) {
                 setTimeout(() => {
-                    for(let idx=0; idx<5; idx++) {
+                    for(let idx=0; idx<8; idx++) {
                         if (!selectedCardsIndices.includes(idx)) {
-                            // Gera e revela automaticamente as que sobraram (Sem ir pro inventário)
+                            // Gera e revela automaticamente as 6 que sobraram (Sem ir pro inventário)
                             const fakeCard = getRandomCard();
                             currentPackCards[idx] = fakeCard;
                             const innerCard = document.getElementById(`gacha-card-inner-${idx}`);
                             window.renderCardHTML(`gacha-card-front-${idx}`, fakeCard, false, false, userData.inventory);
-                            innerCard.classList.add('flipped');
-                            document.getElementById(`gacha-card-${idx}`).classList.add('opacity-50', 'grayscale');
-                            document.getElementById(`gacha-card-${idx}`).classList.remove('cursor-pointer', 'hover:scale-105', 'z-50', 'z-10');
+                            if (innerCard) innerCard.classList.add('flipped');
+                            
+                            const leftCardContainer = document.getElementById(`gacha-card-${idx}`);
+                            if (leftCardContainer) {
+                                leftCardContainer.classList.add('opacity-50', 'grayscale');
+                                leftCardContainer.classList.remove('cursor-pointer', 'hover:scale-105', 'z-50', 'z-10');
+                            }
                         }
                     }
                     isOpeningPack = false;
-                    if (userData.pullsAvailable > 0) document.getElementById('btn-next').classList.remove('hidden');
-                    else document.getElementById('cooldown-msg').classList.remove('hidden');
+                    const btnNext = document.getElementById('btn-next');
+                    if (btnNext) {
+                        btnNext.classList.remove('hidden');
+                        if (userData.pullsAvailable <= 0) {
+                            btnNext.innerText = "VER TEMPO DE RECARGA";
+                        } else {
+                            btnNext.innerText = "ABRIR PRÓXIMO PACOTE";
+                        }
+                    }
                 }, 1000); // 1 segundo pra admirar a carta que tirou antes das ruins aparecerem
             }
         };
 
         window.resetPackArea = () => {
-            document.getElementById('revealed-cards').classList.add('hidden');
-            document.getElementById('booster-pack').classList.remove('hidden');
-            document.getElementById('btn-next').classList.add('hidden');
+            const revealedCards = document.getElementById('revealed-cards');
+            const btnNext = document.getElementById('btn-next');
+            if (revealedCards) revealedCards.classList.add('hidden');
+            if (btnNext) btnNext.classList.add('hidden');
+            window.updateGachaUI(); // Centraliza a lógica de o que mostrar aqui
         };
 
         window.updateGachaUI = () => {
-            document.getElementById('pulls-count').innerText = userData.pullsAvailable;
+            const pullsCountEl = document.getElementById('pulls-count');
+            if (pullsCountEl) pullsCountEl.innerText = userData.pullsAvailable;
+            
+            const containerVazio = document.getElementById('out-of-pulls-container');
+            const boosterPack = document.getElementById('booster-pack');
+            const msgCooldown = document.getElementById('cooldown-msg');
+
             if (userData.pullsAvailable <= 0 && !isOpeningPack) {
-                document.getElementById('booster-pack').classList.add('hidden');
-                document.getElementById('cooldown-msg').classList.remove('hidden');
+                if (boosterPack) boosterPack.classList.add('hidden');
+                if (msgCooldown) msgCooldown.classList.add('hidden'); 
+                if (containerVazio) {
+                    containerVazio.classList.remove('hidden');
+                    containerVazio.classList.add('flex');
+                }
             } else if (!isOpeningPack && cardDatabase.length > 0) {
-                document.getElementById('booster-pack').classList.remove('hidden');
-                document.getElementById('cooldown-msg').classList.add('hidden');
+                if (boosterPack) boosterPack.classList.remove('hidden');
+                if (containerVazio) {
+                    containerVazio.classList.add('hidden');
+                    containerVazio.classList.remove('flex');
+                }
+                if (msgCooldown) msgCooldown.classList.add('hidden');
             }
         };
 
@@ -1321,7 +1377,10 @@
 
             cardsArray.forEach(card => { if((sourceInventory[card.id] || 0) > 0) uniqueCards++; });
 
-            if (isMyAlbum) document.getElementById('collection-count').innerText = uniqueCards;
+            if (isMyAlbum) {
+                const countEl = document.getElementById('collection-count');
+                if (countEl) countEl.innerText = uniqueCards;
+            }
 
             grid.innerHTML = '';
             
