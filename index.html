@@ -4,94 +4,96 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nin CardMeme Collection BR</title>
+    <!-- Ícone do Site (Favicon) -->
+    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/aurioshlookin/nin-ranking/main/assets/img/icon.png">
+    
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Biblioteca de Confetes para o Gacha -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
     <style>
-        body { background-color: #1a202c; color: #e2e8f0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #111827; color: #e5e7eb; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         
         /* Cores dos Ranks */
-        .rank-D { border-color: #a0aec0; box-shadow: 0 0 10px rgba(160, 174, 192, 0.3); }
-        .rank-C { border-color: #48bb78; box-shadow: 0 0 15px rgba(72, 187, 120, 0.4); }
-        .rank-B { border-color: #4299e1; box-shadow: 0 0 20px rgba(66, 153, 225, 0.5); }
-        .rank-A { border-color: #9f7aea; box-shadow: 0 0 25px rgba(159, 122, 234, 0.6); }
-        .rank-S { border-color: #ecc94b; box-shadow: 0 0 35px rgba(236, 201, 75, 0.8); }
+        .rank-D { border-color: #9ca3af; box-shadow: 0 0 10px rgba(156, 163, 175, 0.3); }
+        .rank-C { border-color: #4ade80; box-shadow: 0 0 15px rgba(74, 222, 128, 0.4); }
+        .rank-B { border-color: #60a5fa; box-shadow: 0 0 20px rgba(96, 165, 250, 0.5); }
+        .rank-A { border-color: #c084fc; box-shadow: 0 0 25px rgba(192, 132, 252, 0.6); }
+        .rank-S { border-color: #facc15; box-shadow: 0 0 35px rgba(250, 204, 21, 0.8); }
         .rank-SS { 
-            border-color: #f56565; box-shadow: 0 0 40px rgba(245, 101, 101, 1), inset 0 0 20px rgba(245, 101, 101, 0.5); 
+            border-color: #ef4444; box-shadow: 0 0 40px rgba(239, 68, 68, 1), inset 0 0 20px rgba(239, 68, 68, 0.5); 
             animation: pulse-red 2s infinite;
         }
-        @keyframes pulse-red { 0% { box-shadow: 0 0 40px rgba(245, 101, 101, 0.8); } 50% { box-shadow: 0 0 60px rgba(245, 101, 101, 1); } 100% { box-shadow: 0 0 40px rgba(245, 101, 101, 0.8); } }
+        @keyframes pulse-red { 0% { box-shadow: 0 0 40px rgba(239, 68, 68, 0.8); } 50% { box-shadow: 0 0 60px rgba(239, 68, 68, 1); } 100% { box-shadow: 0 0 40px rgba(239, 68, 68, 0.8); } }
 
         /* Efeitos de Revelação Escalonados por Raridade */
         @keyframes reveal-D {
             0% { transform: scale(1); filter: brightness(1); }
-            50% { transform: scale(1.02) translateY(-2px); filter: brightness(1.1); box-shadow: 0 0 10px #a0aec0; }
-            100% { transform: scale(1); box-shadow: 0 0 5px #a0aec0; }
+            50% { transform: scale(1.02) translateY(-2px); filter: brightness(1.1); box-shadow: 0 0 10px #9ca3af; }
+            100% { transform: scale(1); box-shadow: 0 0 5px #9ca3af; }
         }
         @keyframes reveal-C {
             0% { transform: scale(1); filter: brightness(1); }
-            50% { transform: scale(1.05) translateY(-4px); filter: brightness(1.15); box-shadow: 0 0 15px #48bb78; }
-            100% { transform: scale(1.02); box-shadow: 0 0 10px #48bb78; }
+            50% { transform: scale(1.05) translateY(-4px); filter: brightness(1.15); box-shadow: 0 0 15px #4ade80; }
+            100% { transform: scale(1.02); box-shadow: 0 0 10px #4ade80; }
         }
         @keyframes reveal-B {
             0% { transform: scale(1); filter: brightness(1); }
-            50% { transform: scale(1.08) translateY(-6px); filter: brightness(1.2); box-shadow: 0 0 25px #4299e1; }
-            100% { transform: scale(1.05); box-shadow: 0 0 15px #4299e1; }
+            50% { transform: scale(1.08) translateY(-6px); filter: brightness(1.2); box-shadow: 0 0 25px #60a5fa; }
+            100% { transform: scale(1.05); box-shadow: 0 0 15px #60a5fa; }
         }
         @keyframes reveal-A {
             0% { transform: scale(1); filter: brightness(1); }
-            50% { transform: scale(1.12) translateY(-10px); filter: brightness(1.3); box-shadow: 0 0 40px #9f7aea; }
-            100% { transform: scale(1.08); box-shadow: 0 0 25px #9f7aea; }
+            50% { transform: scale(1.12) translateY(-10px); filter: brightness(1.3); box-shadow: 0 0 40px #c084fc; }
+            100% { transform: scale(1.08); box-shadow: 0 0 25px #c084fc; }
         }
         @keyframes reveal-S {
             0% { transform: scale(1); filter: brightness(1); }
-            50% { transform: scale(1.15) translateY(-15px); filter: brightness(1.5); box-shadow: 0 0 60px #ecc94b; }
-            100% { transform: scale(1.1); box-shadow: 0 0 35px #ecc94b; }
+            50% { transform: scale(1.15) translateY(-15px); filter: brightness(1.5); box-shadow: 0 0 60px #facc15; }
+            100% { transform: scale(1.1); box-shadow: 0 0 35px #facc15; }
         }
         @keyframes reveal-SS {
             0% { transform: scale(1) rotateZ(0deg); filter: brightness(1); }
             25% { transform: scale(1.1) translateY(-10px) rotateZ(-3deg); }
-            50% { transform: scale(1.2) translateY(-20px) rotateZ(3deg); filter: brightness(1.8); box-shadow: 0 0 80px #f56565; }
+            50% { transform: scale(1.2) translateY(-20px) rotateZ(3deg); filter: brightness(1.8); box-shadow: 0 0 80px #ef4444; }
             75% { transform: scale(1.15) translateY(-10px) rotateZ(-1deg); }
-            100% { transform: scale(1.12) rotateZ(0deg); box-shadow: 0 0 50px rgba(245, 101, 101, 1); }
+            100% { transform: scale(1.12) rotateZ(0deg); box-shadow: 0 0 50px rgba(239, 68, 68, 1); }
         }
 
-        .reveal-D { animation: reveal-D 0.6s ease-out forwards !important; z-index: 10; border-color: #a0aec0 !important; }
-        .reveal-C { animation: reveal-C 0.7s ease-out forwards !important; z-index: 20; border-color: #48bb78 !important; }
-        .reveal-B { animation: reveal-B 0.8s ease-out forwards !important; z-index: 30; border-color: #4299e1 !important; }
-        .reveal-A { animation: reveal-A 0.9s ease-out forwards !important; z-index: 40; border-color: #9f7aea !important; }
-        .reveal-S { animation: reveal-S 1s ease-out forwards !important; z-index: 50; border-color: #ecc94b !important; }
-        .reveal-SS { animation: reveal-SS 1.2s ease-in-out forwards !important; z-index: 60; border-color: #f56565 !important; }
+        .reveal-D { animation: reveal-D 0.6s ease-out forwards !important; z-index: 10; border-color: #9ca3af !important; }
+        .reveal-C { animation: reveal-C 0.7s ease-out forwards !important; z-index: 20; border-color: #4ade80 !important; }
+        .reveal-B { animation: reveal-B 0.8s ease-out forwards !important; z-index: 30; border-color: #60a5fa !important; }
+        .reveal-A { animation: reveal-A 0.9s ease-out forwards !important; z-index: 40; border-color: #c084fc !important; }
+        .reveal-S { animation: reveal-S 1s ease-out forwards !important; z-index: 50; border-color: #facc15 !important; }
+        .reveal-SS { animation: reveal-SS 1.2s ease-in-out forwards !important; z-index: 60; border-color: #ef4444 !important; }
 
         /* Cartas e Flip */
         .card-container { perspective: 1000px; }
         .card-inner { position: relative; width: 100%; height: 100%; transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); transform-style: preserve-3d; }
         .card-inner.flipped { transform: rotateY(180deg); }
         .card-front, .card-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 0.75rem; }
-        .card-back { background: linear-gradient(135deg, #2d3748, #1a202c); border: 4px solid #4a5568; display: flex; align-items: center; justify-content: center; }
+        .card-back { background: linear-gradient(135deg, #1f2937, #111827); border: 4px solid #374151; display: flex; align-items: center; justify-content: center; }
         .card-front { transform: rotateY(180deg); background-color: #ebdcb2; color: #1a202c; border-width: 4px; border-style: solid; }
         
-        .tab-active { border-bottom: 2px solid #63b3ed; color: #63b3ed; }
-        .tab-inactive { color: #a0aec0; }
+        .tab-active { border-bottom: 2px solid #22c55e; color: #22c55e; }
+        .tab-inactive { color: #9ca3af; }
 
-        /* Pacotinho (Booster Pack) e Efeitos Especiais de Brilho/Tremor */
+        /* Pacotinho (Booster Pack) Customizado Ninja */
         .pack { width: 220px; height: 320px; position: relative; cursor: pointer; transition: transform 0.2s; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.5)); }
         .pack:hover { transform: scale(1.05) rotate(2deg); }
-        .pack-top, .pack-bottom { position: absolute; width: 100%; background: linear-gradient(135deg, #2b6cb0, #2c5282); border: 4px solid #1a365d; }
-        .pack-top { height: 20%; top: 0; border-radius: 12px 12px 0 0; border-bottom: 3px dashed #90cdf4; z-index: 30; transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+        .pack-top, .pack-bottom { position: absolute; width: 100%; background: linear-gradient(135deg, #111827, #000000); border: 4px solid #166534; }
+        .pack-top { height: 20%; top: 0; border-radius: 12px 12px 0 0; border-bottom: 3px dashed #22c55e; z-index: 30; transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
         .pack-bottom { height: 80%; bottom: 0; border-radius: 0 0 12px 12px; border-top: none; z-index: 30; display: flex; align-items: center; justify-content: center; transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
-        .pack-cards-bg { position: absolute; top: 20px; left: 10px; right: 10px; bottom: 20px; background: #cbd5e0; border-radius: 8px; z-index: 20; }
+        .pack-cards-bg { position: absolute; top: 20px; left: 10px; right: 10px; bottom: 20px; background: #1f2937; border-radius: 8px; z-index: 20; }
         
         @keyframes pack-shake { 0%, 100% { transform: translateX(0) rotate(0deg); } 25% { transform: translateX(-5px) rotate(-2deg); } 50% { transform: translateX(5px) rotate(2deg); } 75% { transform: translateX(-5px) rotate(-2deg); } }
         @keyframes pack-shake-violent { 0%, 100% { transform: translateX(0) rotate(0deg); } 25% { transform: translateX(-12px) translateY(5px) rotate(-5deg); filter: brightness(1.3); } 50% { transform: translateX(12px) translateY(-5px) rotate(5deg); filter: brightness(1.5); } 75% { transform: translateX(-12px) translateY(5px) rotate(-5deg); filter: brightness(1.3); } }
-        @keyframes pack-pulse-SS { 0%, 100% { filter: drop-shadow(0 0 30px #f56565); } 50% { filter: drop-shadow(0 0 80px #f56565) brightness(1.2); } }
-        @keyframes pack-pulse-S { 0%, 100% { filter: drop-shadow(0 0 20px #ecc94b); } 50% { filter: drop-shadow(0 0 50px #ecc94b) brightness(1.1); } }
-        @keyframes pack-pulse-A { 0%, 100% { filter: drop-shadow(0 0 15px #9f7aea); } 50% { filter: drop-shadow(0 0 35px #9f7aea); } }
+        @keyframes pack-pulse-SS { 0%, 100% { filter: drop-shadow(0 0 30px #ef4444); } 50% { filter: drop-shadow(0 0 80px #ef4444) brightness(1.2); } }
+        @keyframes pack-pulse-S { 0%, 100% { filter: drop-shadow(0 0 20px #facc15); } 50% { filter: drop-shadow(0 0 50px #facc15) brightness(1.1); } }
+        @keyframes pack-pulse-A { 0%, 100% { filter: drop-shadow(0 0 15px #c084fc); } 50% { filter: drop-shadow(0 0 35px #c084fc); } }
 
         .pack.shaking { animation: pack-shake 0.3s infinite; }
         .pack.shaking-violent { animation: pack-shake-violent 0.15s infinite; }
-        .pack.glowing-SS { animation: pack-shake-violent 0.1s infinite, pack-pulse-SS 0.5s infinite; }
-        .pack.glowing-S { animation: pack-shake-violent 0.15s infinite, pack-pulse-S 0.6s infinite; }
+        .pack.glowing-SS { animation: pack-shake-violent 0.1s infinite, pack-pulse-SS 0.5s infinite; border-color: #ef4444 !important; }
+        .pack.glowing-S { animation: pack-shake-violent 0.15s infinite, pack-pulse-S 0.6s infinite; border-color: #facc15 !important;}
         .pack.glowing-A { animation: pack-shake 0.2s infinite, pack-pulse-A 0.8s infinite; }
 
         .pack.tearing .pack-top { transform: translateY(-100px) rotate(-10deg); opacity: 0; }
@@ -102,66 +104,68 @@
 <body class="min-h-screen flex flex-col relative bg-gray-900">
 
     <!-- Navbar -->
-    <header class="bg-gray-800 p-4 shadow-md flex justify-between items-center z-10 sticky top-0">
+    <header class="bg-gray-800 p-4 shadow-md flex justify-between items-center z-10 sticky top-0 border-b border-gray-700">
         <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center font-bold text-white text-xl">N</div>
-            <h1 class="text-xl font-bold hidden sm:block">Nin CardMeme Collection BR</h1>
+            <div class="w-10 h-10 rounded-full flex items-center justify-center overflow-hidden border border-green-500 bg-black shadow-[0_0_10px_#22c55e]">
+                <img src="https://raw.githubusercontent.com/aurioshlookin/nin-ranking/main/assets/img/icon.png" alt="Logo Nin" class="w-full h-full object-cover">
+            </div>
+            <h1 class="text-xl font-bold hidden sm:block text-gray-100">Nin CardMeme Collection BR</h1>
         </div>
         
         <div id="nav-auth-area" class="flex items-center gap-4">
             <div id="logged-out-view" class="flex gap-2">
-                <button onclick="window.showModal('login')" class="text-gray-300 hover:text-white px-3 py-2 text-sm font-medium">Entrar</button>
-                <button onclick="window.showModal('register')" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-bold transition">Cadastrar</button>
+                <button onclick="window.showModal('login')" class="text-gray-300 hover:text-white px-3 py-2 text-sm font-medium transition">Entrar</button>
+                <button onclick="window.showModal('register')" class="bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded-lg text-sm font-bold transition shadow-lg shadow-green-900/30">Cadastrar</button>
             </div>
             <div id="logged-in-view" class="hidden items-center gap-4">
                 <div class="flex flex-col items-end">
-                    <div class="text-sm bg-gray-700 px-3 py-1 rounded-full border border-gray-600">
-                        Pulls: <span id="pulls-count" class="font-bold text-blue-400">-</span>/3
+                    <div class="text-sm bg-gray-800 px-3 py-1 rounded-full border border-green-500/50 shadow-inner">
+                        Pulls: <span id="pulls-count" class="font-bold text-green-400">-</span>/3
                     </div>
                     <!-- Temporizador de 8 Horas -->
                     <div id="pull-timer-container" class="text-[10px] text-gray-400 mt-1 hidden">
-                        +1 em: <span id="pull-timer" class="text-yellow-400 font-bold">--:--:--</span>
+                        +1 em: <span id="pull-timer" class="text-green-400 font-bold">--:--:--</span>
                     </div>
                 </div>
                 <div class="flex items-center gap-2">
-                    <div class="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center overflow-hidden border border-gray-500">
+                    <div class="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center overflow-hidden border border-gray-500">
                         <img id="user-avatar" src="" alt="avatar" class="w-full h-full">
                     </div>
-                    <span id="user-display-name" class="text-sm font-semibold hidden sm:inline">Carregando...</span>
-                    <button id="btn-logout" class="text-xs text-red-400 hover:text-red-300 ml-2">Sair</button>
+                    <span id="user-display-name" class="text-sm font-semibold hidden sm:inline text-gray-200">Carregando...</span>
+                    <button id="btn-logout" class="text-xs text-red-400 hover:text-red-300 ml-2 transition">Sair</button>
                 </div>
             </div>
         </div>
     </header>
 
     <!-- Navegação em Abas -->
-    <nav class="flex justify-center bg-gray-800 border-b border-gray-700 overflow-x-auto whitespace-nowrap">
+    <nav class="flex justify-center bg-gray-800 border-b border-gray-700 overflow-x-auto whitespace-nowrap shadow-md">
         <button onclick="window.switchTab('gacha')" id="tab-gacha" class="px-6 py-3 font-semibold tab-active hover:bg-gray-700 transition">Roleta (Gacha)</button>
         <button onclick="window.switchTab('album')" id="tab-album" class="px-6 py-3 font-semibold tab-inactive hover:bg-gray-700 transition">Meu Álbum</button>
-        <button onclick="window.switchTab('explore')" id="tab-explore" class="px-6 py-3 font-semibold tab-inactive hover:bg-gray-700 transition text-yellow-600 border-b-2 border-transparent">Comunidade 🔍</button>
+        <button onclick="window.switchTab('explore')" id="tab-explore" class="px-6 py-3 font-semibold tab-inactive hover:bg-gray-700 transition text-yellow-500 border-b-2 border-transparent">Comunidade 🔍</button>
         <!-- Aba de Trocas -->
         <button onclick="window.switchTab('trade')" id="tab-trade" class="px-6 py-3 font-semibold tab-inactive hover:bg-gray-700 transition text-green-500 border-b-2 border-transparent hidden">Trocas 🤝</button>
         <!-- Aba Admin -->
-        <button onclick="window.switchTab('admin')" id="tab-admin" class="hidden px-6 py-3 font-semibold tab-inactive hover:bg-gray-700 transition text-red-600 border-b-2 border-transparent">⚙️ Criar Cartas</button>
+        <button onclick="window.switchTab('admin')" id="tab-admin" class="hidden px-6 py-3 font-semibold tab-inactive hover:bg-gray-700 transition text-red-500 border-b-2 border-transparent">⚙️ Criar Cartas</button>
     </nav>
 
     <!-- Modal de Login/Registro -->
     <div id="auth-modal" class="fixed inset-0 bg-black/80 flex items-center justify-center z-50 hidden backdrop-blur-sm">
-        <div class="bg-gray-800 p-8 rounded-xl shadow-2xl max-w-sm w-full border border-gray-700 relative">
+        <div class="bg-gray-800 p-8 rounded-xl shadow-[0_0_30px_rgba(34,197,94,0.15)] max-w-sm w-full border border-gray-700 relative">
             <button onclick="window.closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white text-xl">&times;</button>
-            <h2 id="modal-title" class="text-2xl font-bold text-center mb-6">Entrar</h2>
+            <h2 id="modal-title" class="text-2xl font-bold text-center mb-6 text-white">Entrar</h2>
             
             <form id="auth-form" class="space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-300 mb-1">Usuário (Nick no Jogo)</label>
-                    <input type="text" id="auth-username" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500" placeholder="Ex: Auriosh" required>
+                    <input type="text" id="auth-username" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-green-500 transition" placeholder="Ex: Auriosh" required>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-300 mb-1">Senha</label>
-                    <input type="password" id="auth-password" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500" required>
+                    <input type="password" id="auth-password" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-green-500 transition" required>
                 </div>
                 <p id="auth-error" class="text-red-400 text-sm hidden"></p>
-                <button type="submit" id="auth-submit-btn" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-lg transition mt-4">
+                <button type="submit" id="auth-submit-btn" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded-lg transition mt-4 shadow-lg shadow-green-900/30">
                     Entrar
                 </button>
             </form>
@@ -170,28 +174,28 @@
 
     <!-- Modal de Mensagens Customizado -->
     <div id="msg-modal" class="fixed inset-0 bg-black/80 flex items-center justify-center z-[100] hidden backdrop-blur-sm p-4">
-        <div class="bg-gray-800 p-6 rounded-xl shadow-2xl max-w-sm w-full border border-gray-700 text-center">
-            <h3 id="msg-modal-text" class="text-lg font-bold text-white mb-6">Mensagem</h3>
+        <div class="bg-gray-800 p-6 rounded-xl shadow-2xl max-w-sm w-full border border-green-500/30 text-center">
+            <h3 id="msg-modal-text" class="text-lg font-bold text-gray-200 mb-6">Mensagem</h3>
             <div class="flex justify-center gap-4">
-                <button id="msg-modal-cancel" class="hidden bg-gray-600 hover:bg-gray-500 text-white px-4 py-2 rounded-lg transition font-bold">Cancelar</button>
-                <button id="msg-modal-ok" class="bg-blue-600 hover:bg-blue-500 text-white px-8 py-2 rounded-lg font-bold transition shadow-lg">OK</button>
+                <button id="msg-modal-cancel" class="hidden bg-gray-700 hover:bg-gray-600 border border-gray-600 text-white px-4 py-2 rounded-lg transition font-bold">Cancelar</button>
+                <button id="msg-modal-ok" class="bg-green-600 hover:bg-green-500 text-white px-8 py-2 rounded-lg font-bold transition shadow-lg">OK</button>
             </div>
         </div>
     </div>
 
     <!-- Modal de Aceitar Troca -->
     <div id="trade-accept-modal" class="fixed inset-0 bg-black/90 flex items-center justify-center z-[90] hidden backdrop-blur-sm p-4">
-        <div class="bg-gray-800 p-6 rounded-xl shadow-2xl max-w-lg w-full border border-gray-700 flex flex-col max-h-[90vh]">
+        <div class="bg-gray-800 p-6 rounded-xl shadow-2xl max-w-lg w-full border border-green-500/50 flex flex-col max-h-[90vh]">
             <h2 class="text-xl font-bold text-green-400 mb-2">Escolha as cartas para enviar</h2>
             <p id="trade-accept-desc" class="text-sm text-gray-400 mb-4">Abaixo estão listadas apenas as cartas que você tem e que o jogador ainda não possui.</p>
             
-            <div id="trade-accept-grid" class="grid grid-cols-3 sm:grid-cols-4 gap-3 overflow-y-auto p-2 bg-gray-900 rounded-lg flex-grow mb-4">
+            <div id="trade-accept-grid" class="grid grid-cols-3 sm:grid-cols-4 gap-3 overflow-y-auto p-2 bg-gray-900 rounded-lg flex-grow mb-4 border border-gray-700">
                 <!-- Cartas injetadas via JS -->
             </div>
             
             <div class="flex justify-end gap-3 mt-auto pt-4 border-t border-gray-700">
-                <button onclick="document.getElementById('trade-accept-modal').classList.add('hidden')" class="bg-gray-600 hover:bg-gray-500 text-white px-4 py-2 rounded-lg font-bold">Cancelar</button>
-                <button id="btn-confirm-accept" class="bg-green-600 hover:bg-green-500 text-white px-6 py-2 rounded-lg font-bold disabled:opacity-50" disabled>Confirmar Envio</button>
+                <button onclick="document.getElementById('trade-accept-modal').classList.add('hidden')" class="bg-gray-700 hover:bg-gray-600 border border-gray-600 text-white px-4 py-2 rounded-lg font-bold transition">Cancelar</button>
+                <button id="btn-confirm-accept" class="bg-green-600 hover:bg-green-500 text-white px-6 py-2 rounded-lg font-bold disabled:opacity-50 transition" disabled>Confirmar Envio</button>
             </div>
         </div>
     </div>
@@ -201,59 +205,62 @@
 
         <!-- ABA: GACHA -->
         <section id="section-gacha" class="w-full max-w-4xl flex flex-col items-center gap-8">
-            <div id="gacha-locked" class="text-center bg-gray-800 p-8 rounded-xl border border-gray-700 w-full">
-                <h3 class="text-2xl font-bold mb-2">Faça Login para Jogar!</h3>
+            <div id="gacha-locked" class="text-center bg-gray-800 p-8 rounded-xl border border-gray-700 w-full shadow-lg">
+                <h3 class="text-2xl font-bold mb-2 text-white">Faça Login para Jogar!</h3>
                 <p class="text-gray-400 mb-4">Você precisa de uma conta para abrir pacotes e salvar sua coleção.</p>
-                <button onclick="window.showModal('register')" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-6 rounded-lg">Criar Conta Agora</button>
+                <button onclick="window.showModal('register')" class="bg-green-600 hover:bg-green-500 text-white font-bold py-2 px-6 rounded-lg shadow-lg shadow-green-900/30 transition">Criar Conta Agora</button>
             </div>
 
-            <div id="gacha-empty-db" class="hidden text-center bg-red-900/50 border border-red-500 p-8 rounded-xl w-full">
+            <div id="gacha-empty-db" class="hidden text-center bg-red-900/30 border border-red-500/50 p-8 rounded-xl w-full">
                 <h3 class="text-2xl font-bold text-red-400 mb-2">Nenhuma Carta no Jogo!</h3>
                 <p class="text-gray-300">Os admins ainda não criaram nenhuma carta no sistema. Volte mais tarde.</p>
             </div>
 
             <div id="gacha-content" class="hidden w-full flex-col items-center gap-8">
                 <div class="text-center space-y-2">
-                    <h2 class="text-3xl font-bold">Abra seu Pacote!</h2>
-                    <p class="text-gray-400">Cada pacote traz <span class="text-blue-400 font-bold">8 cartas</span>. Escolha <span class="text-green-400 font-bold">2</span> para a sua coleção!</p>
+                    <h2 class="text-3xl font-bold text-gray-100">Abra seu Pacote!</h2>
+                    <p class="text-gray-400">Cada pacote traz <span class="text-green-400 font-bold">8 cartas</span>. Escolha <span class="text-green-400 font-bold">2</span> para a sua coleção!</p>
                 </div>
 
                 <div id="gacha-area" class="relative flex justify-center items-center min-h-[400px] w-full">
+                    
                     <div id="booster-pack" class="pack" onclick="window.openPack()">
                         <div class="pack-cards-bg shadow-inner"></div>
                         <div class="pack-top"></div>
-                        <div class="pack-bottom flex-col gap-2">
-                            <div class="w-16 h-16 bg-blue-400 rounded-full flex items-center justify-center font-bold text-white text-3xl shadow-lg border-2 border-white">N</div>
-                            <span class="block text-3xl font-black text-white tracking-widest" style="text-shadow: 2px 2px 0 #000;">NIN</span>
-                            <span class="block text-sm text-blue-200 font-bold tracking-widest uppercase">Booster Pack</span>
+                        <div class="pack-bottom flex-col gap-3">
+                            <div class="w-20 h-20 bg-black rounded-full flex items-center justify-center overflow-hidden shadow-[0_0_15px_#22c55e] border-2 border-green-500">
+                                <img src="https://raw.githubusercontent.com/aurioshlookin/nin-ranking/main/assets/img/icon.png" alt="Logo" class="w-full h-full object-cover">
+                            </div>
+                            <span class="block text-4xl font-black text-transparent bg-clip-text bg-gradient-to-b from-green-300 to-green-600 tracking-widest drop-shadow-[0_2px_2px_rgba(0,0,0,1)]">NIN</span>
+                            <span class="block text-xs text-gray-300 font-bold tracking-widest uppercase">Booster Pack</span>
                         </div>
                     </div>
                     
                     <!-- Container de Temporizador Grande -->
-                    <div id="out-of-pulls-container" class="hidden flex-col items-center justify-center bg-gray-800 p-8 rounded-xl border-2 border-dashed border-gray-600 w-full max-w-md mx-auto shadow-2xl">
-                        <div class="text-6xl mb-4 opacity-50">⏳</div>
-                        <h3 class="text-2xl font-bold text-gray-300 mb-2">Sem Pacotes!</h3>
+                    <div id="out-of-pulls-container" class="hidden flex-col items-center justify-center bg-gray-800 p-8 rounded-xl border border-gray-700 w-full max-w-md mx-auto shadow-2xl">
+                        <div class="text-6xl mb-4 opacity-30">⏳</div>
+                        <h3 class="text-2xl font-bold text-gray-200 mb-2">Sem Pacotes!</h3>
                         <p class="text-gray-400 text-center mb-6">Sua energia acabou. Aguarde a recarga para voltar a abrir pacotes e expandir seu álbum.</p>
                         <div class="bg-gray-900 px-8 py-4 rounded-lg border border-gray-700 text-center shadow-inner">
                             <span class="block text-xs text-gray-500 uppercase font-bold mb-1">Próximo pacote em:</span>
-                            <span id="large-pull-timer" class="text-4xl font-black text-yellow-400 tracking-wider">--:--:--</span>
+                            <span id="large-pull-timer" class="text-4xl font-black text-green-400 tracking-wider">--:--:--</span>
                         </div>
                     </div>
 
                     <div id="revealed-cards" class="flex flex-wrap justify-center gap-2 sm:gap-4 md:gap-8 hidden w-full"></div>
                 </div>
 
-                <button id="btn-next" onclick="window.resetPackArea()" class="hidden bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 px-8 rounded-full text-xl shadow-lg transition transform hover:scale-105 active:scale-95">
+                <button id="btn-next" onclick="window.resetPackArea()" class="hidden bg-green-600 hover:bg-green-500 text-white font-bold py-4 px-8 rounded-full text-xl shadow-lg shadow-green-900/30 transition transform hover:scale-105 active:scale-95 border border-green-400">
                     ABRIR PRÓXIMO PACOTE
                 </button>
-                <p id="cooldown-msg" class="text-red-400 font-semibold hidden text-xl">Sem pacotes! Volte mais tarde.</p>
+                <p id="cooldown-msg" class="text-gray-400 font-semibold hidden text-xl">Sem pacotes! Volte mais tarde.</p>
             </div>
         </section>
 
         <!-- ABA: ÁLBUM -->
         <section id="section-album" class="w-full max-w-6xl hidden flex-col gap-6">
             <div id="album-locked" class="text-center bg-gray-800 p-8 rounded-xl border border-gray-700">
-                <h3 class="text-2xl font-bold">Álbum Vazio</h3>
+                <h3 class="text-2xl font-bold text-white">Álbum Vazio</h3>
                 <p class="text-gray-400">Faça login para visualizar sua coleção.</p>
             </div>
 
@@ -261,14 +268,14 @@
                 <!-- Controle e Filtros do Álbum -->
                 <div class="flex flex-col md:flex-row justify-between items-center gap-4 bg-gray-800 p-4 rounded-xl border border-gray-700 shadow-md">
                     <div class="flex items-center gap-3">
-                        <h2 class="text-2xl font-bold">Meu Álbum</h2>
-                        <span class="text-xs bg-gray-900 text-gray-400 px-2 py-1 rounded border border-gray-600">Coleção: <span id="collection-count" class="font-bold text-white">0</span>/<span id="total-cards-count">0</span></span>
+                        <h2 class="text-2xl font-bold text-gray-100">Meu Álbum</h2>
+                        <span class="text-xs bg-gray-900 text-gray-400 px-2 py-1 rounded border border-gray-600">Coleção: <span id="collection-count" class="font-bold text-green-400">0</span>/<span id="total-cards-count">0</span></span>
                     </div>
                     
                     <div class="flex flex-wrap items-center gap-4">
                         <div class="flex items-center gap-2">
                             <label class="text-xs font-bold text-gray-400">ORDENAR:</label>
-                            <select id="album-sort" onchange="window.updateAlbumViewSettings()" class="bg-gray-700 border border-gray-600 rounded px-2 py-1 text-white text-sm focus:outline-none focus:border-blue-500">
+                            <select id="album-sort" onchange="window.updateAlbumViewSettings()" class="bg-gray-700 border border-gray-600 rounded px-2 py-1 text-white text-sm focus:outline-none focus:border-green-500">
                                 <option value="tier-desc">Raridade (Maior > Menor)</option>
                                 <option value="tier-asc">Raridade (Menor > Maior)</option>
                                 <option value="qty-desc">Mais Repetidas</option>
@@ -276,7 +283,7 @@
                             </select>
                         </div>
                         <div class="flex items-center gap-1 bg-gray-900 rounded p-1 border border-gray-600">
-                            <button onclick="window.setAlbumViewMode('grid')" id="btn-view-grid" class="px-3 py-1 rounded bg-gray-600 text-white text-xs font-bold transition">Grade</button>
+                            <button onclick="window.setAlbumViewMode('grid')" id="btn-view-grid" class="px-3 py-1 rounded bg-green-600 text-white text-xs font-bold transition">Grade</button>
                             <button onclick="window.setAlbumViewMode('table')" id="btn-view-table" class="px-3 py-1 rounded text-gray-400 hover:bg-gray-700 hover:text-white text-xs font-bold transition">Tabela</button>
                             <button onclick="window.setAlbumViewMode('ranked')" id="btn-view-ranked" class="px-3 py-1 rounded text-gray-400 hover:bg-gray-700 hover:text-white text-xs font-bold transition">Por Rank</button>
                         </div>
@@ -290,18 +297,18 @@
 
         <!-- ABA: COMUNIDADE -->
         <section id="section-explore" class="w-full max-w-6xl hidden flex-col gap-6">
-            <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 flex flex-col md:flex-row gap-4 items-center justify-between">
+            <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 flex flex-col md:flex-row gap-4 items-center justify-between shadow-md">
                 <div>
-                    <h2 class="text-2xl font-bold text-yellow-400">Ranking & Comunidade</h2>
+                    <h2 class="text-2xl font-bold text-yellow-500">Ranking & Comunidade</h2>
                     <p class="text-gray-400 text-sm">Pesquise ninjas e veja quem tem as melhores coleções.</p>
                 </div>
                 <div class="flex w-full md:w-auto gap-2">
-                    <input type="text" id="search-input" oninput="window.filterPlayers()" placeholder="Nick do Ninja..." class="w-full md:w-64 bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-yellow-400">
-                    <button onclick="window.loadAllPlayers(true)" class="bg-gray-700 hover:bg-gray-600 text-white font-bold px-4 py-2 rounded-lg transition" title="Atualizar Lista">🔄</button>
+                    <input type="text" id="search-input" oninput="window.filterPlayers()" placeholder="Nick do Ninja..." class="w-full md:w-64 bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-green-500">
+                    <button onclick="window.loadAllPlayers(true)" class="bg-gray-700 hover:bg-gray-600 border border-gray-600 text-white font-bold px-4 py-2 rounded-lg transition" title="Atualizar Lista">🔄</button>
                 </div>
             </div>
             <p id="explore-error" class="text-red-400 text-center hidden font-bold"></p>
-            <div id="explore-table-container" class="w-full overflow-x-auto bg-gray-800 rounded-xl border border-gray-700">
+            <div id="explore-table-container" class="w-full overflow-x-auto bg-gray-800 rounded-xl border border-gray-700 shadow-md">
                 <table class="w-full text-left border-collapse whitespace-nowrap">
                     <thead>
                         <tr class="bg-gray-900 text-gray-400 text-sm border-b border-gray-700">
@@ -323,14 +330,14 @@
             <div id="explore-results" class="hidden flex-col gap-6 w-full">
                 <div class="flex items-center justify-between border-b border-gray-700 pb-4">
                     <div class="flex items-center gap-3">
-                        <div class="w-12 h-12 bg-gray-600 rounded-full overflow-hidden border-2 border-yellow-400">
+                        <div class="w-12 h-12 bg-gray-600 rounded-full overflow-hidden border-2 border-green-500">
                             <img id="explore-avatar" src="" alt="avatar" class="w-full h-full">
                         </div>
                         <div>
-                            <h3 class="text-xl font-bold">Álbum de: <span id="explore-name" class="text-yellow-400"></span></h3>
+                            <h3 class="text-xl font-bold text-gray-200">Álbum de: <span id="explore-name" class="text-green-400"></span></h3>
                         </div>
                     </div>
-                    <button onclick="window.closePlayerAlbum()" class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg text-sm font-bold transition">Voltar à Lista</button>
+                    <button onclick="window.closePlayerAlbum()" class="bg-gray-700 hover:bg-gray-600 border border-gray-600 px-4 py-2 rounded-lg text-sm font-bold transition text-white">Voltar à Lista</button>
                 </div>
                 <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4" id="explore-grid"></div>
             </div>
@@ -341,10 +348,10 @@
             <div class="flex justify-between items-end border-b border-gray-700 pb-4">
                 <div>
                     <h2 class="text-2xl font-bold text-green-400">Centro de Trocas 🤝</h2>
-                    <p class="text-sm text-gray-400">Só é permitido realizar <strong class="text-white">1 troca concluída por dia</strong> (Criando ou Aceitando).</p>
+                    <p class="text-sm text-gray-400">Só é permitido realizar <strong class="text-gray-200">1 troca concluída por dia</strong> (Criando ou Aceitando).</p>
                 </div>
                 <div class="text-right">
-                    <span class="text-gray-400 block">Trocas hoje: <span id="trade-limit-count" class="font-bold text-green-400">0</span>/1</span>
+                    <span class="text-gray-400 block text-sm">Trocas hoje: <span id="trade-limit-count" class="font-bold text-green-400">0</span>/1</span>
                     <span class="text-[10px] text-gray-500">Reseta 00:00</span>
                 </div>
             </div>
@@ -352,19 +359,19 @@
             <div class="flex flex-col lg:flex-row gap-6">
                 <!-- Coluna Esquerda: Minhas Ofertas -->
                 <div class="w-full lg:w-1/3 flex flex-col gap-6">
-                    <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 relative">
-                        <div id="trade-form-blocker" class="absolute inset-0 bg-gray-900/80 backdrop-blur-sm z-10 flex flex-col items-center justify-center rounded-xl hidden">
-                            <p id="trade-form-blocker-msg" class="text-yellow-400 font-bold text-center px-4">Você já tem uma oferta ativa ou já concluiu sua troca de hoje.</p>
+                    <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-md relative overflow-hidden">
+                        <div id="trade-form-blocker" class="absolute inset-0 bg-gray-900/80 backdrop-blur-sm z-10 flex flex-col items-center justify-center hidden">
+                            <p id="trade-form-blocker-msg" class="text-green-400 font-bold text-center px-4">Você já tem uma oferta ativa ou já concluiu sua troca de hoje.</p>
                         </div>
                         
-                        <h3 class="text-xl font-bold mb-4">Criar Nova Oferta</h3>
-                        <p class="text-xs text-gray-400 mb-4">Ofereça uma carta e peça uma raridade. O jogador que aceitar enviará cartas que você <span class="text-yellow-400 font-bold">ainda não possui</span>.</p>
+                        <h3 class="text-xl font-bold mb-4 text-gray-100">Criar Nova Oferta</h3>
+                        <p class="text-xs text-gray-400 mb-4">Ofereça uma carta e peça uma raridade. O jogador que aceitar enviará cartas que você <span class="text-green-400 font-bold">ainda não possui</span>.</p>
                         
                         <form id="trade-form" class="space-y-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-300 mb-1">A Carta Que Eu Ofereço:</label>
                                 <div class="flex items-center gap-3">
-                                    <select id="trade-offer" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white" required>
+                                    <select id="trade-offer" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-green-500" required>
                                         <option value="">Selecione uma carta repetida...</option>
                                     </select>
                                     <img id="trade-offer-preview" class="hidden w-10 h-14 object-cover rounded border border-gray-500 bg-gray-800" src="" alt="preview">
@@ -372,19 +379,19 @@
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-300 mb-1">A Raridade Que Eu Quero:</label>
-                                <select id="trade-request-tier" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white" required disabled>
+                                <select id="trade-request-tier" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-green-500" required disabled>
                                     <option value="">Primeiro selecione o que vai oferecer...</option>
                                 </select>
                             </div>
                             <div id="trade-ratio-info" class="text-yellow-400 font-bold text-sm text-center py-2"></div>
-                            <button type="submit" id="btn-create-trade" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-2 rounded-lg transition mt-4 shadow-lg">
+                            <button type="submit" id="btn-create-trade" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-2 rounded-lg transition mt-4 shadow-lg shadow-green-900/20">
                                 Publicar Oferta no Mural
                             </button>
                         </form>
                     </div>
 
-                    <div class="bg-gray-800 p-6 rounded-xl border border-gray-700">
-                        <h3 class="text-lg font-bold mb-4 text-blue-400">Minhas Ofertas Ativas</h3>
+                    <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-md">
+                        <h3 class="text-lg font-bold mb-4 text-green-400">Minhas Ofertas Ativas</h3>
                         <div id="my-trades-list" class="space-y-3">
                             <p class="text-sm text-gray-500">Nenhuma oferta ativa no momento.</p>
                         </div>
@@ -392,8 +399,8 @@
                 </div>
 
                 <!-- Coluna Direita: Mural Global -->
-                <div class="w-full lg:w-2/3 bg-gray-800 p-6 rounded-xl border border-gray-700">
-                    <h3 class="text-xl font-bold text-yellow-400 mb-4">Mural Global de Trocas</h3>
+                <div class="w-full lg:w-2/3 bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-md">
+                    <h3 class="text-xl font-bold text-yellow-500 mb-4">Mural Global de Trocas</h3>
                     <div id="global-trades-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="p-8 text-center text-gray-400 w-full col-span-full">Carregando mural...</div>
                     </div>
@@ -403,8 +410,8 @@
 
         <!-- ABA: ADMIN (CRIAR CARTAS) -->
         <section id="section-admin" class="w-full max-w-4xl hidden flex-col gap-6">
-            <div class="bg-gray-800 p-8 rounded-xl border border-red-900 shadow-2xl">
-                <h2 class="text-2xl font-bold text-red-400 mb-2 border-b border-gray-700 pb-2">Painel do Administrador</h2>
+            <div class="bg-gray-800 p-8 rounded-xl border border-red-900/50 shadow-2xl">
+                <h2 class="text-2xl font-bold text-red-500 mb-2 border-b border-gray-700 pb-2">Painel do Administrador</h2>
                 <p class="text-gray-400 text-sm mb-6">Crie ou edite cartas. Certifique-se de que a imagem já foi enviada para a pasta <code>assets/cards/</code> no GitHub.</p>
                 
                 <div class="flex flex-col md:flex-row gap-8">
@@ -412,11 +419,11 @@
                     <form id="admin-form" class="space-y-4 flex-1">
                         <div>
                             <label class="block text-sm font-medium text-gray-300 mb-1">Nome da Carta</label>
-                            <input type="text" id="admin-name" oninput="window.updateAdminPreview()" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white" required placeholder="Ex: Masiel Bolado">
+                            <input type="text" id="admin-name" oninput="window.updateAdminPreview()" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:border-green-500 focus:outline-none" required placeholder="Ex: Masiel Bolado">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-300 mb-1">Raridade (Tier)</label>
-                            <select id="admin-tier" onchange="window.updateAdminPreview()" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white">
+                            <select id="admin-tier" onchange="window.updateAdminPreview()" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:border-green-500 focus:outline-none">
                                 <option value="D">D - Comum (50%)</option>
                                 <option value="C">C - Incomum (30%)</option>
                                 <option value="B">B - Raro (13%)</option>
@@ -427,21 +434,21 @@
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-300 mb-1">Descrição</label>
-                            <input type="text" id="admin-desc" oninput="window.updateAdminPreview()" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white" required placeholder="Ex: Um momento histórico do servidor.">
+                            <input type="text" id="admin-desc" oninput="window.updateAdminPreview()" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:border-green-500 focus:outline-none" required placeholder="Ex: Um momento histórico do servidor.">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-300 mb-1">Escolha a Imagem (Arquivos no GitHub)</label>
-                            <div id="github-images-loading" class="text-yellow-400 text-sm animate-pulse hidden">Buscando imagens no GitHub...</div>
+                            <div id="github-images-loading" class="text-green-400 text-sm animate-pulse hidden">Buscando imagens no GitHub...</div>
                             <div id="github-images-grid" class="grid grid-cols-3 sm:grid-cols-4 gap-2 max-h-40 overflow-y-auto p-2 bg-gray-900 border border-gray-600 rounded-lg">
                                 <!-- Imagens injetadas via JS -->
                             </div>
                             <p id="github-images-empty" class="text-sm text-gray-400 hidden mt-2">Nenhuma nova imagem disponível.</p>
                         </div>
                         
-                        <button type="submit" id="admin-submit" class="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-3 rounded-lg transition mt-4 shadow-lg shadow-red-900/50">
+                        <button type="submit" id="admin-submit" class="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-3 rounded-lg transition mt-4 shadow-lg shadow-red-900/30">
                             CRIAR CARTA E ADICIONAR AO JOGO
                         </button>
-                        <button type="button" id="admin-cancel-btn" onclick="window.cancelEdit()" class="hidden w-full bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 rounded-lg transition mt-2">
+                        <button type="button" id="admin-cancel-btn" onclick="window.cancelEdit()" class="hidden w-full bg-gray-700 hover:bg-gray-600 border border-gray-600 text-white font-bold py-2 rounded-lg transition mt-2">
                             CANCELAR EDIÇÃO
                         </button>
                         <p id="admin-msg" class="text-center font-bold text-sm hidden mt-2"></p>
@@ -459,8 +466,8 @@
                 </div>
             </div>
             
-            <div class="bg-gray-800 p-6 rounded-xl border border-gray-700">
-                <h3 class="text-xl font-bold mb-4">Cartas no Sistema (<span id="admin-card-count">0</span>)</h3>
+            <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-md">
+                <h3 class="text-xl font-bold mb-4 text-gray-200">Cartas no Sistema (<span id="admin-card-count" class="text-green-400">0</span>)</h3>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-sm">
                         <thead class="text-gray-400 border-b border-gray-700">
@@ -519,9 +526,9 @@
                     sec.classList.remove('hidden'); sec.classList.add('flex');
                     btn.classList.remove('tab-inactive', 'text-yellow-600', 'text-green-500', 'text-red-600', 'border-transparent');
                     btn.classList.add('tab-active');
-                    if(t === 'explore') btn.classList.add('text-yellow-400', 'border-yellow-400');
-                    if(t === 'trade') btn.classList.add('text-green-400', 'border-green-400');
-                    if(t === 'admin') btn.classList.add('text-red-400', 'border-red-400');
+                    if(t === 'explore') btn.classList.add('text-yellow-500', 'border-yellow-500');
+                    if(t === 'trade') btn.classList.add('text-green-500', 'border-green-500');
+                    if(t === 'admin') btn.classList.add('text-red-500', 'border-red-500');
 
                     if (t === 'explore' && window.loadAllPlayers) window.loadAllPlayers(); 
                     if (t === 'admin' && window.loadGitHubImages) {
@@ -530,7 +537,7 @@
                     }
                 } else {
                     sec.classList.add('hidden'); sec.classList.remove('flex');
-                    btn.classList.remove('tab-active', 'text-yellow-400', 'border-yellow-400', 'text-green-400', 'border-green-400', 'text-red-400', 'border-red-400');
+                    btn.classList.remove('tab-active', 'text-yellow-500', 'border-yellow-500', 'text-green-500', 'border-green-500', 'text-red-500', 'border-red-500');
                     btn.classList.add('tab-inactive', 'border-transparent');
                     if(t === 'explore') btn.classList.add('text-yellow-600');
                     if(t === 'trade') btn.classList.add('text-green-500');
@@ -545,10 +552,10 @@
                 const btn = document.getElementById(`btn-view-${m}`);
                 if(btn) {
                     if (m === mode) {
-                        btn.classList.add('bg-gray-600', 'text-white');
-                        btn.classList.remove('text-gray-400', 'hover:bg-gray-700', 'hover:text-white');
+                        btn.classList.add('bg-green-600', 'text-white');
+                        btn.classList.remove('text-gray-400', 'hover:bg-gray-700', 'hover:text-white', 'bg-gray-600');
                     } else {
-                        btn.classList.remove('bg-gray-600', 'text-white');
+                        btn.classList.remove('bg-green-600', 'text-white', 'bg-gray-600');
                         btn.classList.add('text-gray-400', 'hover:bg-gray-700', 'hover:text-white');
                     }
                 }
@@ -562,7 +569,6 @@
         };
 
         // --- SISTEMA DE AUDIO (WEB AUDIO API) ---
-        // Cria sons dinâmicos sem precisar de links externos que podem quebrar
         const AudioContext = window.AudioContext || window.webkitAudioContext;
         const audioCtx = new AudioContext();
 
@@ -576,7 +582,6 @@
             const now = audioCtx.currentTime;
             
             if(tier === 'SS') {
-                // Acorde épico ascendente com 2 osciladores
                 osc.type = 'sawtooth';
                 osc.frequency.setValueAtTime(300, now);
                 osc.frequency.exponentialRampToValueAtTime(800, now + 0.5);
@@ -592,7 +597,6 @@
                 osc2.connect(gainNode);
                 osc2.start(now); osc2.stop(now + 1.5);
             } else if(tier === 'S') {
-                // Brilho agudo
                 osc.type = 'sine';
                 osc.frequency.setValueAtTime(400, now);
                 osc.frequency.exponentialRampToValueAtTime(800, now + 0.3);
@@ -601,14 +605,12 @@
                 gainNode.gain.exponentialRampToValueAtTime(0.01, now + 1);
                 osc.start(now); osc.stop(now + 1);
             } else if(tier === 'A' || tier === 'B') {
-                // Toque feliz
                 osc.type = 'triangle';
                 osc.frequency.setValueAtTime(400, now);
                 gainNode.gain.setValueAtTime(0.2, now);
                 gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
                 osc.start(now); osc.stop(now + 0.5);
             } else {
-                // Toque comum
                 osc.type = 'sine';
                 osc.frequency.setValueAtTime(200, now);
                 gainNode.gain.setValueAtTime(0.1, now);
@@ -620,9 +622,9 @@
         window.fireConfetti = (tier) => {
             if(typeof confetti !== 'function') return;
             if(tier === 'SS') {
-                confetti({ particleCount: 150, spread: 100, origin: { y: 0.6 }, colors: ['#f56565', '#000000', '#ffffff'], zIndex: 1000 });
+                confetti({ particleCount: 150, spread: 100, origin: { y: 0.6 }, colors: ['#ef4444', '#000000', '#ffffff'], zIndex: 1000 });
             } else if(tier === 'S') {
-                confetti({ particleCount: 100, spread: 80, origin: { y: 0.6 }, colors: ['#ecc94b', '#ffffff'], zIndex: 1000 });
+                confetti({ particleCount: 100, spread: 80, origin: { y: 0.6 }, colors: ['#facc15', '#ffffff'], zIndex: 1000 });
             }
         };
     </script>
@@ -655,6 +657,7 @@
         let allOpenTrades = [];
         
         let cardDatabase = [];
+        // ATUALIZADO PARA O NOVO REPOSITÓRIO GITHUB DO RANKING
         const GITHUB_RAW_URL = "https://raw.githubusercontent.com/aurioshlookin/NinCardMemeCollectionBR/main/assets/cards/";
         
         let selectedAdminImage = ""; 
@@ -726,7 +729,7 @@
                         <td class="py-2">${c.name}</td>
                         <td>${c.tier}</td>
                         <td class="text-gray-500 text-xs">${c.img}</td>
-                        <td><button type="button" onclick="window.editCard('${c.id}')" class="text-blue-400 hover:text-blue-300 text-xs font-bold bg-gray-800 px-2 py-1 rounded border border-gray-600">Editar</button></td>
+                        <td><button type="button" onclick="window.editCard('${c.id}')" class="text-green-400 hover:text-green-300 text-xs font-bold bg-gray-800 px-2 py-1 rounded border border-gray-600 transition">Editar</button></td>
                     </tr>`;
             });
 
@@ -1050,10 +1053,10 @@
                 }
 
                 globalGrid.innerHTML += `
-                    <div class="bg-gray-900 rounded-xl border ${isMyTrade ? 'border-blue-500 shadow-md shadow-blue-900/50' : 'border-gray-600'} overflow-hidden flex flex-col">
+                    <div class="bg-gray-900 rounded-xl border ${isMyTrade ? 'border-green-500 shadow-md shadow-green-900/50' : 'border-gray-600'} overflow-hidden flex flex-col">
                         <div class="bg-gray-800 px-3 py-2 border-b border-gray-700 flex items-center gap-2">
                             <img src="https://api.dicebear.com/7.x/pixel-art/svg?seed=${trade.fromUserName}" class="w-6 h-6 rounded-full bg-gray-700 border border-gray-500">
-                            <span class="font-bold text-sm ${isMyTrade ? 'text-blue-400' : 'text-gray-200'}">${trade.fromUserName} ${isMyTrade ? '(Você)' : ''}</span>
+                            <span class="font-bold text-sm ${isMyTrade ? 'text-green-400' : 'text-gray-200'}">${trade.fromUserName} ${isMyTrade ? '(Você)' : ''}</span>
                         </div>
                         <div class="p-3 flex justify-between items-center gap-2 flex-grow">
                             <div class="w-16 h-20 bg-gray-800 rounded border border-gray-600 flex flex-col justify-center items-center relative overflow-hidden" title="${offerCard.name}">
@@ -1141,7 +1144,7 @@
                         const instanceId = `${c.id}_${i}`; 
                         grid.innerHTML += `
                             <div id="accept-card-${instanceId}" onclick="window.toggleAcceptCard('${c.id}', '${instanceId}')" class="cursor-pointer border-2 border-transparent p-1 rounded bg-gray-800 flex flex-col items-center transition relative">
-                                <img src="${GITHUB_RAW_URL + c.img}" class="w-16 h-20 object-cover pointer-events-none rounded">
+                                <img src="${GITHUB_RAW_URL + c.img}" class="w-16 h-20 object-cover pointer-events-none rounded border border-gray-600">
                                 <span class="text-[9px] mt-1 text-center font-bold truncate w-full text-white pointer-events-none">${c.name}</span>
                                 <div id="check-${instanceId}" class="absolute inset-0 bg-green-500/50 hidden items-center justify-center pointer-events-none rounded">
                                     <span class="text-white text-2xl font-black">✓</span>
@@ -1234,7 +1237,7 @@
                 document.getElementById('trade-accept-modal').classList.add('hidden');
                 window.showMessage("MUITO BEM! A troca foi realizada com sucesso.");
             } catch (e) {
-                window.showMessage("Falha na transação: " + e);
+                window.showMessage("Falha na transação. Você atualizou as Regras do Firebase conforme o tutorial?");
             } finally {
                 btn.disabled = false;
                 btn.innerText = "Confirmar Envio";
@@ -1268,7 +1271,6 @@
             if (userData.pullsAvailable === 3) updateData.lastPullTimestamp = Date.now();
             await updateDoc(userRef, updateData);
 
-            // Gera as cartas previamente na memória
             currentPackCards = [];
             let highestTierVal = 0;
             let highestTierStr = 'D';
@@ -1285,25 +1287,21 @@
 
             const pack = document.getElementById('booster-pack');
             
-            // Inicia Efeitos de Som e Brilho baseados na melhor carta!
             if (pack) {
                 if(highestTierVal >= 5) {
                     pack.classList.add(`glowing-${highestTierStr}`, 'shaking-violent');
                 } else {
                     pack.classList.add('shaking');
                 }
-                // Toca som pelo Sintetizador do Navegador!
                 window.playGachaSound(highestTierStr);
             }
 
-            // Suspense maior para cartas muito raras
             const suspenseTime = highestTierVal >= 5 ? 1200 : 400;
 
             setTimeout(() => {
                 if (pack) {
                     pack.classList.remove('shaking', 'shaking-violent', 'glowing-SS', 'glowing-S', 'glowing-A');
                     pack.classList.add('tearing');
-                    // Efeito Visual Adicional se for Rara
                     window.fireConfetti(highestTierStr);
                 }
 
@@ -1316,18 +1314,17 @@
                         revealedContainer.innerHTML = '';
                         revealedContainer.classList.remove('hidden');
 
-                        // Renderiza as 8 cartas de cabeça para baixo
                         for(let index=0; index<8; index++) {
                             revealedContainer.innerHTML += `
                                 <div class="card-container w-24 h-36 sm:w-32 sm:h-48 md:w-40 md:h-60 cursor-pointer transform transition hover:scale-105" id="gacha-card-${index}" onclick="window.revealSingleCard(${index})">
                                     <div class="card-inner shadow-2xl rounded-xl" id="gacha-card-inner-${index}">
-                                        <div class="card-back text-3xl sm:text-4xl hover:shadow-blue-500/50 transition duration-300">❓</div>
+                                        <div class="card-back text-3xl sm:text-4xl hover:shadow-green-500/50 border border-gray-600 transition duration-300">❓</div>
                                         <div class="card-front p-1 sm:p-2 flex flex-col" id="gacha-card-front-${index}"></div>
                                     </div>
                                 </div>`;
                         }
                     }
-                }, 400); // Tempo do envelope sendo rasgado
+                }, 400); 
             }, suspenseTime);
         };
 
@@ -1348,7 +1345,6 @@
             const cardContainer = document.getElementById(`gacha-card-${index}`);
             if (cardContainer) cardContainer.classList.remove('hover:scale-105');
             
-            // EFEITOS DE BRILHO AO VIRAR A CARTA
             const ringColors = { 'D': 'ring-gray-400', 'C': 'ring-green-400', 'B': 'ring-blue-400', 'A': 'ring-purple-400', 'S': 'ring-yellow-400', 'SS': 'ring-red-500' };
             if (cardContainer) cardContainer.classList.add(`reveal-${cardData.tier}`, 'ring-4', ringColors[cardData.tier]);
             
@@ -1426,7 +1422,7 @@
             container.innerHTML = `
                 <div class="flex justify-between items-start mb-1 sm:mb-2 absolute top-1 left-1 right-1 z-10">
                     <span class="font-bold text-[10px] sm:text-xs bg-gray-900 text-white px-1 sm:px-2 py-0.5 sm:py-1 rounded shadow-md opacity-90 border border-gray-600">Rank ${cardData.tier}</span>
-                    ${showQuantity && quantity > 1 ? `<span class="font-bold text-[10px] sm:text-xs bg-blue-600 text-white px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full shadow-md border border-blue-400">x${quantity}</span>` : ''}
+                    ${showQuantity && quantity > 1 ? `<span class="font-bold text-[10px] sm:text-xs bg-green-600 text-white px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full shadow-md border border-green-400">x${quantity}</span>` : ''}
                 </div>
                 
                 <div class="flex-grow flex items-center justify-center bg-gray-300 rounded overflow-hidden relative border-2 border-gray-800">
@@ -1509,7 +1505,7 @@
                             <td class="p-3 font-bold">${card.name}</td>
                             <td class="p-3 font-bold text-yellow-400">${card.tier}</td>
                             <td class="p-3 truncate max-w-[200px]">${card.desc}</td>
-                            <td class="p-3 text-center font-bold ${quantity > 1 ? 'text-blue-400' : ''}">x${quantity}</td>
+                            <td class="p-3 text-center font-bold ${quantity > 1 ? 'text-green-400' : ''}">x${quantity}</td>
                         </tr>`;
                     } else {
                         tableHTML += `<tr class="opacity-50 bg-gray-800 text-gray-500 transition duration-150">
@@ -1616,7 +1612,7 @@
                         <td class="p-4 text-center text-yellow-400 font-semibold">${stats.S}</td>
                         <td class="p-4 text-center text-red-400 font-bold">${stats.SS}</td>
                         <td class="p-4 text-center">
-                            <button onclick="window.viewPlayerAlbum('${player.uid}')" class="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1 rounded-lg text-xs font-bold transition shadow">Ver Álbum</button>
+                            <button onclick="window.viewPlayerAlbum('${player.uid}')" class="bg-green-600 hover:bg-green-500 text-white px-3 py-1 rounded-lg text-xs font-bold transition shadow">Ver Álbum</button>
                         </td>
                     </tr>`;
             });
@@ -1682,7 +1678,7 @@
 
                 availableImages.forEach(file => {
                     const imgDiv = document.createElement('div');
-                    imgDiv.className = "cursor-pointer rounded border-2 border-transparent hover:border-blue-400 transition overflow-hidden h-24 bg-gray-800 relative group";
+                    imgDiv.className = "cursor-pointer rounded border-2 border-transparent hover:border-green-400 transition overflow-hidden h-24 bg-gray-800 relative group";
                     imgDiv.onclick = () => window.selectAdminImage(file.name, imgDiv);
                     
                     if (selectedAdminImage === file.name) {
@@ -1699,7 +1695,7 @@
 
             } catch (err) {
                 loading.innerText = "Erro ao carregar imagens. Pasta assets/cards existe?";
-                loading.classList.replace('text-yellow-400', 'text-red-400');
+                loading.classList.replace('text-green-400', 'text-red-400');
             } finally {
                 isFetchingImages = false; 
             }
