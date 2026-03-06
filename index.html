@@ -204,6 +204,40 @@
         </div>
     </div>
 
+    <!-- Modal de Detalhes da Carta -->
+    <div id="card-detail-modal" class="fixed inset-0 bg-black/90 flex items-center justify-center z-[110] hidden backdrop-blur-md p-4">
+        <div class="bg-gray-800 rounded-xl shadow-[0_0_40px_rgba(0,0,0,0.8)] max-w-4xl w-full border border-gray-700 relative flex flex-col md:flex-row overflow-hidden max-h-[90vh] overflow-y-auto">
+            <button onclick="window.closeCardDetail()" class="absolute top-4 right-4 text-gray-400 hover:text-white text-3xl z-50 bg-black/50 w-10 h-10 rounded-full flex items-center justify-center transition hover:bg-red-600">&times;</button>
+
+            <!-- Card Showcase -->
+            <div class="w-full md:w-1/2 p-8 flex justify-center items-center bg-gray-900 border-b md:border-b-0 md:border-r border-gray-700 relative min-h-[450px]">
+                <div id="detail-card-container" class="w-64 h-96 shadow-2xl transform transition hover:scale-105"></div>
+            </div>
+
+            <!-- Card Info -->
+            <div class="w-full md:w-1/2 p-6 md:p-10 flex flex-col justify-center relative">
+                <div class="flex items-center gap-3 mb-2">
+                    <span id="detail-card-tier" class="px-3 py-1 font-black text-sm rounded shadow-md border"></span>
+                    <span id="detail-card-chance" class="text-gray-400 text-sm font-bold bg-gray-900 px-2 py-1 rounded border border-gray-700 shadow-inner"></span>
+                </div>
+                <h2 id="detail-card-name" class="text-3xl md:text-4xl font-bold text-white mb-6 drop-shadow-md"></h2>
+
+                <div class="bg-black/40 p-5 rounded-lg border border-gray-700 mb-6 shadow-inner">
+                    <h4 class="text-xs text-gray-500 uppercase font-bold mb-2">Descrição</h4>
+                    <p id="detail-card-desc" class="text-gray-300 text-lg leading-relaxed italic"></p>
+                </div>
+
+                <div id="detail-card-owned-container" class="bg-green-900/20 p-4 rounded-lg border border-green-500/30 flex items-center justify-between">
+                    <div>
+                        <h4 class="text-xs text-green-500 uppercase font-bold mb-1">Na sua Coleção</h4>
+                        <p class="text-3xl font-black text-green-400 drop-shadow-md">x<span id="detail-card-owned"></span></p>
+                    </div>
+                    <div class="text-4xl opacity-20">📁</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Conteúdo Principal -->
     <main class="flex-grow p-4 md:p-8 flex flex-col items-center">
 
@@ -447,6 +481,20 @@
                             <label class="block text-sm font-medium text-gray-300 mb-1">Descrição</label>
                             <input type="text" id="admin-desc" oninput="window.updateAdminPreview()" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:border-green-500 focus:outline-none" required placeholder="Ex: Um momento histórico do servidor.">
                         </div>
+                        <div class="grid grid-cols-3 gap-4 bg-gray-900/50 p-3 rounded-lg border border-gray-700">
+                            <div>
+                                <label class="block text-xs font-medium text-gray-400 mb-1">Zoom Imagem</label>
+                                <input type="range" id="admin-zoom" min="0.5" max="3" step="0.05" value="1" oninput="window.updateAdminPreview()" class="w-full accent-green-500 mt-2">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-400 mb-1">Tam. Fonte Nome</label>
+                                <input type="number" id="admin-name-size" value="12" oninput="window.updateAdminPreview()" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-1 text-white focus:border-green-500 focus:outline-none text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-400 mb-1">Tam. Fonte Desc</label>
+                                <input type="number" id="admin-desc-size" value="9" oninput="window.updateAdminPreview()" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-1 text-white focus:border-green-500 focus:outline-none text-sm">
+                            </div>
+                        </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-300 mb-1">Escolha a Imagem (Arquivos no GitHub)</label>
                             <div id="github-images-loading" class="text-green-400 text-sm animate-pulse hidden">Buscando imagens no GitHub...</div>
@@ -466,10 +514,11 @@
                     </form>
 
                     <!-- Preview ao Vivo da Carta -->
-                    <div class="flex flex-col items-center w-full md:w-64 border-t md:border-t-0 md:border-l border-gray-700 pt-6 md:pt-0 md:pl-8">
-                        <h3 class="text-gray-400 text-sm font-bold mb-4">Pré-visualização</h3>
-                        <div class="w-48 h-72">
-                            <div id="admin-preview-container" class="w-full h-full shadow-2xl transition transform">
+                    <div class="flex flex-col items-center w-full md:w-80 border-t md:border-t-0 md:border-l border-gray-700 pt-6 md:pt-0 md:pl-8">
+                        <h3 class="text-gray-400 text-sm font-bold mb-1">Pré-visualização</h3>
+                        <p class="text-[10px] text-green-400 mb-4 font-bold text-center bg-green-900/30 px-2 py-1 rounded border border-green-500/30">Dica: Arraste a imagem na carta para posicionar!</p>
+                        <div class="w-64 h-96 cursor-move relative z-10">
+                            <div id="admin-preview-container" class="w-full h-full shadow-2xl transition transform pointer-events-none">
                                 <!-- A carta será gerada aqui pelo JS -->
                             </div>
                         </div>
@@ -502,6 +551,7 @@
         window.authMode = 'login';
         window.currentAlbumSort = 'tier-desc';
         window.currentAlbumView = 'grid';
+        window.adminCardState = { posX: 50, posY: 50 }; // Estado do reposicionamento da imagem
         
         window.showModal = (mode) => {
             window.authMode = mode;
@@ -579,9 +629,97 @@
             if(window.refreshAlbum) window.refreshAlbum();
         };
 
-        window.updateAlbumViewSettings = () => {
-            window.currentAlbumSort = document.getElementById('album-sort').value;
-            if(window.refreshAlbum) window.refreshAlbum();
+        // --- SISTEMA DE ARRASTE DO ADMIN PREVIEW ---
+        let isDraggingPreview = false;
+        let dragStartX, dragStartY;
+
+        const handleDragStart = (e) => {
+            const container = document.getElementById('admin-preview-container');
+            // Verifica se clicou no container pai (a div com cursor-move)
+            if(container && container.parentElement.contains(e.target)) {
+                isDraggingPreview = true;
+                dragStartX = e.clientX || e.touches[0].clientX;
+                dragStartY = e.clientY || e.touches[0].clientY;
+                if(e.type === 'mousedown') e.preventDefault();
+            }
+        };
+
+        const handleDragMove = (e) => {
+            if(!isDraggingPreview) return;
+            if(e.type === 'touchmove') e.preventDefault();
+            
+            const clientX = e.clientX || e.touches[0].clientX;
+            const clientY = e.clientY || e.touches[0].clientY;
+            
+            const dx = clientX - dragStartX;
+            const dy = clientY - dragStartY;
+            
+            // Ajuste de sensibilidade
+            window.adminCardState.posX -= dx * 0.4; 
+            window.adminCardState.posY -= dy * 0.4;
+            
+            // Limitar entre 0% e 100%
+            window.adminCardState.posX = Math.max(0, Math.min(100, window.adminCardState.posX));
+            window.adminCardState.posY = Math.max(0, Math.min(100, window.adminCardState.posY));
+            
+            dragStartX = clientX;
+            dragStartY = clientY;
+            
+            if(window.updateAdminPreview) window.updateAdminPreview();
+        };
+
+        const handleDragEnd = () => { isDraggingPreview = false; };
+
+        document.addEventListener('mousedown', handleDragStart);
+        document.addEventListener('mousemove', handleDragMove);
+        document.addEventListener('mouseup', handleDragEnd);
+        
+        document.addEventListener('touchstart', handleDragStart, {passive: false});
+        document.addEventListener('touchmove', handleDragMove, {passive: false});
+        document.addEventListener('touchend', handleDragEnd);
+
+        // --- MODAL DETALHE DA CARTA ---
+        window.showCardDetail = (cardId) => {
+            if (typeof cardDatabase === 'undefined' || !cardDatabase) return;
+            const card = cardDatabase.find(c => c.id === cardId);
+            if(!card) return;
+            
+            const dropRates = { 'C': '52%', 'B': '39%', 'A': '8%', 'S': '0.9%', 'SS': '0.01%' };
+            const tierColors = { 'C': 'text-green-400 border-green-400', 'B': 'text-blue-400 border-blue-400', 'A': 'text-purple-400 border-purple-400', 'S': 'text-yellow-400 border-yellow-400', 'SS': 'text-red-500 border-red-500' };
+            
+            document.getElementById('detail-card-name').innerText = card.name;
+            document.getElementById('detail-card-desc').innerText = card.desc;
+            
+            const tierEl = document.getElementById('detail-card-tier');
+            tierEl.innerText = `Rank ${card.tier}`;
+            tierEl.className = `px-3 py-1 font-black text-sm rounded shadow-md border ${tierColors[card.tier]} bg-gray-900`;
+            
+            document.getElementById('detail-card-chance').innerText = `Chance Drop: ${dropRates[card.tier]}`;
+            
+            // Check inventory (using the global userData from module if available, or just fallback)
+            let qty = 0;
+            if(window._currentUserData && window._currentUserData.inventory) {
+                qty = window._currentUserData.inventory[cardId] || 0;
+            }
+            
+            const ownedEl = document.getElementById('detail-card-owned');
+            const ownedContainer = document.getElementById('detail-card-owned-container');
+            
+            if(qty > 0) {
+                ownedEl.innerText = qty;
+                ownedContainer.classList.remove('hidden');
+                ownedContainer.classList.add('flex');
+            } else {
+                ownedContainer.classList.add('hidden');
+                ownedContainer.classList.remove('flex');
+            }
+            
+            window.renderCardHTML('detail-card-container', card, false, true, window._currentUserData ? window._currentUserData.inventory : {});
+            document.getElementById('card-detail-modal').classList.remove('hidden');
+        };
+
+        window.closeCardDetail = () => {
+            document.getElementById('card-detail-modal').classList.add('hidden');
         };
 
         // --- SISTEMA DE AUDIO (WEB AUDIO API) ---
@@ -840,6 +978,7 @@
                 unsubUser = onSnapshot(doc(db, "users", user.uid), async (docSnap) => {
                     if (docSnap.exists()) {
                         userData = docSnap.data();
+                        window._currentUserData = userData; // Exporta para o escopo global (usado no modal)
 
                         if (userData.pullsAvailable < 3 && !userData.lastPullTimestamp) await updateDoc(doc(db, "users", user.uid), { lastPullTimestamp: Date.now() });
                         if (user.email === 'auriosh@nincard.com' && userData.role !== 'admin') await updateDoc(doc(db, "users", user.uid), { role: 'admin' });
@@ -1440,6 +1579,17 @@
             const layout = cardData.layout || 'standard';
             const isFullArt = layout === 'full-art';
             
+            // Valores personalizáveis (Zoom, Posição e Fontes)
+            const zoom = cardData.imageZoom || 1;
+            const posX = cardData.imagePosX ?? 50;
+            const posY = cardData.imagePosY ?? 50;
+            const imgStyle = `object-fit: cover; object-position: ${posX}% ${posY}%; transform: scale(${zoom}); transform-origin: center;`;
+
+            const nameFontSize = cardData.nameFontSize ? `${cardData.nameFontSize}px` : (isFullArt ? '14px' : '12px');
+            const descFontSize = cardData.descFontSize ? `${cardData.descFontSize}px` : (isFullArt ? '10px' : '9px');
+            const nameStyle = `font-size: ${nameFontSize}; line-height: 1.1;`;
+            const descStyle = `font-size: ${descFontSize}; line-height: 1.2;`;
+
             const rankClasses = {
                 'C': 'border-green-400 bg-gradient-to-br from-green-900 to-black',
                 'B': 'border-blue-400 bg-gradient-to-br from-blue-900 to-black',
@@ -1467,34 +1617,34 @@
             if(isFullArt) {
                 contentHTML = `
                     ${foilEffect}
-                    <div class="absolute inset-0 z-0">
-                        <img src="${fullImageUrl}" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='https://via.placeholder.com/150/cbd5e0/4a5568?text=Sem+Imagem';">
+                    <div class="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+                        <img src="${fullImageUrl}" style="${imgStyle}" class="w-full h-full" onerror="this.onerror=null; this.src='https://via.placeholder.com/150/cbd5e0/4a5568?text=Sem+Imagem';">
                     </div>
-                    <div class="absolute top-1 left-1 right-1 z-10 flex justify-between">
-                        <span class="font-black text-[10px] sm:text-xs bg-black/80 px-1.5 py-0.5 rounded border border-gray-600 ${tierColorText[cardData.tier]} shadow-md">R.${cardData.tier}</span>
+                    <div class="absolute top-1 left-1 right-1 z-10 flex justify-between pointer-events-none">
+                        <span class="font-black text-xs bg-black/80 px-1.5 py-0.5 rounded border border-gray-600 ${tierColorText[cardData.tier]} shadow-md">R.${cardData.tier}</span>
                     </div>
-                    <div class="absolute bottom-0 left-0 right-0 p-2 sm:p-3 bg-gradient-to-t from-black via-black/80 to-transparent z-10">
-                        <h3 class="font-black text-white text-xs sm:text-sm drop-shadow-[0_2px_2px_rgba(0,0,0,1)]">${cardData.name}</h3>
-                        <p class="text-[9px] sm:text-[10px] text-gray-300 italic mt-0.5 leading-tight line-clamp-3">${cardData.desc}</p>
+                    <div class="absolute bottom-0 left-0 right-0 p-2 sm:p-3 bg-gradient-to-t from-black via-black/80 to-transparent z-10 pointer-events-none">
+                        <h3 class="font-black text-white drop-shadow-[0_2px_2px_rgba(0,0,0,1)]" style="${nameStyle}">${cardData.name}</h3>
+                        <p class="text-gray-300 italic mt-0.5 leading-tight line-clamp-3" style="${descStyle}">${cardData.desc}</p>
                     </div>
-                    ${showQuantity && quantity > 1 ? `<div class="absolute top-1 right-1 bg-green-600 text-white text-[10px] sm:text-xs font-bold px-1.5 py-0.5 rounded-full shadow-lg border border-green-400 z-40">x${quantity}</div>` : ''}
+                    ${showQuantity && quantity > 1 ? `<div class="absolute top-1 right-1 bg-green-600 text-white text-xs font-bold px-1.5 py-0.5 rounded-full shadow-lg border border-green-400 z-40 pointer-events-none">x${quantity}</div>` : ''}
                 `;
             } else {
                 // Layout Padrão (Tipo Pokémon)
                 contentHTML = `
                     ${foilEffect}
-                    <div class="relative z-10 p-1 sm:p-2 h-full flex flex-col">
+                    <div class="relative z-10 p-1 sm:p-2 h-full flex flex-col pointer-events-none">
                         <div class="flex justify-between items-center mb-1">
-                            <h3 class="font-bold text-[10px] sm:text-xs text-white drop-shadow-md truncate max-w-[70%]">${cardData.name}</h3>
-                            <span class="font-black text-[9px] sm:text-[10px] ${tierColorText[cardData.tier]} bg-black/60 px-1 rounded shadow-md">R.${cardData.tier}</span>
+                            <h3 class="font-bold text-white drop-shadow-md truncate max-w-[70%]" style="${nameStyle}">${cardData.name}</h3>
+                            <span class="font-black text-[10px] sm:text-xs ${tierColorText[cardData.tier]} bg-black/60 px-1 rounded shadow-md">R.${cardData.tier}</span>
                         </div>
                         
                         <div class="w-full aspect-[4/3] bg-black border-2 border-gray-500 overflow-hidden shadow-inner flex-shrink-0 rounded">
-                            <img src="${fullImageUrl}" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='https://via.placeholder.com/150/cbd5e0/4a5568?text=Sem+Imagem';">
+                            <img src="${fullImageUrl}" style="${imgStyle}" class="w-full h-full" onerror="this.onerror=null; this.src='https://via.placeholder.com/150/cbd5e0/4a5568?text=Sem+Imagem';">
                         </div>
                         
                         <div class="flex-grow mt-1 sm:mt-1.5 bg-black/40 p-1 sm:p-1.5 rounded border border-white/20 overflow-hidden text-center flex items-center justify-center">
-                            <p class="text-[8px] sm:text-[9.px] text-gray-200 italic leading-tight line-clamp-4">${cardData.desc}</p>
+                            <p class="text-gray-200 italic leading-tight line-clamp-4" style="${descStyle}">${cardData.desc}</p>
                         </div>
                         
                         ${showQuantity && quantity > 1 ? `<div class="absolute bottom-1 right-1 bg-green-600 text-white text-[10px] sm:text-xs font-bold px-1.5 py-0.5 rounded-full shadow-lg border border-green-400 z-40">x${quantity}</div>` : ''}
@@ -1544,7 +1694,8 @@
                 cardsArray.forEach(card => {
                     const quantity = sourceInventory[card.id] || 0;
                     const wrapper = document.createElement('div');
-                    wrapper.className = "w-full aspect-[2/3] relative rounded-xl transition transform hover:scale-105 shadow-lg";
+                    wrapper.className = "w-full aspect-[2/3] relative rounded-xl transition transform hover:scale-105 shadow-lg cursor-pointer";
+                    wrapper.onclick = () => window.showCardDetail(card.id);
                     
                     if (quantity > 0) {
                         const innerCard = document.createElement('div');
@@ -1569,7 +1720,7 @@
                     const fullImageUrl = GITHUB_RAW_URL + card.img;
                     
                     if (hasCard) {
-                        tableHTML += `<tr class="hover:bg-gray-700 text-white transition duration-150">
+                        tableHTML += `<tr class="hover:bg-gray-700 text-white transition duration-150 cursor-pointer" onclick="window.showCardDetail('${card.id}')">
                             <td class="p-2"><img src="${fullImageUrl}" class="w-8 h-10 object-cover rounded border border-gray-500"></td>
                             <td class="p-3 font-bold">${card.name}</td>
                             <td class="p-3 font-bold text-yellow-400">${card.tier}</td>
@@ -1577,7 +1728,7 @@
                             <td class="p-3 text-center font-bold ${quantity > 1 ? 'text-green-400' : ''}">x${quantity}</td>
                         </tr>`;
                     } else {
-                        tableHTML += `<tr class="opacity-50 bg-gray-800 text-gray-500 transition duration-150">
+                        tableHTML += `<tr class="opacity-50 bg-gray-800 text-gray-500 transition duration-150 cursor-pointer" onclick="window.showCardDetail('${card.id}')">
                             <td class="p-2"><div class="w-8 h-10 bg-gray-700 rounded border border-gray-600 flex items-center justify-center font-bold">?</div></td>
                             <td class="p-3 font-bold">???</td>
                             <td class="p-3 font-bold">${card.tier}</td>
@@ -1607,7 +1758,8 @@
                     cardsInTier.forEach(card => {
                         const quantity = sourceInventory[card.id] || 0;
                         const wrapper = document.createElement('div');
-                        wrapper.className = "w-full aspect-[2/3] relative rounded-xl transition transform hover:scale-105 shadow-lg";
+                        wrapper.className = "w-full aspect-[2/3] relative rounded-xl transition transform hover:scale-105 shadow-lg cursor-pointer";
+                        wrapper.onclick = () => window.showCardDetail(card.id);
                         
                         if (quantity > 0) {
                             const innerCard = document.createElement('div');
@@ -1788,7 +1940,12 @@
                 tier: document.getElementById('admin-tier').value || 'C',
                 layout: document.getElementById('admin-layout').value || 'standard',
                 desc: document.getElementById('admin-desc').value || 'Descrição...',
-                img: selectedAdminImage || ''
+                img: selectedAdminImage || '',
+                imageZoom: parseFloat(document.getElementById('admin-zoom').value) || 1,
+                imagePosX: window.adminCardState.posX,
+                imagePosY: window.adminCardState.posY,
+                nameFontSize: parseInt(document.getElementById('admin-name-size').value),
+                descFontSize: parseInt(document.getElementById('admin-desc-size').value)
             };
             window.renderCardHTML('admin-preview-container', tempCard, false, true, {});
         };
@@ -1801,6 +1958,12 @@
             document.getElementById('admin-tier').value = card.tier;
             document.getElementById('admin-layout').value = card.layout || 'standard';
             document.getElementById('admin-desc').value = card.desc;
+            
+            document.getElementById('admin-zoom').value = card.imageZoom || 1;
+            document.getElementById('admin-name-size').value = card.nameFontSize || (card.layout === 'full-art' ? 14 : 12);
+            document.getElementById('admin-desc-size').value = card.descFontSize || (card.layout === 'full-art' ? 10 : 9);
+            window.adminCardState = { posX: card.imagePosX ?? 50, posY: card.imagePosY ?? 50 };
+            
             selectedAdminImage = card.img; 
             
             document.getElementById('admin-submit').innerText = "SALVAR ALTERAÇÕES";
@@ -1814,6 +1977,12 @@
             editingCardId = null;
             document.getElementById('admin-form').reset();
             selectedAdminImage = "";
+            
+            document.getElementById('admin-zoom').value = 1;
+            document.getElementById('admin-name-size').value = 12;
+            document.getElementById('admin-desc-size').value = 9;
+            window.adminCardState = { posX: 50, posY: 50 };
+            
             document.getElementById('admin-submit').innerText = "CRIAR CARTA E ADICIONAR AO JOGO";
             document.getElementById('admin-cancel-btn').classList.add('hidden');
             window.updateAdminPreview();
@@ -1843,6 +2012,11 @@
                     layout: document.getElementById('admin-layout').value,
                     desc: document.getElementById('admin-desc').value,
                     img: selectedAdminImage,
+                    imageZoom: parseFloat(document.getElementById('admin-zoom').value) || 1,
+                    imagePosX: window.adminCardState.posX,
+                    imagePosY: window.adminCardState.posY,
+                    nameFontSize: parseInt(document.getElementById('admin-name-size').value) || (document.getElementById('admin-layout').value === 'full-art' ? 14 : 12),
+                    descFontSize: parseInt(document.getElementById('admin-desc-size').value) || (document.getElementById('admin-layout').value === 'full-art' ? 10 : 9)
                 };
 
                 if (editingCardId) {
@@ -1861,6 +2035,12 @@
                 msg.classList.remove('hidden');
                 document.getElementById('admin-form').reset();
                 selectedAdminImage = ""; 
+                
+                document.getElementById('admin-zoom').value = 1;
+                document.getElementById('admin-name-size').value = 12;
+                document.getElementById('admin-desc-size').value = 9;
+                window.adminCardState = { posX: 50, posY: 50 };
+                
                 window.updateAdminPreview(); 
                 window.loadGitHubImages(); 
             } catch (err) {
