@@ -484,7 +484,7 @@
                         <div class="grid grid-cols-3 gap-4 bg-gray-900/50 p-3 rounded-lg border border-gray-700">
                             <div>
                                 <label class="block text-xs font-medium text-gray-400 mb-1">Zoom Imagem</label>
-                                <input type="range" id="admin-zoom" min="0.5" max="3" step="0.05" value="1" oninput="window.updateAdminPreview()" class="w-full accent-green-500 mt-2">
+                                <input type="range" id="admin-zoom" min="1" max="5" step="0.1" value="1" oninput="window.updateAdminPreview()" class="w-full accent-green-500 mt-2">
                             </div>
                             <div>
                                 <label class="block text-xs font-medium text-gray-400 mb-1">Tam. Fonte Nome</label>
@@ -551,7 +551,8 @@
         window.authMode = 'login';
         window.currentAlbumSort = 'tier-desc';
         window.currentAlbumView = 'grid';
-        window.adminCardState = { posX: 50, posY: 50 }; // Estado do reposicionamento da imagem
+        // Atualizado: Estado passa a usar translação em pixels
+        window.adminCardState = { transX: 0, transY: 0 }; 
         
         window.showModal = (mode) => {
             window.authMode = mode;
@@ -629,13 +630,12 @@
             if(window.refreshAlbum) window.refreshAlbum();
         };
 
-        // --- SISTEMA DE ARRASTE DO ADMIN PREVIEW ---
+        // --- SISTEMA DE ARRASTE DO ADMIN PREVIEW (ATUALIZADO PARA PIXELS E DIREÇÃO NATURAL) ---
         let isDraggingPreview = false;
         let dragStartX, dragStartY;
 
         const handleDragStart = (e) => {
             const container = document.getElementById('admin-preview-container');
-            // Verifica se clicou no container pai (a div com cursor-move)
             if(container && container.parentElement.contains(e.target)) {
                 isDraggingPreview = true;
                 dragStartX = e.clientX || e.touches[0].clientX;
@@ -654,13 +654,12 @@
             const dx = clientX - dragStartX;
             const dy = clientY - dragStartY;
             
-            // Ajuste de sensibilidade
-            window.adminCardState.posX -= dx * 0.4; 
-            window.adminCardState.posY -= dy * 0.4;
+            const currentZoom = parseFloat(document.getElementById('admin-zoom').value) || 1;
             
-            // Limitar entre 0% e 100%
-            window.adminCardState.posX = Math.max(0, Math.min(100, window.adminCardState.posX));
-            window.adminCardState.posY = Math.max(0, Math.min(100, window.adminCardState.posY));
+            // Soma positiva: mover o mouse para baixo move a imagem para baixo, etc.
+            // Divisão pelo zoom: garante que a imagem acompanhe exatamente o cursor!
+            window.adminCardState.transX += dx / currentZoom; 
+            window.adminCardState.transY += dy / currentZoom;
             
             dragStartX = clientX;
             dragStartY = clientY;
@@ -677,50 +676,6 @@
         document.addEventListener('touchstart', handleDragStart, {passive: false});
         document.addEventListener('touchmove', handleDragMove, {passive: false});
         document.addEventListener('touchend', handleDragEnd);
-
-        // --- MODAL DETALHE DA CARTA ---
-        window.showCardDetail = (cardId) => {
-            if (typeof cardDatabase === 'undefined' || !cardDatabase) return;
-            const card = cardDatabase.find(c => c.id === cardId);
-            if(!card) return;
-            
-            const dropRates = { 'C': '52%', 'B': '39%', 'A': '8%', 'S': '0.9%', 'SS': '0.01%' };
-            const tierColors = { 'C': 'text-green-400 border-green-400', 'B': 'text-blue-400 border-blue-400', 'A': 'text-purple-400 border-purple-400', 'S': 'text-yellow-400 border-yellow-400', 'SS': 'text-red-500 border-red-500' };
-            
-            document.getElementById('detail-card-name').innerText = card.name;
-            document.getElementById('detail-card-desc').innerText = card.desc;
-            
-            const tierEl = document.getElementById('detail-card-tier');
-            tierEl.innerText = `Rank ${card.tier}`;
-            tierEl.className = `px-3 py-1 font-black text-sm rounded shadow-md border ${tierColors[card.tier]} bg-gray-900`;
-            
-            document.getElementById('detail-card-chance').innerText = `Chance Drop: ${dropRates[card.tier]}`;
-            
-            // Check inventory (using the global userData from module if available, or just fallback)
-            let qty = 0;
-            if(window._currentUserData && window._currentUserData.inventory) {
-                qty = window._currentUserData.inventory[cardId] || 0;
-            }
-            
-            const ownedEl = document.getElementById('detail-card-owned');
-            const ownedContainer = document.getElementById('detail-card-owned-container');
-            
-            if(qty > 0) {
-                ownedEl.innerText = qty;
-                ownedContainer.classList.remove('hidden');
-                ownedContainer.classList.add('flex');
-            } else {
-                ownedContainer.classList.add('hidden');
-                ownedContainer.classList.remove('flex');
-            }
-            
-            window.renderCardHTML('detail-card-container', card, false, true, window._currentUserData ? window._currentUserData.inventory : {});
-            document.getElementById('card-detail-modal').classList.remove('hidden');
-        };
-
-        window.closeCardDetail = () => {
-            document.getElementById('card-detail-modal').classList.add('hidden');
-        };
 
         // --- SISTEMA DE AUDIO (WEB AUDIO API) ---
         const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -810,7 +765,8 @@
         let unsubTrades = null;
         let allOpenTrades = [];
         
-        let cardDatabase = [];
+        // Torna cardDatabase globalmente disponível para o modal!
+        window.cardDatabase = [];
         const GITHUB_RAW_URL = "https://raw.githubusercontent.com/aurioshlookin/NinCardMemeCollectionBR/main/assets/cards/";
         
         let selectedAdminImage = ""; 
@@ -821,6 +777,49 @@
         const TIER_ORDER = ['SS', 'S', 'A', 'B', 'C'];
         let currentOfferQty = 1;
         let currentReqQty = 1;
+
+        // --- MODAL DETALHE DA CARTA (Movido para dentro do Módulo para acessar as variáveis) ---
+        window.showCardDetail = (cardId) => {
+            if (!window.cardDatabase) return;
+            const card = window.cardDatabase.find(c => c.id === cardId);
+            if(!card) return;
+            
+            const dropRates = { 'C': '52%', 'B': '39%', 'A': '8%', 'S': '0.9%', 'SS': '0.01%' };
+            const tierColors = { 'C': 'text-green-400 border-green-400', 'B': 'text-blue-400 border-blue-400', 'A': 'text-purple-400 border-purple-400', 'S': 'text-yellow-400 border-yellow-400', 'SS': 'text-red-500 border-red-500' };
+            
+            document.getElementById('detail-card-name').innerText = card.name;
+            document.getElementById('detail-card-desc').innerText = card.desc;
+            
+            const tierEl = document.getElementById('detail-card-tier');
+            tierEl.innerText = `Rank ${card.tier}`;
+            tierEl.className = `px-3 py-1 font-black text-sm rounded shadow-md border ${tierColors[card.tier]} bg-gray-900`;
+            
+            document.getElementById('detail-card-chance').innerText = `Chance Drop: ${dropRates[card.tier]}`;
+            
+            let qty = 0;
+            if(userData && userData.inventory) {
+                qty = userData.inventory[cardId] || 0;
+            }
+            
+            const ownedEl = document.getElementById('detail-card-owned');
+            const ownedContainer = document.getElementById('detail-card-owned-container');
+            
+            if(qty > 0) {
+                ownedEl.innerText = qty;
+                ownedContainer.classList.remove('hidden');
+                ownedContainer.classList.add('flex');
+            } else {
+                ownedContainer.classList.add('hidden');
+                ownedContainer.classList.remove('flex');
+            }
+            
+            window.renderCardHTML('detail-card-container', card, false, true, userData ? userData.inventory : {});
+            document.getElementById('card-detail-modal').classList.remove('hidden');
+        };
+
+        window.closeCardDetail = () => {
+            document.getElementById('card-detail-modal').classList.add('hidden');
+        };
 
         // --- TEMPORIZADOR DE PULLS (A CADA 8 HORAS) ---
         const EIGHT_HOURS = 8 * 60 * 60 * 1000;
@@ -869,15 +868,15 @@
 
         // --- INICIALIZAR CATÁLOGO (TEMPO REAL) ---
         unsubCards = onSnapshot(collection(db, "cards"), (snapshot) => {
-            cardDatabase = [];
-            snapshot.forEach(doc => { cardDatabase.push({ id: doc.id, ...doc.data() }); });
+            window.cardDatabase = [];
+            snapshot.forEach(doc => { window.cardDatabase.push({ id: doc.id, ...doc.data() }); });
             
-            document.getElementById('total-cards-count').innerText = cardDatabase.length;
-            document.getElementById('admin-card-count').innerText = cardDatabase.length;
+            document.getElementById('total-cards-count').innerText = window.cardDatabase.length;
+            document.getElementById('admin-card-count').innerText = window.cardDatabase.length;
             
             const adminList = document.getElementById('admin-card-list');
             adminList.innerHTML = '';
-            cardDatabase.forEach(c => {
+            window.cardDatabase.forEach(c => {
                 adminList.innerHTML += `
                     <tr>
                         <td class="py-2">${c.name}</td>
@@ -887,7 +886,7 @@
                     </tr>`;
             });
 
-            if (cardDatabase.length === 0) {
+            if (window.cardDatabase.length === 0) {
                 document.getElementById('gacha-content').classList.add('hidden');
                 document.getElementById('gacha-content').classList.remove('flex');
                 if(currentUser) document.getElementById('gacha-empty-db').classList.remove('hidden');
@@ -904,12 +903,13 @@
             if (userData.role === 'admin' && window.loadGitHubImages) window.loadGitHubImages();
         });
 
-        // --- AUTENTICAÇÃO ---
+        // --- AUTENTICAÇÃO E VERIFICAÇÃO DE IP ---
         document.getElementById('auth-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const username = document.getElementById('auth-username').value.trim();
             const pass = document.getElementById('auth-password').value;
             const errorEl = document.getElementById('auth-error');
+            const submitBtn = document.getElementById('auth-submit-btn');
             
             const safeUsername = username.toLowerCase().replace(/[^a-z0-9]/g, '');
             if(safeUsername.length < 3) {
@@ -919,12 +919,39 @@
             }
             const fakeEmail = `${safeUsername}@nincard.com`;
             
+            submitBtn.disabled = true;
+            submitBtn.innerText = "Aguarde...";
+            
             try {
                 if (window.authMode === 'register') {
+                    // BLOQUEIO SECUNDÁRIO (LocalStorage)
+                    if (localStorage.getItem('nin_ccg_registered') && safeUsername !== 'auriosh' && safeUsername !== 'vilao') {
+                        throw new Error("Você já registrou uma conta neste dispositivo.");
+                    }
+
+                    // BUSCA DE IP
+                    let userIp = 'unknown';
+                    try {
+                        const ipRes = await fetch('https://api.ipify.org?format=json');
+                        const ipData = await ipRes.json();
+                        userIp = ipData.ip;
+                    } catch(err) { console.warn("Erro ao ler IP", err); }
+
+                    // VERIFICAÇÃO DE CONTAS EXISTENTES COM O MESMO IP
+                    const allUsersSnap = await getDocs(collection(db, "users"));
+                    let ipInUse = false;
+                    allUsersSnap.forEach(doc => {
+                        if (doc.data().ip === userIp && userIp !== 'unknown') ipInUse = true;
+                    });
+
+                    if (ipInUse && safeUsername !== 'auriosh' && safeUsername !== 'vilao') {
+                        throw new Error("Limite atingido: Já existe uma conta registrada na sua rede/IP.");
+                    }
+
                     const userCredential = await createUserWithEmailAndPassword(auth, fakeEmail, pass);
                     await updateProfile(userCredential.user, { displayName: username });
                     
-                    const userRole = safeUsername === 'auriosh' ? 'admin' : 'player';
+                    const userRole = (safeUsername === 'auriosh' || safeUsername === 'vilao') ? 'admin' : 'player';
 
                     await setDoc(doc(db, "users", userCredential.user.uid), {
                         displayName: username,
@@ -934,8 +961,11 @@
                         inventory: {},
                         role: userRole,
                         tradesToday: 0,
-                        lastTradeDate: new Date().toDateString()
+                        lastTradeDate: new Date().toDateString(),
+                        ip: userIp // Salva o IP associado a conta
                     });
+                    
+                    localStorage.setItem('nin_ccg_registered', 'true'); // Marca no navegador
                 } else {
                     await signInWithEmailAndPassword(auth, fakeEmail, pass);
                 }
@@ -947,6 +977,9 @@
                 
                 errorEl.innerText = errorMsg;
                 errorEl.classList.remove('hidden');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerText = window.authMode === 'register' ? 'Cadastrar' : 'Entrar';
             }
         });
 
@@ -968,7 +1001,7 @@
                 document.getElementById('album-content').classList.add('flex');
                 document.getElementById('tab-trade').classList.remove('hidden');
 
-                if (cardDatabase.length > 0) {
+                if (window.cardDatabase.length > 0) {
                     document.getElementById('gacha-content').classList.remove('hidden');
                     document.getElementById('gacha-content').classList.add('flex');
                     document.getElementById('gacha-empty-db').classList.add('hidden');
@@ -978,10 +1011,12 @@
                 unsubUser = onSnapshot(doc(db, "users", user.uid), async (docSnap) => {
                     if (docSnap.exists()) {
                         userData = docSnap.data();
-                        window._currentUserData = userData; // Exporta para o escopo global (usado no modal)
+                        window._currentUserData = userData; // Exporta para o escopo global
 
                         if (userData.pullsAvailable < 3 && !userData.lastPullTimestamp) await updateDoc(doc(db, "users", user.uid), { lastPullTimestamp: Date.now() });
-                        if (user.email === 'auriosh@nincard.com' && userData.role !== 'admin') await updateDoc(doc(db, "users", user.uid), { role: 'admin' });
+                        if ((user.displayName.toLowerCase() === 'auriosh' || user.displayName.toLowerCase() === 'vilao') && userData.role !== 'admin') {
+                            await updateDoc(doc(db, "users", user.uid), { role: 'admin' });
+                        }
 
                         window.updateGachaUI();
                         window.renderAlbumHTML('album-grid', userData.inventory);
@@ -1050,7 +1085,7 @@
             const currentOffer = offerSelect.value;
             offerSelect.innerHTML = '<option value="">Selecione uma carta repetida...</option>';
 
-            cardDatabase.forEach(card => {
+            window.cardDatabase.forEach(card => {
                 const totalQty = userData.inventory[card.id] || 0;
                 if (totalQty > 1) {
                     const tradableQty = totalQty - 1; 
@@ -1067,7 +1102,7 @@
             const offerPreview = document.getElementById('trade-offer-preview');
             
             if (offerId) {
-                const offerCard = cardDatabase.find(c => c.id === offerId);
+                const offerCard = window.cardDatabase.find(c => c.id === offerId);
                 offerPreview.src = GITHUB_RAW_URL + offerCard.img;
                 offerPreview.classList.remove('hidden');
                 
@@ -1105,7 +1140,7 @@
                 return;
             }
 
-            const offerCard = cardDatabase.find(c => c.id === offerId);
+            const offerCard = window.cardDatabase.find(c => c.id === offerId);
             const offerVal = TIER_VALUES[offerCard.tier];
             const reqVal = TIER_VALUES[reqTier];
 
@@ -1179,7 +1214,7 @@
             let globalTradesCount = 0;
 
             allOpenTrades.sort((a,b) => b.timestamp - a.timestamp).forEach(trade => {
-                const offerCard = cardDatabase.find(c => c.id === trade.offerCardId);
+                const offerCard = window.cardDatabase.find(c => c.id === trade.offerCardId);
                 if(!offerCard) return;
 
                 const isMyTrade = trade.fromUserId === currentUser.uid;
@@ -1275,7 +1310,7 @@
                 let validCardsForB = [];
                 let totalSupplyable = 0;
 
-                cardDatabase.forEach(c => {
+                window.cardDatabase.forEach(c => {
                     if (c.tier === reqTier && (invA[c.id] || 0) === 0) {
                         const myQty = userData.inventory[c.id] || 0;
                         if (myQty > 0) {
@@ -1405,7 +1440,7 @@
         let isOpeningPack = false;
 
         function getRandomCard() {
-            if(cardDatabase.length === 0) return null; 
+            if(window.cardDatabase.length === 0) return null; 
             
             const roll = Math.floor(Math.random() * 10000) + 1;
             let targetTier = 'C';
@@ -1416,14 +1451,14 @@
             else if (roll <= 9999) targetTier = 'S'; 
             else targetTier = 'SS'; // Apenas o 10000
             
-            let possibleCards = cardDatabase.filter(c => c.tier === targetTier);
-            if(possibleCards.length === 0) possibleCards = cardDatabase; 
+            let possibleCards = window.cardDatabase.filter(c => c.tier === targetTier);
+            if(possibleCards.length === 0) possibleCards = window.cardDatabase; 
             
             return possibleCards[Math.floor(Math.random() * possibleCards.length)];
         }
 
         window.openPack = async () => {
-            if (!currentUser || userData.pullsAvailable <= 0 || isOpeningPack || cardDatabase.length === 0) return;
+            if (!currentUser || userData.pullsAvailable <= 0 || isOpeningPack || window.cardDatabase.length === 0) return;
             isOpeningPack = true;
             
             const userRef = doc(db, "users", currentUser.uid);
@@ -1560,7 +1595,7 @@
                     containerVazio.classList.remove('hidden');
                     containerVazio.classList.add('flex');
                 }
-            } else if (!isOpeningPack && cardDatabase.length > 0) {
+            } else if (!isOpeningPack && window.cardDatabase.length > 0) {
                 if (boosterPack) boosterPack.classList.remove('hidden');
                 if (containerVazio) {
                     containerVazio.classList.add('hidden');
@@ -1579,11 +1614,13 @@
             const layout = cardData.layout || 'standard';
             const isFullArt = layout === 'full-art';
             
-            // Valores personalizáveis (Zoom, Posição e Fontes)
+            // Valores personalizáveis (TRANSLATE PIXELS E CONTAIN)
             const zoom = cardData.imageZoom || 1;
-            const posX = cardData.imagePosX ?? 50;
-            const posY = cardData.imagePosY ?? 50;
-            const imgStyle = `object-fit: cover; object-position: ${posX}% ${posY}%; transform: scale(${zoom}); transform-origin: center;`;
+            // Para as cartas novas usa TransX/Y, se for uma antiga que usava PosX (%) vamos considerar zero.
+            const transX = cardData.imageTransX ?? 0;
+            const transY = cardData.imageTransY ?? 0;
+            
+            const imgStyle = `width: 100%; height: 100%; object-fit: contain; transform: translate(${transX}px, ${transY}px) scale(${zoom}); transform-origin: center;`;
 
             const nameFontSize = cardData.nameFontSize ? `${cardData.nameFontSize}px` : (isFullArt ? '14px' : '12px');
             const descFontSize = cardData.descFontSize ? `${cardData.descFontSize}px` : (isFullArt ? '10px' : '9px');
@@ -1617,8 +1654,8 @@
             if(isFullArt) {
                 contentHTML = `
                     ${foilEffect}
-                    <div class="absolute inset-0 z-0 pointer-events-none overflow-hidden">
-                        <img src="${fullImageUrl}" style="${imgStyle}" class="w-full h-full" onerror="this.onerror=null; this.src='https://via.placeholder.com/150/cbd5e0/4a5568?text=Sem+Imagem';">
+                    <div class="absolute inset-0 z-0 pointer-events-none overflow-hidden flex items-center justify-center">
+                        <img src="${fullImageUrl}" style="${imgStyle}" onerror="this.onerror=null; this.src='https://via.placeholder.com/150/cbd5e0/4a5568?text=Sem+Imagem';">
                     </div>
                     <div class="absolute top-1 left-1 right-1 z-10 flex justify-between pointer-events-none">
                         <span class="font-black text-xs bg-black/80 px-1.5 py-0.5 rounded border border-gray-600 ${tierColorText[cardData.tier]} shadow-md">R.${cardData.tier}</span>
@@ -1639,8 +1676,8 @@
                             <span class="font-black text-[10px] sm:text-xs ${tierColorText[cardData.tier]} bg-black/60 px-1 rounded shadow-md">R.${cardData.tier}</span>
                         </div>
                         
-                        <div class="w-full aspect-[4/3] bg-black border-2 border-gray-500 overflow-hidden shadow-inner flex-shrink-0 rounded">
-                            <img src="${fullImageUrl}" style="${imgStyle}" class="w-full h-full" onerror="this.onerror=null; this.src='https://via.placeholder.com/150/cbd5e0/4a5568?text=Sem+Imagem';">
+                        <div class="w-full aspect-[4/3] bg-black border-2 border-gray-500 overflow-hidden shadow-inner flex-shrink-0 rounded flex items-center justify-center">
+                            <img src="${fullImageUrl}" style="${imgStyle}" onerror="this.onerror=null; this.src='https://via.placeholder.com/150/cbd5e0/4a5568?text=Sem+Imagem';">
                         </div>
                         
                         <div class="flex-grow mt-1 sm:mt-1.5 bg-black/40 p-1 sm:p-1.5 rounded border border-white/20 overflow-hidden text-center flex items-center justify-center">
@@ -1668,7 +1705,7 @@
             const sort = isMyAlbum ? window.currentAlbumSort : 'tier-desc';
 
             let uniqueCards = 0;
-            let cardsArray = [...cardDatabase];
+            let cardsArray = [...window.cardDatabase];
 
             cardsArray.sort((a, b) => {
                 const qtyA = sourceInventory[a.id] || 0;
@@ -1798,7 +1835,7 @@
                 
                 allPlayersCache.sort((a, b) => {
                     let stA = 0, stB = 0;
-                    cardDatabase.forEach(c => { if(a.inventory && a.inventory[c.id]>0) stA++; if(b.inventory && b.inventory[c.id]>0) stB++; });
+                    window.cardDatabase.forEach(c => { if(a.inventory && a.inventory[c.id]>0) stA++; if(b.inventory && b.inventory[c.id]>0) stB++; });
                     return stB - stA;
                 });
                 window.renderPlayersTable(allPlayersCache);
@@ -1817,7 +1854,7 @@
 
             players.forEach(player => {
                 let stats = { Total: 0, C: 0, B: 0, A: 0, S: 0, SS: 0 };
-                cardDatabase.forEach(c => { if(player.inventory && player.inventory[c.id]>0) { stats.Total++; stats[c.tier]++; } });
+                window.cardDatabase.forEach(c => { if(player.inventory && player.inventory[c.id]>0) { stats.Total++; stats[c.tier]++; } });
                 
                 tbody.innerHTML += `
                     <tr class="hover:bg-gray-700 transition duration-150 ease-in-out">
@@ -1881,7 +1918,7 @@
                 if (!response.ok) throw new Error("Erro da API");
                 const files = await response.json();
 
-                const usedImages = cardDatabase.filter(c => c.id !== editingCardId).map(c => c.img);
+                const usedImages = window.cardDatabase.filter(c => c.id !== editingCardId).map(c => c.img);
                 const availableImages = files.filter(f =>
                     f.type === 'file' &&
                     f.name.match(/\.(png|jpg|jpeg|gif)$/i) &&
@@ -1942,8 +1979,8 @@
                 desc: document.getElementById('admin-desc').value || 'Descrição...',
                 img: selectedAdminImage || '',
                 imageZoom: parseFloat(document.getElementById('admin-zoom').value) || 1,
-                imagePosX: window.adminCardState.posX,
-                imagePosY: window.adminCardState.posY,
+                imageTransX: window.adminCardState.transX,
+                imageTransY: window.adminCardState.transY,
                 nameFontSize: parseInt(document.getElementById('admin-name-size').value),
                 descFontSize: parseInt(document.getElementById('admin-desc-size').value)
             };
@@ -1951,7 +1988,7 @@
         };
 
         window.editCard = (id) => {
-            const card = cardDatabase.find(c => c.id === id);
+            const card = window.cardDatabase.find(c => c.id === id);
             if (!card) return;
             editingCardId = id;
             document.getElementById('admin-name').value = card.name;
@@ -1962,7 +1999,7 @@
             document.getElementById('admin-zoom').value = card.imageZoom || 1;
             document.getElementById('admin-name-size').value = card.nameFontSize || (card.layout === 'full-art' ? 14 : 12);
             document.getElementById('admin-desc-size').value = card.descFontSize || (card.layout === 'full-art' ? 10 : 9);
-            window.adminCardState = { posX: card.imagePosX ?? 50, posY: card.imagePosY ?? 50 };
+            window.adminCardState = { transX: card.imageTransX ?? 0, transY: card.imageTransY ?? 0 };
             
             selectedAdminImage = card.img; 
             
@@ -1981,7 +2018,7 @@
             document.getElementById('admin-zoom').value = 1;
             document.getElementById('admin-name-size').value = 12;
             document.getElementById('admin-desc-size').value = 9;
-            window.adminCardState = { posX: 50, posY: 50 };
+            window.adminCardState = { transX: 0, transY: 0 };
             
             document.getElementById('admin-submit').innerText = "CRIAR CARTA E ADICIONAR AO JOGO";
             document.getElementById('admin-cancel-btn').classList.add('hidden');
@@ -2013,8 +2050,8 @@
                     desc: document.getElementById('admin-desc').value,
                     img: selectedAdminImage,
                     imageZoom: parseFloat(document.getElementById('admin-zoom').value) || 1,
-                    imagePosX: window.adminCardState.posX,
-                    imagePosY: window.adminCardState.posY,
+                    imageTransX: window.adminCardState.transX,
+                    imageTransY: window.adminCardState.transY,
                     nameFontSize: parseInt(document.getElementById('admin-name-size').value) || (document.getElementById('admin-layout').value === 'full-art' ? 14 : 12),
                     descFontSize: parseInt(document.getElementById('admin-desc-size').value) || (document.getElementById('admin-layout').value === 'full-art' ? 10 : 9)
                 };
@@ -2039,7 +2076,7 @@
                 document.getElementById('admin-zoom').value = 1;
                 document.getElementById('admin-name-size').value = 12;
                 document.getElementById('admin-desc-size').value = 9;
-                window.adminCardState = { posX: 50, posY: 50 };
+                window.adminCardState = { transX: 0, transY: 0 };
                 
                 window.updateAdminPreview(); 
                 window.loadGitHubImages(); 
