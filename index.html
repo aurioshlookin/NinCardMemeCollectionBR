@@ -213,10 +213,8 @@
         </div>
     </div>
 
-    <!-- Modal de Detalhes da Carta (COM O BOTÃO X EXTERNO CORRIGIDO NA VIEWPORT) -->
+    <!-- Modal de Detalhes da Carta -->
     <div id="card-detail-modal" class="fixed inset-0 bg-black/90 flex flex-col items-center justify-center z-[110] hidden backdrop-blur-md p-4 pt-16 md:pt-4">
-        
-        <!-- O BOTÃO X AGORA ESTÁ FIXADO NA TELA (VIEWPORT) E ALINHADO PERFEITAMENTE COM SVG -->
         <button onclick="window.closeCardDetail()" class="fixed top-4 right-4 md:top-8 md:right-8 text-gray-300 hover:text-white z-[120] w-12 h-12 rounded-full bg-gray-900 border-2 border-gray-600 flex items-center justify-center transition hover:bg-red-600 hover:border-red-400 shadow-2xl">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -449,7 +447,7 @@
                     </div>
                     <button onclick="window.closePlayerAlbum()" class="bg-gray-700 hover:bg-gray-600 border border-gray-600 px-4 py-2 rounded-lg text-sm font-bold transition text-white">Voltar à Lista</button>
                 </div>
-                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4" id="explore-grid"></div>
+                <div class="flex flex-col gap-8 w-full" id="explore-grid"></div>
             </div>
         </section>
 
@@ -603,12 +601,20 @@
                         
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-sm font-medium text-gray-300 mb-1">Número (Ex: 001)</label>
+                                <label class="block text-sm font-medium text-gray-300 mb-1">Número</label>
                                 <input type="text" id="admin-card-number" oninput="window.updateAdminPreview()" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:border-green-500 focus:outline-none" required placeholder="001">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-300 mb-1">Coleção (Ex: Vol.1)</label>
-                                <input type="text" id="admin-card-version" oninput="window.updateAdminPreview()" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:border-green-500 focus:outline-none" required placeholder="Vol.1">
+                                <label class="block text-sm font-medium text-gray-300 mb-1">Coleção / Volume</label>
+                                <select id="admin-card-version" onchange="window.updateAdminPreview()" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:border-green-500 focus:outline-none" required>
+                                    <option value="Vol. 1">Vol. 1</option>
+                                    <option value="Vol. 2">Vol. 2</option>
+                                    <option value="Vol. 3">Vol. 3</option>
+                                    <option value="Vol. 4">Vol. 4</option>
+                                    <option value="Vol. 5">Vol. 5</option>
+                                    <option value="Especial">Especial</option>
+                                    <option value="Promo">Promo</option>
+                                </select>
                             </div>
                         </div>
 
@@ -683,11 +689,17 @@
             <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-md">
                 <h3 class="text-xl font-bold mb-4 text-gray-200">Cartas no Sistema (<span id="admin-card-count" class="text-green-400">0</span>)</h3>
                 <div class="overflow-x-auto">
-                    <table class="w-full text-left text-sm">
-                        <thead class="text-gray-400 border-b border-gray-700">
-                            <tr><th>Nº</th><th>Nome</th><th>Tier</th><th>Versão</th><th>Ação</th></tr>
+                    <table class="w-full text-left text-sm border-collapse">
+                        <thead class="text-gray-400 border-b border-gray-700 bg-gray-900">
+                            <tr>
+                                <th class="px-4 py-3">Nº</th>
+                                <th class="px-4 py-3">Nome</th>
+                                <th class="px-4 py-3">Tier</th>
+                                <th class="px-4 py-3">Versão</th>
+                                <th class="px-4 py-3">Ação</th>
+                            </tr>
                         </thead>
-                        <tbody id="admin-card-list" class="divide-y divide-gray-700"></tbody>
+                        <tbody id="admin-card-list"></tbody>
                     </table>
                 </div>
             </div>
@@ -794,6 +806,7 @@
             }
         };
 
+        // --- SISTEMA DE DRAG PARA O PREVIEW ADMIN ---
         let isDraggingPreview = false;
         let dragStartX, dragStartY;
 
@@ -862,18 +875,14 @@
             };
 
             if(tier === 'SS') {
-                createOsc('sine', 150, now, 2.0, 0.6, 30); // Bass bomb
-                createOsc('sawtooth', 300, now, 1.0, 0.3, 1500); // Riser
-                createOsc('square', 800, now + 0.8, 1.5, 0.2, 2500); // Epic sparkle
-                [400, 500, 600, 800, 1000, 1200, 1500].forEach((f, i) => {
-                    createOsc('sine', f, now + 0.1 * i, 0.6, 0.3); // Arp
-                });
+                createOsc('sine', 150, now, 2.0, 0.6, 30); 
+                createOsc('sawtooth', 300, now, 1.0, 0.3, 1500); 
+                createOsc('square', 800, now + 0.8, 1.5, 0.2, 2500); 
+                [400, 500, 600, 800, 1000, 1200, 1500].forEach((f, i) => createOsc('sine', f, now + 0.1 * i, 0.6, 0.3));
             } else if(tier === 'S') {
                 createOsc('sine', 200, now, 1.5, 0.5, 50); 
                 createOsc('triangle', 400, now, 1.0, 0.3, 1000);
-                [500, 650, 800, 1000].forEach((f, i) => {
-                    createOsc('sine', f, now + 0.15 * i, 0.5, 0.2);
-                });
+                [500, 650, 800, 1000].forEach((f, i) => createOsc('sine', f, now + 0.15 * i, 0.5, 0.2));
             } else if(tier === 'A') {
                 createOsc('triangle', 300, now, 0.8, 0.3, 800);
                 createOsc('sine', 600, now + 0.1, 0.6, 0.2, 1200);
@@ -881,10 +890,9 @@
                 createOsc('triangle', 400, now, 0.5, 0.2, 600);
                 createOsc('sine', 800, now, 0.4, 0.1);
             } else {
-                // C - Gostosinho de ouvir (Satisfying pop & soft chime)
-                createOsc('square', 250, now, 0.15, 0.1, 50); // Thump/tear
-                createOsc('sine', 700, now + 0.05, 0.4, 0.2); // Ding
-                createOsc('sine', 1050, now + 0.15, 0.5, 0.15); // Ding (higher)
+                createOsc('square', 250, now, 0.15, 0.1, 50); 
+                createOsc('sine', 700, now + 0.05, 0.4, 0.2); 
+                createOsc('sine', 1050, now + 0.15, 0.5, 0.15); 
             }
         };
 
@@ -906,25 +914,24 @@
                 osc.stop(time + duration);
             };
 
-            // Sound design: Snappy, ascending chimes for higher tiers
             if(tier === 'SS') {
-                createOsc('triangle', 523.25, now, 0.3, 0.2); // C5
-                createOsc('triangle', 659.25, now + 0.05, 0.3, 0.2); // E5
-                createOsc('triangle', 783.99, now + 0.1, 0.3, 0.2); // G5
-                createOsc('sine', 1046.50, now + 0.15, 0.5, 0.3); // C6 sparkle
+                createOsc('triangle', 523.25, now, 0.3, 0.2);
+                createOsc('triangle', 659.25, now + 0.05, 0.3, 0.2);
+                createOsc('triangle', 783.99, now + 0.1, 0.3, 0.2);
+                createOsc('sine', 1046.50, now + 0.15, 0.5, 0.3);
             } else if(tier === 'S') {
-                createOsc('triangle', 523.25, now, 0.3, 0.2); // C5
-                createOsc('triangle', 659.25, now + 0.05, 0.3, 0.2); // E5
-                createOsc('sine', 783.99, now + 0.1, 0.4, 0.2); // G5
+                createOsc('triangle', 523.25, now, 0.3, 0.2);
+                createOsc('triangle', 659.25, now + 0.05, 0.3, 0.2);
+                createOsc('sine', 783.99, now + 0.1, 0.4, 0.2);
             } else if(tier === 'A') {
-                createOsc('triangle', 440.00, now, 0.2, 0.15); // A4
-                createOsc('sine', 554.37, now + 0.05, 0.3, 0.15); // C#5
+                createOsc('triangle', 440.00, now, 0.2, 0.15);
+                createOsc('sine', 554.37, now + 0.05, 0.3, 0.15);
             } else if(tier === 'B') {
-                createOsc('triangle', 392.00, now, 0.2, 0.15); // G4
-                createOsc('sine', 493.88, now + 0.05, 0.2, 0.15); // B4
-            } else { // C
-                createOsc('sine', 349.23, now, 0.15, 0.1); // F4 (single soft chime)
-                createOsc('square', 200, now, 0.05, 0.05); // Tiny mechanical click
+                createOsc('triangle', 392.00, now, 0.2, 0.15);
+                createOsc('sine', 493.88, now + 0.05, 0.2, 0.15);
+            } else { 
+                createOsc('sine', 349.23, now, 0.15, 0.1);
+                createOsc('square', 200, now, 0.05, 0.05);
             }
         };
 
@@ -978,6 +985,22 @@
         const TIER_ORDER = ['SS', 'S', 'A', 'B', 'C'];
         let currentOfferQty = 1; let currentReqQty = 1;
 
+        // SUGERIR PRÓXIMO NÚMERO DE CARTA
+        window.suggestNextCardNumber = () => {
+            if (editingCardId) return; // Não mudar se estiver editando uma carta existente
+            let maxNum = 0;
+            window.cardDatabase.forEach(c => {
+                const num = parseInt(c.cardNumber, 10);
+                if (!isNaN(num) && num > maxNum) { maxNum = num; }
+            });
+            const nextStr = String(maxNum + 1).padStart(3, '0');
+            const numInput = document.getElementById('admin-card-number');
+            if (numInput && !editingCardId) {
+                numInput.value = nextStr;
+                window.updateAdminPreview();
+            }
+        };
+
         // --- FUNÇÃO PARA INICIAR LISTENERS GLOBAIS COM TRATAMENTO DE ERROS ---
         const startGlobalListeners = () => {
             if (!unsubSettings) {
@@ -1026,28 +1049,45 @@
                     document.getElementById('total-cards-count').innerText = total;
                     document.getElementById('admin-card-count').innerText = total;
                     
+                    // RENDERIZAÇÃO DA TABELA DO ADMIN ORDENADA E SEPARADA POR RARIDADE
                     const adminList = document.getElementById('admin-card-list');
                     if (adminList) {
-                        adminList.innerHTML = '';
+                        let html = '';
                         let sortedAdminDb = [...window.cardDatabase].sort((a,b) => (a.cardNumber || '0').localeCompare(b.cardNumber || '0'));
                         
-                        sortedAdminDb.forEach(c => {
-                            adminList.innerHTML += `
-                                <tr>
-                                    <td class="py-2 text-gray-500 font-bold">#${c.cardNumber || '000'}</td>
-                                    <td class="font-bold text-white">${c.name}</td>
-                                    <td>${c.tier}</td>
-                                    <td class="text-gray-400 text-xs">${c.cardVersion || 'V1'}</td>
-                                    <td><button type="button" onclick="window.editCard('${c.id}')" class="text-green-400 hover:text-green-300 text-xs font-bold bg-gray-800 px-2 py-1 rounded border border-gray-600 transition">Editar</button></td>
-                                </tr>`;
+                        TIER_ORDER.forEach(tier => {
+                            const tierCards = sortedAdminDb.filter(c => c.tier === tier);
+                            if (tierCards.length > 0) {
+                                const tierColorText = {
+                                    'C': 'text-green-400', 'B': 'text-blue-400', 'A': 'text-purple-400', 'S': 'text-yellow-400', 'SS': 'text-red-500'
+                                };
+                                html += `
+                                    <tr class="bg-gray-800 border-y border-gray-700 shadow-inner">
+                                        <td colspan="5" class="px-4 py-2 font-black ${tierColorText[tier]} uppercase tracking-wider text-sm">
+                                            Rank ${tier} <span class="text-gray-400 text-xs font-bold ml-2">(${tierCards.length} cartas)</span>
+                                        </td>
+                                    </tr>
+                                `;
+                                tierCards.forEach(c => {
+                                    html += `
+                                        <tr class="hover:bg-gray-800 transition">
+                                            <td class="px-4 py-3 text-gray-500 font-bold whitespace-nowrap">#${c.cardNumber || '000'}</td>
+                                            <td class="px-4 py-3 font-bold text-white whitespace-nowrap">${c.name}</td>
+                                            <td class="px-4 py-3 font-bold ${tierColorText[c.tier]}">${c.tier}</td>
+                                            <td class="px-4 py-3 text-gray-400 text-xs whitespace-nowrap">${c.cardVersion || 'Vol. 1'}</td>
+                                            <td class="px-4 py-3"><button type="button" onclick="window.editCard('${c.id}')" class="text-green-400 hover:text-green-300 text-xs font-bold bg-gray-700 hover:bg-gray-600 px-3 py-1.5 rounded border border-gray-600 transition shadow">Editar</button></td>
+                                        </tr>`;
+                                });
+                            }
                         });
+                        adminList.innerHTML = html;
                     }
 
                     if (total === 0) {
                         document.getElementById('gacha-content').classList.add('hidden');
                         document.getElementById('gacha-content').classList.remove('flex');
                         if(currentUser) document.getElementById('gacha-empty-db').classList.remove('hidden');
-                    } else if (currentUser) {
+                    } else {
                         document.getElementById('gacha-content').classList.remove('hidden');
                         document.getElementById('gacha-content').classList.add('flex');
                         document.getElementById('gacha-empty-db').classList.add('hidden');
@@ -1058,7 +1098,10 @@
                         window.updateTradeOptions();
                         window.renderAchievements();
                     }
-                    if (currentUser && userData.role === 'admin' && window.loadGitHubImages) window.loadGitHubImages();
+                    if (currentUser && userData.role === 'admin') {
+                        if(window.loadGitHubImages) window.loadGitHubImages();
+                        window.suggestNextCardNumber(); 
+                    }
                 }, () => { unsubCards = null; });
             }
         };
@@ -1209,8 +1252,12 @@
                         window.updateTradeLimitsUI(); 
                         window.renderAchievements();
 
-                        if (userData.role === 'admin') document.getElementById('tab-admin').classList.remove('hidden');
-                        else document.getElementById('tab-admin').classList.add('hidden');
+                        if (userData.role === 'admin') {
+                            document.getElementById('tab-admin').classList.remove('hidden');
+                            window.suggestNextCardNumber();
+                        } else {
+                            document.getElementById('tab-admin').classList.add('hidden');
+                        }
                     }
                 });
 
@@ -1369,7 +1416,6 @@
         window.claimAchievement = async (achievId, type) => {
             if(isOpeningAchiev) return;
             
-            // Trava de segurança extra para evitar cliques múltiplos acidentais!
             const totalOpened = userData.totalPacksOpened || 0;
             if (achievId === 'tens') {
                 const claimedTens = userData.claimedAchievements?.tens || 0;
@@ -1381,7 +1427,6 @@
 
             isOpeningAchiev = true;
             
-            // Bloqueia visualmente o botão para mostrar que está processando
             const btn = document.getElementById(`btn-claim-${achievId}`);
             if(btn) { btn.disabled = true; btn.innerText = "Processando..."; }
 
@@ -1395,7 +1440,6 @@
             try {
                 await updateDoc(doc(db, "users", currentUser.uid), { claimedAchievements: newClaimed });
                 
-                // Configurar Overlay de Abertura
                 currentAchievType = type;
                 achievPackCards = [];
                 for(let i=0; i<8; i++) {
@@ -1453,7 +1497,7 @@
             document.getElementById('achiev-overlay-title').innerText = "Escolha 2 Cartas!";
             document.getElementById('achiev-overlay-title').classList.remove('animate-pulse');
 
-            let highestTierStr = currentAchievType === 'premium' ? 'SS' : 'A'; // Fake it for sound
+            let highestTierStr = currentAchievType === 'premium' ? 'SS' : 'A';
             window.playGachaSound(highestTierStr);
 
             pack.classList.add('tearing');
@@ -1863,7 +1907,8 @@
             if(!grid) return;
             
             const isMyAlbum = gridId === 'album-grid';
-            const mode = isMyAlbum ? window.currentAlbumView : 'grid';
+            // MUDANÇA: Se não for meu álbum (Comunidade), FORÇA o modo 'ranked' (separado por raridade com X/X)
+            const mode = isMyAlbum ? window.currentAlbumView : 'ranked';
             const sort = isMyAlbum ? window.currentAlbumSort : 'tier-desc';
 
             let uniqueCards = 0;
@@ -1942,20 +1987,29 @@
                 grid.innerHTML = tableHTML;
             } else if (mode === 'ranked') {
                 grid.className = 'flex flex-col gap-8 w-full';
+                const tierColorText = {
+                    'C': 'text-green-400 border-green-400/30', 'B': 'text-blue-400 border-blue-400/30', 'A': 'text-purple-400 border-purple-400/30', 'S': 'text-yellow-400 border-yellow-400/30', 'SS': 'text-red-500 border-red-500/30'
+                };
+
                 TIER_ORDER.forEach(tier => {
-                    const cardsInTier = cardsArray.filter(c => c.tier === tier);
+                    // Ordenação específica dentro do modo ranqueado (por número da carta)
+                    const cardsInTier = cardsArray.filter(c => c.tier === tier).sort((a,b) => (a.cardNumber || '0').localeCompare(b.cardNumber || '0'));
                     if(cardsInTier.length === 0) return;
                     
                     let tierOwned = 0;
                     cardsInTier.forEach(c => { if((sourceInventory[c.id] || 0) > 0) tierOwned++; });
                     
-                    let sectionHTML = `<div>
-                        <h3 class="text-xl font-bold border-b border-gray-700 pb-2 mb-4 text-white flex justify-between">Rank ${tier} <span class="text-sm text-gray-400 font-normal">${tierOwned}/${cardsInTier.length}</span></h3>
-                        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4" id="tier-grid-${tier}"></div>
-                    </div>`;
+                    let sectionHTML = `
+                        <div class="bg-gray-800/50 p-4 rounded-xl border ${tierColorText[tier].split(' ')[1]}">
+                            <h3 class="text-xl font-bold border-b border-gray-700 pb-2 mb-4 text-white flex justify-between items-center">
+                                <span class="${tierColorText[tier].split(' ')[0]} uppercase tracking-wider">Rank ${tier}</span>
+                                <span class="text-sm bg-gray-900 border border-gray-700 px-3 py-1 rounded-full text-gray-400 font-bold">${tierOwned} / ${cardsInTier.length}</span>
+                            </h3>
+                            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4" id="tier-grid-${gridId}-${tier}"></div>
+                        </div>`;
                     grid.insertAdjacentHTML('beforeend', sectionHTML);
                     
-                    const tierGrid = document.getElementById(`tier-grid-${tier}`);
+                    const tierGrid = document.getElementById(`tier-grid-${gridId}-${tier}`);
                     cardsInTier.forEach(card => {
                         const quantity = sourceInventory[card.id] || 0;
                         const wrapper = document.createElement('div');
@@ -1964,7 +2018,7 @@
                             wrapper.className = "w-full aspect-[2/3] relative rounded-xl transition transform hover:scale-105 shadow-lg cursor-pointer";
                             wrapper.onclick = () => window.showCardDetail(card.id);
                             const innerCard = document.createElement('div');
-                            innerCard.id = `card-rank-${card.id}`;
+                            innerCard.id = `card-rank-${gridId}-${card.id}`;
                             innerCard.className = "w-full h-full";
                             wrapper.appendChild(innerCard);
                             tierGrid.appendChild(wrapper);
@@ -2585,7 +2639,16 @@
             editingCardId = id;
             document.getElementById('admin-name').value = card.name;
             document.getElementById('admin-card-number').value = card.cardNumber || '000';
-            document.getElementById('admin-card-version').value = card.cardVersion || 'V1';
+            
+            // Garantir que a versão exista no select
+            const versionSelect = document.getElementById('admin-card-version');
+            const exists = Array.from(versionSelect.options).some(opt => opt.value === card.cardVersion);
+            if (!exists && card.cardVersion) {
+                const newOption = new Option(card.cardVersion, card.cardVersion);
+                versionSelect.add(newOption);
+            }
+            versionSelect.value = card.cardVersion || 'Vol. 1';
+            
             document.getElementById('admin-tier').value = card.tier;
             document.getElementById('admin-layout').value = card.layout || 'standard';
             document.getElementById('admin-desc').value = card.desc;
@@ -2603,11 +2666,16 @@
         };
 
         window.cancelEdit = () => {
-            editingCardId = null; document.getElementById('admin-form').reset(); selectedAdminImage = "";
+            editingCardId = null; 
+            document.getElementById('admin-form').reset(); 
+            selectedAdminImage = "";
             document.getElementById('admin-zoom').value = 1; document.getElementById('admin-name-size').value = 12; document.getElementById('admin-desc-size').value = 9;
             window.adminCardState = { transX: 0, transY: 0 };
             document.getElementById('admin-submit').innerText = "CRIAR CARTA E ADICIONAR AO JOGO";
             document.getElementById('admin-cancel-btn').classList.add('hidden');
+            
+            // Sugere o próximo número disponível pois voltamos ao modo de "Criação"
+            window.suggestNextCardNumber();
             window.updateAdminPreview(); window.loadGitHubImages();
         };
 
@@ -2658,6 +2726,10 @@
                 window.adminCardState = { transX: 0, transY: 0 };
                 
                 window.updateAdminPreview(); window.loadGitHubImages(); 
+                
+                // Sugere o próximo número disponível automaticamente após salvar
+                window.suggestNextCardNumber();
+
             } catch (err) {
                 msg.innerText = "Erro: " + err.message;
                 msg.className = "text-center font-bold text-sm mt-2 text-red-400";
