@@ -211,7 +211,7 @@
 
             <!-- Card Showcase -->
             <div class="w-full md:w-1/2 p-8 flex justify-center items-center bg-gray-900 border-b md:border-b-0 md:border-r border-gray-700 relative min-h-[450px]">
-                <div id="detail-card-container" class="w-64 h-96 shadow-2xl transform transition hover:scale-105"></div>
+                <div id="detail-card-container" class="w-[280px] h-[420px] sm:w-[320px] sm:h-[480px] flex-shrink-0 shadow-2xl transform transition hover:scale-105"></div>
             </div>
 
             <!-- Card Info -->
@@ -1731,10 +1731,10 @@
                 cardsArray.forEach(card => {
                     const quantity = sourceInventory[card.id] || 0;
                     const wrapper = document.createElement('div');
-                    wrapper.className = "w-full aspect-[2/3] relative rounded-xl transition transform hover:scale-105 shadow-lg cursor-pointer";
-                    wrapper.onclick = () => window.showCardDetail(card.id);
                     
                     if (quantity > 0) {
+                        wrapper.className = "w-full aspect-[2/3] relative rounded-xl transition transform hover:scale-105 shadow-lg cursor-pointer";
+                        wrapper.onclick = () => window.showCardDetail(card.id);
                         const innerCard = document.createElement('div');
                         innerCard.id = `card-${gridId}-${card.id}`;
                         innerCard.className = "w-full h-full";
@@ -1742,7 +1742,7 @@
                         grid.appendChild(wrapper);
                         window.renderCardHTML(innerCard.id, card, true, true, sourceInventory);
                     } else {
-                        wrapper.className += " bg-gray-800 border-2 border-gray-700 flex items-center justify-center opacity-50";
+                        wrapper.className = "w-full aspect-[2/3] relative rounded-xl transition shadow-lg bg-gray-800 border-2 border-gray-700 flex items-center justify-center opacity-50";
                         wrapper.innerHTML = `<span class="text-gray-500 font-bold text-xl">?</span>`;
                         grid.appendChild(wrapper);
                     }
@@ -1765,7 +1765,7 @@
                             <td class="p-3 text-center font-bold ${quantity > 1 ? 'text-green-400' : ''}">x${quantity}</td>
                         </tr>`;
                     } else {
-                        tableHTML += `<tr class="opacity-50 bg-gray-800 text-gray-500 transition duration-150 cursor-pointer" onclick="window.showCardDetail('${card.id}')">
+                        tableHTML += `<tr class="opacity-50 bg-gray-800 text-gray-500 transition duration-150">
                             <td class="p-2"><div class="w-8 h-10 bg-gray-700 rounded border border-gray-600 flex items-center justify-center font-bold">?</div></td>
                             <td class="p-3 font-bold">???</td>
                             <td class="p-3 font-bold">${card.tier}</td>
@@ -1795,10 +1795,10 @@
                     cardsInTier.forEach(card => {
                         const quantity = sourceInventory[card.id] || 0;
                         const wrapper = document.createElement('div');
-                        wrapper.className = "w-full aspect-[2/3] relative rounded-xl transition transform hover:scale-105 shadow-lg cursor-pointer";
-                        wrapper.onclick = () => window.showCardDetail(card.id);
                         
                         if (quantity > 0) {
+                            wrapper.className = "w-full aspect-[2/3] relative rounded-xl transition transform hover:scale-105 shadow-lg cursor-pointer";
+                            wrapper.onclick = () => window.showCardDetail(card.id);
                             const innerCard = document.createElement('div');
                             innerCard.id = `card-rank-${card.id}`;
                             innerCard.className = "w-full h-full";
@@ -1806,7 +1806,7 @@
                             tierGrid.appendChild(wrapper);
                             window.renderCardHTML(innerCard.id, card, true, true, sourceInventory);
                         } else {
-                            wrapper.className += " bg-gray-800 border-2 border-gray-700 flex items-center justify-center opacity-50";
+                            wrapper.className = "w-full aspect-[2/3] relative rounded-xl transition shadow-lg bg-gray-800 border-2 border-gray-700 flex items-center justify-center opacity-50";
                             wrapper.innerHTML = `<span class="text-gray-500 font-bold text-xl">?</span>`;
                             tierGrid.appendChild(wrapper);
                         }
@@ -1911,7 +1911,10 @@
 
             loading.classList.remove('hidden');
             emptyMsg.classList.add('hidden');
-            selectedAdminImage = "";
+            
+            if (!editingCardId) {
+                selectedAdminImage = "";
+            }
 
             try {
                 const response = await fetch('https://api.github.com/repos/aurioshlookin/NinCardMemeCollectionBR/contents/assets/cards');
