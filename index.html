@@ -1527,7 +1527,15 @@
 
         window.revealSingleCard = async (index) => {
             const innerContainer = document.getElementById(`gacha-card-inner-${index}`);
-            if (!innerContainer || selectedCardsIndices.length >= 2 || innerContainer.classList.contains('flipped')) return;
+            
+            // SE A CARTA JÁ ESTIVER VIRADA (as que escolheu ou as que sobraram), ABRE DETALHES
+            if (innerContainer && innerContainer.classList.contains('flipped')) {
+                const cardData = currentPackCards[index];
+                if (cardData) window.showCardDetail(cardData.id);
+                return;
+            }
+
+            if (!innerContainer || selectedCardsIndices.length >= 2) return;
 
             const cardData = currentPackCards[index];
             selectedCardsIndices.push(index);
@@ -1556,8 +1564,9 @@
                             
                             const leftCardContainer = document.getElementById(`gacha-card-${idx}`);
                             if (leftCardContainer) {
-                                leftCardContainer.classList.add('opacity-50', 'grayscale');
-                                leftCardContainer.classList.remove('cursor-pointer', 'hover:scale-105', 'z-50', 'z-10');
+                                // Deixa 70% de opacidade pra ler melhor e não remove a ação de clicar!
+                                leftCardContainer.classList.add('opacity-70', 'grayscale');
+                                leftCardContainer.classList.remove('hover:scale-105', 'z-50', 'z-10');
                             }
                         }
                     }
