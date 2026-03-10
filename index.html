@@ -606,7 +606,7 @@
                 </div>
             </div>
 
-            <!-- Formulário de Criação/Edição de Cartas (RESTAURADO) -->
+            <!-- Formulário de Criação/Edição de Cartas -->
             <div class="bg-gray-800 p-8 rounded-xl border border-red-900/50 shadow-2xl">
                 <h3 class="text-xl font-bold mb-4 text-white">Criar ou Editar Carta</h3>
                 <div class="flex flex-col md:flex-row gap-8">
@@ -1328,7 +1328,10 @@
                 unsubUser = onSnapshot(doc(db, "users", user.uid), async (docSnap) => {
                     if (docSnap.exists()) {
                         userData = docSnap.data();
-                        if(!userData.claimedAchievements) userData.claimedAchievements = {};
+                        
+                        // Defesa contra properties indefinidas
+                        userData.inventory = userData.inventory || {};
+                        userData.claimedAchievements = userData.claimedAchievements || {};
 
                         if (userData.pullsAvailable < 5 && !userData.lastPullTimestamp) {
                             await updateDoc(doc(db, "users", user.uid), { lastPullTimestamp: Date.now() });
@@ -1424,10 +1427,11 @@
         window.checkTierComplete = (tier) => {
             if(window.cardDatabase.length === 0) return false;
             let total = 0; let owned = 0;
+            const inv = userData.inventory || {};
             window.cardDatabase.forEach(c => {
                 if(c.tier === tier) {
                     total++;
-                    if(userData.inventory && userData.inventory[c.id] > 0) owned++;
+                    if(inv[c.id] > 0) owned++;
                 }
             });
             return total > 0 && owned === total;
@@ -1930,6 +1934,9 @@
         window.renderCardHTML = (elementId, cardData, showQuantity = false, isAlbum = false, sourceInventory = {}) => {
             const container = document.getElementById(elementId);
             if(!container) return;
+            
+            // VERIFICAÇÃO DE SEGURANÇA
+            sourceInventory = sourceInventory || {};
             const quantity = sourceInventory[cardData.id] || 0;
             
             const layout = cardData.layout || 'standard';
@@ -2041,7 +2048,8 @@
             if (chanceEl) chanceEl.innerText = `Chance Drop: ${dropRates[card.tier]}`;
             
             let qty = 0;
-            if(userData && userData.inventory) { qty = userData.inventory[cardId] || 0; }
+            const inv = userData.inventory || {};
+            if(userData) { qty = inv[cardId] || 0; }
             
             const ownedEl = document.getElementById('detail-card-owned');
             const ownedContainer = document.getElementById('detail-card-owned-container');
@@ -2055,7 +2063,7 @@
                 }
             }
             
-            window.renderCardHTML('detail-card-container', card, false, true, userData ? userData.inventory : {});
+            window.renderCardHTML('detail-card-container', card, false, true, inv);
             const modal = document.getElementById('card-detail-modal');
             if(modal) {
                 modal.classList.remove('hidden');
@@ -2077,6 +2085,9 @@
             const grid = document.getElementById(gridId);
             if(!grid) return;
             
+            // VERIFICAÇÃO DE SEGURANÇA
+            sourceInventory = sourceInventory || {};
+
             const isMyAlbum = gridId === 'album-grid';
             const mode = isMyAlbum ? window.currentAlbumView : 'ranked';
             const sort = isMyAlbum ? window.currentAlbumSort : 'tier-desc';
@@ -2219,11 +2230,15 @@
             try {
                 const querySnapshot = await getDocs(collection(db, "users"));
                 allPlayersCache = [];
-                querySnapshot.forEach(doc => allPlayersCache.push({ uid: doc.id, ...doc.data() }));
+                querySnapshot.forEach(doc => {
+                    let data = doc.data();
+                    data.inventory = data.inventory || {}; // Segurança
+                    allPlayersCache.push({ uid: doc.id, ...data });
+                });
                 
                 allPlayersCache.sort((a, b) => {
                     let stA = 0, stB = 0;
-                    window.cardDatabase.forEach(c => { if(a.inventory && a.inventory[c.id]>0) stA++; if(b.inventory && b.inventory[c.id]>0) stB++; });
+                    window.cardDatabase.forEach(c => { if(a.inventory[c.id]>0) stA++; if(b.inventory[c.id]>0) stB++; });
                     return stB - stA;
                 });
                 window.renderPlayersTable(allPlayersCache);
@@ -2247,9 +2262,10 @@
 
             players.forEach(player => {
                 let stats = { Total: 0, C: 0, B: 0, A: 0, S: 0, SS: 0 };
-                window.cardDatabase.forEach(c => { if(player.inventory && player.inventory[c.id]>0) { stats.Total++; stats[c.tier]++; } });
+                const inv = player.inventory || {};
+                window.cardDatabase.forEach(c => { if(inv[c.id]>0) { stats.Total++; stats[c.tier]++; } });
                 
-                const medalHTML = window.getUserMedals(player.inventory);
+                const medalHTML = window.getUserMedals(inv);
 
                 tbody.innerHTML += `
                     <tr class="hover:bg-gray-700 transition duration-150 ease-in-out">
@@ -2292,7 +2308,7 @@
             if (exploreName) exploreName.innerText = player.displayName;
             if (exploreAvatar) exploreAvatar.src = `https://api.dicebear.com/7.x/pixel-art/svg?seed=${player.displayName || player.uid}`;
             
-            window.renderAlbumHTML('explore-grid', player.inventory);
+            window.renderAlbumHTML('explore-grid', player.inventory || {});
             
             if (exploreResults) {
                 exploreResults.classList.remove('hidden');
@@ -2342,8 +2358,9 @@
             const currentOffer = offerSelect.value;
             offerSelect.innerHTML = '<option value="">Selecione uma carta repetida...</option>';
 
+            const inv = userData.inventory || {};
             window.cardDatabase.forEach(card => {
-                const totalQty = userData.inventory[card.id] || 0;
+                const totalQty = inv[card.id] || 0;
                 if (totalQty > 1) {
                     const tradableQty = totalQty - 1; 
                     offerSelect.innerHTML += `<option value="${card.id}">${card.name} (Rank ${card.tier}) - Disponíveis: ${tradableQty}</option>`;
@@ -2418,7 +2435,8 @@
                 const reqTier = document.getElementById('trade-request-tier')?.value;
 
                 if(!offerId || !reqTier) return window.showMessage("Selecione a carta e a raridade desejada!");
-                if((userData.inventory[offerId] || 0) <= currentOfferQty) return window.showMessage("Você não possui cartas suficientes para criar a oferta e manter 1 cópia.");
+                const inv = userData.inventory || {};
+                if((inv[offerId] || 0) <= currentOfferQty) return window.showMessage("Você não possui cartas suficientes para criar a oferta e manter 1 cópia.");
 
                 const today = new Date().toDateString();
                 const tradesToday = userData.lastTradeDate === today ? (userData.tradesToday || 0) : 0;
@@ -2430,12 +2448,12 @@
                     await runTransaction(db, async (transaction) => {
                         const userRef = doc(db, "users", currentUser.uid);
                         const userSnap = await transaction.get(userRef);
-                        let inv = userSnap.data().inventory || {};
+                        let transInv = userSnap.data().inventory || {};
 
-                        if((inv[offerId] || 0) <= currentOfferQty) throw "Cartas insuficientes no inventário.";
+                        if((transInv[offerId] || 0) <= currentOfferQty) throw "Cartas insuficientes no inventário.";
 
-                        inv[offerId] -= currentOfferQty; 
-                        transaction.update(userRef, { inventory: inv });
+                        transInv[offerId] -= currentOfferQty; 
+                        transaction.update(userRef, { inventory: transInv });
 
                         const newTradeRef = doc(collection(db, "trades"));
                         transaction.set(newTradeRef, {
@@ -2536,11 +2554,11 @@
 
                         const userRef = doc(db, "users", currentUser.uid);
                         const userSnap = await transaction.get(userRef);
-                        let inv = userSnap.data().inventory || {};
+                        let transInv = userSnap.data().inventory || {};
 
-                        inv[tradeData.offerCardId] = (inv[tradeData.offerCardId] || 0) + (tradeData.offerQuantity || 1);
+                        transInv[tradeData.offerCardId] = (transInv[tradeData.offerCardId] || 0) + (tradeData.offerQuantity || 1);
 
-                        transaction.update(userRef, { inventory: inv });
+                        transaction.update(userRef, { inventory: transInv });
                         transaction.update(tradeRef, { status: 'cancelled' });
                     });
                     window.showMessage("Oferta cancelada e cartas devolvidas ao seu álbum!");
@@ -2561,10 +2579,11 @@
                 const invA = userASnap.data().inventory || {};
 
                 let validCardsForB = []; let totalSupplyable = 0;
+                const myInv = userData.inventory || {};
 
                 window.cardDatabase.forEach(c => {
                     if (c.tier === reqTier && (invA[c.id] || 0) === 0) {
-                        const myQty = userData.inventory[c.id] || 0;
+                        const myQty = myInv[c.id] || 0;
                         if (myQty > 0) {
                             validCardsForB.push({ ...c, myQty });
                             totalSupplyable += myQty;
