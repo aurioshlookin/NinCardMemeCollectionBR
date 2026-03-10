@@ -377,7 +377,7 @@
         <section id="section-achievements" class="w-full max-w-5xl hidden flex-col gap-8">
             <div class="text-center space-y-2 mb-4">
                 <h2 class="text-4xl font-bold text-blue-400 drop-shadow-md">Conquistas Ninja 🏆</h2>
-                <p class="text-gray-400">Complete missões e resgate prêmios exclusivos. Pacotes resgatados aqui são abertos imediatamente!</p>
+                <p class="text-gray-400">Complete missões e resgate prêmios exclusivos. Alguns pacotes resgatados aqui são abertos imediatamente!</p>
             </div>
             
             <div id="achievements-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
@@ -1445,9 +1445,9 @@
 
             const achievements = [
                 { 
-                    id: 'first3', title: 'Primeiros Passos', desc: 'Abra 3 pacotes básicos. <br><span class="text-[10px] text-gray-500">Prêmio: +1 Pacote Básico</span>', 
-                    isReady: totalOpened >= 3, isClaimed: userData.claimedAchievements?.first3, 
-                    type: 'basic', progress: `${Math.min(3, totalOpened)}/3`
+                    id: 'first5', title: 'Primeiros Passos', desc: 'Abra 5 pacotes básicos. <br><span class="text-[10px] text-gray-500">Prêmio: +5 Pacotes Básicos (Na Roleta)</span>', 
+                    isReady: totalOpened >= 5, isClaimed: userData.claimedAchievements?.first5, 
+                    type: 'basic_pulls', progress: `${Math.min(5, totalOpened)}/5`
                 },
                 { 
                     id: 'tens', title: 'Veterano Constante', desc: 'A cada 10 pacotes abertos, ganhe 1 Premium.<br><span class="text-[10px] text-gray-500">Prêmio: Pacote Shuriken Premium (S/SS)</span>', 
@@ -1486,7 +1486,8 @@
                     btnHTML = `<button disabled class="w-full bg-gray-700 text-gray-400 font-bold py-2 rounded-lg cursor-not-allowed">Já Resgatado</button>`;
                 } else if (achiev.isReady) {
                     const colorBtn = achiev.type === 'premium' ? 'bg-yellow-600 hover:bg-yellow-500 text-white' : 'bg-green-600 hover:bg-green-500 text-white';
-                    btnHTML = `<button id="btn-claim-${achiev.id}" onclick="window.claimAchievement('${achiev.id}', '${achiev.type}')" class="w-full ${colorBtn} font-bold py-2 rounded-lg transition shadow-lg animate-pulse">RESGATAR E ABRIR!</button>`;
+                    const btnText = achiev.type === 'basic_pulls' ? 'RESGATAR PACOTES' : 'RESGATAR E ABRIR!';
+                    btnHTML = `<button id="btn-claim-${achiev.id}" onclick="window.claimAchievement('${achiev.id}', '${achiev.type}')" class="w-full ${colorBtn} font-bold py-2 rounded-lg transition shadow-lg animate-pulse">${btnText}</button>`;
                 } else {
                     btnHTML = `<button disabled class="w-full bg-gray-900 border border-gray-600 text-gray-500 font-bold py-2 rounded-lg cursor-not-allowed">Bloqueado</button>`;
                 }
@@ -1536,8 +1537,27 @@
             }
 
             try {
-                await updateDoc(doc(db, "users", currentUser.uid), { claimedAchievements: newClaimed });
+                // Prepara a atualização da base de dados
+                const updateObj = { claimedAchievements: newClaimed };
                 
+                // Se for a conquista de Primeiros Passos, adiciona os 5 pulls
+                if (achievId === 'first5') {
+                    updateObj.pullsAvailable = (userData.pullsAvailable || 0) + 5;
+                }
+                
+                await updateDoc(doc(db, "users", currentUser.uid), updateObj);
+                
+                // Se for pacote na Roleta, não abre o modal visual
+                if (achievId === 'first5') {
+                    window.showMessage("Parabéns! Você resgatou +5 Pacotes Básicos! Volte à aba Roleta para abri-los.");
+                    isOpeningAchiev = false;
+                    if(btn) btn.innerText = "Já Resgatado";
+                    window.updateGachaUI();
+                    window.renderAchievements();
+                    return;
+                }
+                
+                // --- CONTINUA LÓGICA DE ABRIR O PACOTE PREMIUM/BÁSICO IMEDIATO ---
                 currentAchievType = type;
                 achievPackCards = [];
                 for(let i=0; i<8; i++) {
