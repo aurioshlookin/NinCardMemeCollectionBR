@@ -137,7 +137,7 @@
             <div id="logged-in-view" class="hidden items-center gap-4">
                 <div class="flex flex-col items-end">
                     <div class="text-sm bg-gray-800 px-3 py-1 rounded-full border border-green-500/50 shadow-inner flex items-center gap-2">
-                        <span>Pulls: <span id="pulls-count" class="font-bold text-green-400">-</span>/3</span>
+                        <span>Pulls: <span id="pulls-count" class="font-bold text-green-400">-</span>/5</span>
                     </div>
                     <div id="pull-timer-container" class="text-[10px] text-gray-400 mt-1 hidden">
                         +1 em: <span id="pull-timer" class="text-green-400 font-bold">--:--:--</span>
@@ -225,12 +225,12 @@
             <!-- Card Showcase -->
             <div class="w-full md:w-1/2 p-8 flex justify-center items-center bg-gray-900 border-b md:border-b-0 md:border-r border-gray-700 relative min-h-[450px]">
                 <div class="w-[240px] sm:w-[300px] aspect-[2/3] flex-shrink-0 shadow-2xl transform transition hover:scale-105 rounded-xl">
-                    <div id="detail-card-container" class="w-full h-full"></div>
+                    <div id="detail-card-container" class="w-full h-full pointer-events-none"></div>
                 </div>
             </div>
 
             <!-- Card Info -->
-            <div class="w-full md:w-1/2 p-6 md:p-10 flex flex-col justify-center relative">
+            <div class="w-full md:w-1/2 p-6 md:p-10 flex flex-col justify-center relative pointer-events-none">
                 <div class="flex items-center gap-3 mb-2">
                     <span id="detail-card-tier" class="px-3 py-1 font-black text-sm rounded shadow-md border"></span>
                     <span id="detail-card-chance" class="text-gray-400 text-sm font-bold bg-gray-900 px-2 py-1 rounded border border-gray-700 shadow-inner"></span>
@@ -311,6 +311,23 @@
                     </div>
                     <div class="text-right">
                         <button onclick="window.switchTab('achievements')" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded shadow text-sm font-bold transition">Ver Conquistas 🏆</button>
+                    </div>
+                </div>
+
+                <!-- Barra de Progresso do Premium -->
+                <div class="w-full max-w-md bg-gray-800 border border-yellow-500/30 p-4 rounded-xl shadow-lg relative overflow-hidden">
+                    <div class="absolute -right-4 -top-4 text-6xl opacity-10 pointer-events-none">🎁</div>
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-sm font-bold text-yellow-400 drop-shadow-md">Progresso do Pacote Premium</span>
+                        <span id="premium-progress-text" class="text-sm font-bold text-gray-200 bg-gray-900 px-2 py-0.5 rounded border border-gray-600">0/10</span>
+                    </div>
+                    <div class="w-full bg-gray-900 rounded-full h-3 sm:h-4 border border-gray-700 overflow-hidden relative shadow-inner">
+                        <div id="premium-progress-bar" class="bg-gradient-to-r from-yellow-600 to-yellow-400 h-full rounded-full transition-all duration-700 ease-out shadow-[0_0_10px_rgba(250,204,21,0.5)]" style="width: 0%"></div>
+                    </div>
+                    <div id="premium-claim-alert" class="hidden mt-4 text-center">
+                        <button onclick="window.switchTab('achievements')" class="w-full bg-yellow-600 hover:bg-yellow-500 text-white font-black py-2 px-4 rounded-lg text-xs tracking-wider shadow-lg shadow-yellow-900/50 transition border border-yellow-400 animate-pulse">
+                            🎉 REIVINDICAR PREMIUM AGORA! 🎉
+                        </button>
                     </div>
                 </div>
 
@@ -456,10 +473,10 @@
             <div class="flex justify-between items-end border-b border-gray-700 pb-4">
                 <div>
                     <h2 class="text-2xl font-bold text-green-400">Centro de Trocas 🤝</h2>
-                    <p class="text-sm text-gray-400">Só é permitido realizar <strong class="text-gray-200">1 troca concluída por dia</strong> (Criando ou Aceitando).</p>
+                    <p class="text-sm text-gray-400">Só é permitido realizar <strong class="text-gray-200">2 trocas concluídas por dia</strong> (Criando ou Aceitando).</p>
                 </div>
                 <div class="text-right">
-                    <span class="text-gray-400 block text-sm">Trocas hoje: <span id="trade-limit-count" class="font-bold text-green-400">0</span>/1</span>
+                    <span class="text-gray-400 block text-sm">Trocas hoje: <span id="trade-limit-count" class="font-bold text-green-400">0</span>/2</span>
                     <span class="text-[10px] text-gray-500">Reseta 00:00</span>
                 </div>
             </div>
@@ -469,7 +486,7 @@
                 <div class="w-full lg:w-1/3 flex flex-col gap-6">
                     <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-md relative overflow-hidden">
                         <div id="trade-form-blocker" class="absolute inset-0 bg-gray-900/80 backdrop-blur-sm z-10 flex flex-col items-center justify-center hidden">
-                            <p id="trade-form-blocker-msg" class="text-green-400 font-bold text-center px-4">Você já tem uma oferta ativa ou já concluiu sua troca de hoje.</p>
+                            <p id="trade-form-blocker-msg" class="text-green-400 font-bold text-center px-4">Você já tem uma oferta ativa ou já concluiu suas trocas de hoje.</p>
                         </div>
                         
                         <h3 class="text-xl font-bold mb-4 text-gray-100">Criar Nova Oferta</h3>
@@ -1147,21 +1164,21 @@
 
         startGlobalListeners();
 
-        // --- TEMPORIZADOR DE PULLS (A CADA 8 HORAS) ---
-        const EIGHT_HOURS = 8 * 60 * 60 * 1000;
+        // --- TEMPORIZADOR DE PULLS (A CADA 3 HORAS, LIMITE 5) ---
+        const THREE_HOURS = 3 * 60 * 60 * 1000;
 
         setInterval(() => {
             if (!currentUser || !userData) return;
             
-            if (userData.pullsAvailable < 3 && userData.lastPullTimestamp) {
+            if (userData.pullsAvailable < 5 && userData.lastPullTimestamp) {
                 const now = Date.now();
                 const timePassed = now - userData.lastPullTimestamp;
                 
-                if (timePassed >= EIGHT_HOURS) {
-                    const pullsEarned = Math.floor(timePassed / EIGHT_HOURS);
-                    let newPulls = Math.min(3, userData.pullsAvailable + pullsEarned);
-                    let newTimestamp = userData.lastPullTimestamp + (pullsEarned * EIGHT_HOURS);
-                    if (newPulls === 3) newTimestamp = null; 
+                if (timePassed >= THREE_HOURS) {
+                    const pullsEarned = Math.floor(timePassed / THREE_HOURS);
+                    let newPulls = Math.min(5, userData.pullsAvailable + pullsEarned);
+                    let newTimestamp = userData.lastPullTimestamp + (pullsEarned * THREE_HOURS);
+                    if (newPulls === 5) newTimestamp = null; 
 
                     updateDoc(doc(db, "users", currentUser.uid), { pullsAvailable: newPulls, lastPullTimestamp: newTimestamp }).catch(e => console.warn(e));
                     
@@ -1170,14 +1187,14 @@
                     window.updateGachaUI();
                 }
 
-                if (userData.pullsAvailable < 3 && userData.lastPullTimestamp) {
+                if (userData.pullsAvailable < 5 && userData.lastPullTimestamp) {
                     const timerContainer = document.getElementById('pull-timer-container');
                     const timerText = document.getElementById('pull-timer');
                     const largeTimer = document.getElementById('large-pull-timer');
 
                     if (timerContainer) timerContainer.classList.remove('hidden');
                     
-                    const timeLeft = EIGHT_HOURS - ((Date.now() - userData.lastPullTimestamp) % EIGHT_HOURS);
+                    const timeLeft = THREE_HOURS - ((Date.now() - userData.lastPullTimestamp) % THREE_HOURS);
                     const h = Math.floor(timeLeft / (1000 * 60 * 60)).toString().padStart(2, '0');
                     const m = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60)).toString().padStart(2, '0');
                     const s = Math.floor((timeLeft % (1000 * 60)) / 1000).toString().padStart(2, '0');
@@ -1238,7 +1255,7 @@
 
                         await setDoc(doc(db, "users", userCredential.user.uid), {
                             displayName: username, displayNameLower: username.toLowerCase(),
-                            pullsAvailable: 3, lastPullTimestamp: null, inventory: {}, role: userRole,
+                            pullsAvailable: 5, lastPullTimestamp: null, inventory: {}, role: userRole,
                             tradesToday: 0, lastTradeDate: new Date().toDateString(), totalPacksOpened: 0, 
                             claimedAchievements: {}, ip: userIp 
                         });
@@ -1313,7 +1330,7 @@
                         userData = docSnap.data();
                         if(!userData.claimedAchievements) userData.claimedAchievements = {};
 
-                        if (userData.pullsAvailable < 3 && !userData.lastPullTimestamp) {
+                        if (userData.pullsAvailable < 5 && !userData.lastPullTimestamp) {
                             await updateDoc(doc(db, "users", user.uid), { lastPullTimestamp: Date.now() });
                         }
                         if ((user.displayName.toLowerCase() === 'auriosh' || user.displayName.toLowerCase() === 'vilao') && userData.role !== 'admin') {
@@ -1566,6 +1583,8 @@
 
                 overlay.classList.remove('hidden');
                 overlay.classList.add('flex');
+                
+                window.updateGachaUI(); // Atualiza a barra do Premium
 
             } catch(e) {
                 console.error(e);
@@ -1719,7 +1738,7 @@
             
             const userRef = doc(db, "users", currentUser.uid);
             let updateData = { pullsAvailable: userData.pullsAvailable - 1 };
-            if (userData.pullsAvailable === 3) updateData.lastPullTimestamp = Date.now();
+            if (userData.pullsAvailable === 5) updateData.lastPullTimestamp = Date.now();
             updateData.totalPacksOpened = (userData.totalPacksOpened || 0) + 1;
             
             await updateDoc(userRef, updateData).catch(e => console.error(e));
@@ -1854,6 +1873,27 @@
             const totalOpenedEl = document.getElementById('gacha-total-packs-opened');
             if(totalOpenedEl) totalOpenedEl.innerText = userData.totalPacksOpened || 0;
             
+            // Lógica da Barra do Premium
+            const totalOpened = userData.totalPacksOpened || 0;
+            const claimedTens = userData.claimedAchievements?.tens || 0;
+            const maxTens = Math.floor(totalOpened / 10);
+            const pendingClaims = maxTens > claimedTens;
+            
+            let currentProgress = totalOpened % 10;
+            if (pendingClaims && currentProgress === 0) currentProgress = 10;
+            
+            const progressText = document.getElementById('premium-progress-text');
+            const progressBar = document.getElementById('premium-progress-bar');
+            const claimAlert = document.getElementById('premium-claim-alert');
+            
+            if (progressText) progressText.innerText = `${currentProgress}/10`;
+            if (progressBar) progressBar.style.width = `${(currentProgress / 10) * 100}%`;
+            
+            if (claimAlert) {
+                if (pendingClaims) claimAlert.classList.remove('hidden');
+                else claimAlert.classList.add('hidden');
+            }
+
             const containerVazio = document.getElementById('out-of-pulls-container');
             const boosterPack = document.getElementById('booster-pack');
 
@@ -2264,9 +2304,9 @@
             const blocker = document.getElementById('trade-form-blocker');
             if (blocker) {
                 const msg = document.getElementById('trade-form-blocker-msg');
-                if (tradesToday >= 1) {
+                if (tradesToday >= 2) {
                     blocker.classList.remove('hidden');
-                    if(msg) msg.innerText = "Você já concluiu uma troca hoje. Volte amanhã à 00:00!";
+                    if(msg) msg.innerText = "Você já concluiu suas trocas de hoje. Volte amanhã à 00:00!";
                 } else if (hasActiveTrade) {
                     blocker.classList.remove('hidden');
                     if(msg) msg.innerText = "Você já tem uma oferta ativa no mural. Cancele-a antes de criar outra.";
@@ -2362,7 +2402,7 @@
 
                 const today = new Date().toDateString();
                 const tradesToday = userData.lastTradeDate === today ? (userData.tradesToday || 0) : 0;
-                if (tradesToday >= 1) return window.showMessage("Você já concluiu sua troca diária.");
+                if (tradesToday >= 2) return window.showMessage("Você já concluiu suas trocas diárias.");
 
                 if(btn) { btn.disabled = true; btn.innerText = "Publicando..."; }
 
@@ -2494,7 +2534,7 @@
             try {
                 const today = new Date().toDateString();
                 const tradesToday = userData.lastTradeDate === today ? (userData.tradesToday || 0) : 0;
-                if (tradesToday >= 1) return window.showMessage("Você já atingiu seu limite diário de trocas hoje (1/dia).");
+                if (tradesToday >= 2) return window.showMessage("Você já atingiu seu limite diário de trocas hoje (2/dia).");
 
                 const userASnap = await getDoc(doc(db, "users", fromUserId));
                 if(!userASnap.exists()) throw "O criador da oferta não foi encontrado.";
@@ -2600,8 +2640,8 @@
                     let tradesA = userASnap.data().lastTradeDate === today ? (userASnap.data().tradesToday || 0) : 0;
                     let tradesB = userBSnap.data().lastTradeDate === today ? (userBSnap.data().tradesToday || 0) : 0;
                     
-                    if (tradesA >= 1) throw "O criador da oferta já atingiu o limite de trocas de hoje.";
-                    if (tradesB >= 1) throw "Você atingiu seu limite diário de trocas.";
+                    if (tradesA >= 2) throw "O criador da oferta já atingiu o limite de trocas de hoje.";
+                    if (tradesB >= 2) throw "Você atingiu seu limite diário de trocas.";
 
                     finalCardsToSend.forEach(id => {
                         if((invB[id] || 0) < 1) throw "Inventário insuficiente! Alguém já usou essa carta.";
@@ -2610,8 +2650,8 @@
 
                     invB[state.offerId] = (invB[state.offerId] || 0) + offQty;
 
-                    transaction.update(userARef, { inventory: invA, tradesToday: 1, lastTradeDate: today });
-                    transaction.update(userBRef, { inventory: invB, tradesToday: 1, lastTradeDate: today });
+                    transaction.update(userARef, { inventory: invA, tradesToday: tradesA + 1, lastTradeDate: today });
+                    transaction.update(userBRef, { inventory: invB, tradesToday: tradesB + 1, lastTradeDate: today });
                     transaction.update(tradeRef, { status: 'completed', acceptedBy: currentUser.uid });
                 });
 
