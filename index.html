@@ -143,7 +143,28 @@
                         +1 em: <span id="pull-timer" class="text-green-400 font-bold">--:--:--</span>
                     </div>
                 </div>
+                
                 <div class="flex items-center gap-2">
+                    <!-- Sino de Notificações -->
+                    <div class="relative flex items-center mr-2">
+                        <button id="btn-notifications" onclick="window.toggleNotifications()" class="relative p-2 text-gray-400 hover:text-white transition">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                            </svg>
+                            <span id="notif-badge" class="absolute top-0 right-0 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full hidden">0</span>
+                        </button>
+                        <!-- Dropdown Notificações -->
+                        <div id="notif-dropdown" class="absolute top-full right-0 mt-3 w-80 sm:w-96 bg-gray-800 border border-gray-700 rounded-xl shadow-2xl hidden flex-col z-50 overflow-hidden transform origin-top-right transition">
+                            <div class="p-3 border-b border-gray-700 font-bold text-gray-200 bg-gray-900 flex justify-between items-center">
+                                <span>Notificações</span>
+                                <button onclick="window.clearNotifications()" class="text-xs text-red-400 hover:text-red-300 font-bold px-2 py-1 rounded hover:bg-red-900/30 transition">Limpar Histórico</button>
+                            </div>
+                            <div id="notif-list" class="flex flex-col overflow-y-auto max-h-80 divide-y divide-gray-700 bg-gray-800">
+                                <div class="p-4 text-center text-gray-500 text-sm">Nenhuma notificação.</div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center overflow-hidden border border-gray-500">
                         <img id="user-avatar" src="" alt="avatar" class="w-full h-full">
                     </div>
@@ -837,6 +858,16 @@
             }
         };
 
+        // FECHAR DROPDOWN DE NOTIFICAÇÕES SE CLICAR FORA
+        document.addEventListener('click', (e) => {
+            const drop = document.getElementById('notif-dropdown');
+            const btn = document.getElementById('btn-notifications');
+            if(drop && !drop.classList.contains('hidden') && !drop.contains(e.target) && !btn.contains(e.target)) {
+                drop.classList.add('hidden');
+                drop.classList.remove('flex');
+            }
+        });
+
         // --- SISTEMA DE DRAG PARA O PREVIEW ADMIN ---
         let isDraggingPreview = false;
         let dragStartX, dragStartY;
@@ -1001,7 +1032,7 @@
         let userData = { 
             pullsAvailable: 0, inventory: {}, role: 'player', tradesToday: 0, 
             lastTradeDate: "", lastPullTimestamp: null, totalPacksOpened: 0, 
-            claimedAchievements: {} 
+            claimedAchievements: {}, notifications: []
         };
         let globalSettings = { registrationsOpen: true };
         let unsubUser = null; let unsubCards = null; let unsubTrades = null; let unsubSettings = null;
@@ -1030,6 +1061,66 @@
             if (numInput && !editingCardId) {
                 numInput.value = nextStr;
                 window.updateAdminPreview();
+            }
+        };
+
+        // --- FUNÇÕES DE NOTIFICAÇÃO ---
+        window.renderNotifications = (notifs) => {
+            const list = document.getElementById('notif-list');
+            const badge = document.getElementById('notif-badge');
+            
+            if(!list || !badge) return;
+            
+            if(!notifs || notifs.length === 0) {
+                list.innerHTML = '<div class="p-4 text-center text-gray-500 text-sm">Nenhuma notificação.</div>';
+                badge.classList.add('hidden');
+                return;
+            }
+            
+            const unreadCount = notifs.filter(n => !n.read).length;
+            if(unreadCount > 0) {
+                badge.innerText = unreadCount > 9 ? '9+' : unreadCount;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+            
+            list.innerHTML = notifs.map(n => `
+                <div class="p-4 text-sm transition ${!n.read ? 'bg-gray-700/80 border-l-4 border-green-500' : 'hover:bg-gray-700/40'}">
+                    <div class="text-[10px] text-gray-400 mb-1.5 font-bold uppercase tracking-wider">${new Date(n.timestamp).toLocaleString()}</div>
+                    <div class="text-gray-200 leading-relaxed">${n.message}</div>
+                </div>
+            `).join('');
+        };
+
+        window.toggleNotifications = () => {
+            const drop = document.getElementById('notif-dropdown');
+            if(!drop) return;
+            
+            drop.classList.toggle('hidden');
+            drop.classList.toggle('flex');
+            
+            if(!drop.classList.contains('hidden') && currentUser) {
+                const notifs = userData.notifications || [];
+                let changed = false;
+                const updatedNotifs = notifs.map(n => {
+                    if(!n.read) { n.read = true; changed = true; }
+                    return n;
+                });
+                
+                if(changed) {
+                    updateDoc(doc(db, "users", currentUser.uid), { notifications: updatedNotifs })
+                        .catch(e => console.error("Erro ao marcar notificações:", e));
+                }
+            }
+        };
+
+        window.clearNotifications = async () => {
+            if(!currentUser) return;
+            try {
+                await updateDoc(doc(db, "users", currentUser.uid), { notifications: [] });
+            } catch(e) {
+                console.error("Erro ao limpar notificações:", e);
             }
         };
 
@@ -1266,7 +1357,7 @@
                             displayName: username, displayNameLower: username.toLowerCase(),
                             pullsAvailable: 5, lastPullTimestamp: null, inventory: {}, role: userRole,
                             tradesToday: 0, lastTradeDate: new Date().toDateString(), totalPacksOpened: 0, 
-                            claimedAchievements: {}, ip: userIp 
+                            claimedAchievements: {}, notifications: [], ip: userIp 
                         });
                         
                         localStorage.setItem('nin_ccg_registered', 'true'); 
@@ -1341,6 +1432,7 @@
                         // Defesa contra properties indefinidas
                         userData.inventory = userData.inventory || {};
                         userData.claimedAchievements = userData.claimedAchievements || {};
+                        userData.notifications = userData.notifications || [];
 
                         if (userData.pullsAvailable < 5 && !userData.lastPullTimestamp) {
                             await updateDoc(doc(db, "users", user.uid), { lastPullTimestamp: Date.now() });
@@ -1354,6 +1446,7 @@
                         window.updateTradeOptions(); 
                         window.updateTradeLimitsUI(); 
                         window.renderAchievements();
+                        window.renderNotifications(userData.notifications);
 
                         const tabAdmin = document.getElementById('tab-admin');
                         if (userData.role === 'admin') {
@@ -2698,7 +2791,35 @@
 
                     invB[state.offerId] = (invB[state.offerId] || 0) + offQty;
 
-                    transaction.update(userARef, { inventory: invA, tradesToday: tradesA + 1, lastTradeDate: today });
+                    // Criar Notificação para o Usuário A (Dono da Oferta)
+                    const offerCard = window.cardDatabase.find(c => c.id === state.offerId);
+                    const offerCardName = offerCard ? offerCard.name : "Carta Desconhecida";
+                    
+                    // Pegar o nome de todas as cartas enviadas e contar as repetidas visualmente na string final
+                    const sentNamesCount = {};
+                    finalCardsToSend.forEach(id => {
+                        const c = window.cardDatabase.find(card => card.id === id);
+                        const cName = c ? c.name : "Desconhecida";
+                        sentNamesCount[cName] = (sentNamesCount[cName] || 0) + 1;
+                    });
+                    
+                    const sentCardNamesString = Object.entries(sentNamesCount)
+                        .map(([name, count]) => count > 1 ? `${count}x ${name}` : `${name}`)
+                        .join(", ");
+
+                    const newNotif = {
+                        id: 'notif_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+                        type: 'trade_accepted',
+                        message: `🎉 <strong class="text-green-400">${currentUser.displayName}</strong> aceitou sua troca! Levou <strong class="text-red-400">${offQty}x ${offerCardName}</strong> e enviou: <strong class="text-yellow-400">${sentCardNamesString}</strong>.`,
+                        read: false,
+                        timestamp: Date.now()
+                    };
+                    
+                    let notifsA = userASnap.data().notifications || [];
+                    notifsA.unshift(newNotif);
+                    if(notifsA.length > 30) notifsA.pop(); // Mantém apenas as últimas 30
+
+                    transaction.update(userARef, { inventory: invA, tradesToday: tradesA + 1, lastTradeDate: today, notifications: notifsA });
                     transaction.update(userBRef, { inventory: invB, tradesToday: tradesB + 1, lastTradeDate: today });
                     transaction.update(tradeRef, { status: 'completed', acceptedBy: currentUser.uid });
                 });
@@ -2707,7 +2828,7 @@
                 if(modal) modal.classList.add('hidden');
                 window.showMessage("MUITO BEM! A troca foi realizada com sucesso.");
             } catch (e) {
-                window.showMessage("Falha na transação. Você atualizou as Regras do Firebase conforme o tutorial?");
+                window.showMessage("Falha na transação. Certifique-se de não estar burlando o sistema.");
             } finally {
                 if(btn) { btn.disabled = false; btn.innerText = "Confirmar Envio"; }
             }
