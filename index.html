@@ -85,7 +85,7 @@
         .pack { width: 220px; height: 320px; position: relative; cursor: pointer; transition: transform 0.2s; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.5)); }
         .pack:hover { transform: scale(1.05) rotate(2deg); }
         .pack-top, .pack-bottom { position: absolute; width: 100%; background: linear-gradient(135deg, #111827, #000000); border: 4px solid #166534; }
-        .pack-top { height: 20%; top: 0; border-radius: 12px 12px 0 0; border-bottom: 3px dashed #22c55e; z-index: 30; transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+        .pack-top { height: 20%; top: 0; border-radius: 12px 12px 0 0; border-bottom: 3px dashed #22c55e; z-index: 40; transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
         .pack-bottom { height: 80%; bottom: 0; border-radius: 0 0 12px 12px; border-top: none; z-index: 30; display: flex; align-items: center; justify-content: center; transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
         .pack-cards-bg { position: absolute; top: 20px; left: 10px; right: 10px; bottom: 20px; background: #1f2937; border-radius: 8px; z-index: 20; }
         
@@ -165,7 +165,7 @@
     </nav>
 
     <!-- Modal de Login/Registro -->
-    <div id="auth-modal" class="fixed inset-0 bg-black/80 flex items-center justify-center z-50 hidden backdrop-blur-sm">
+    <div id="auth-modal" class="fixed inset-0 bg-black/80 flex items-center justify-center z-50 hidden backdrop-blur-sm" onclick="if(event.target === this) window.closeModal()">
         <div class="bg-gray-800 p-8 rounded-xl shadow-[0_0_30px_rgba(34,197,94,0.15)] max-w-sm w-full border border-gray-700 relative">
             <button onclick="window.closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white text-xl">&times;</button>
             <h2 id="modal-title" class="text-2xl font-bold text-center mb-6 text-white">Entrar</h2>
@@ -199,7 +199,7 @@
     </div>
 
     <!-- Modal de Aceitar Troca -->
-    <div id="trade-accept-modal" class="fixed inset-0 bg-black/90 flex items-center justify-center z-[90] hidden backdrop-blur-sm p-4">
+    <div id="trade-accept-modal" class="fixed inset-0 bg-black/90 flex items-center justify-center z-[90] hidden backdrop-blur-sm p-4" onclick="if(event.target === this) this.classList.add('hidden')">
         <div class="bg-gray-800 p-6 rounded-xl shadow-2xl max-w-lg w-full border border-green-500/50 flex flex-col max-h-[90vh]">
             <h2 class="text-xl font-bold text-green-400 mb-2">Escolha as cartas para enviar</h2>
             <p id="trade-accept-desc" class="text-sm text-gray-400 mb-4">Abaixo estão listadas apenas as cartas que você tem e que o jogador ainda não possui.</p>
@@ -214,7 +214,7 @@
     </div>
 
     <!-- Modal de Detalhes da Carta -->
-    <div id="card-detail-modal" class="fixed inset-0 bg-black/90 flex flex-col items-center justify-center z-[110] hidden backdrop-blur-md p-4 pt-16 md:pt-4">
+    <div id="card-detail-modal" class="fixed inset-0 bg-black/90 flex flex-col items-center justify-center z-[110] hidden backdrop-blur-md p-4 pt-16 md:pt-4" onclick="if(event.target === this) window.closeCardDetail()">
         <button onclick="window.closeCardDetail()" class="fixed top-4 right-4 md:top-8 md:right-8 text-gray-300 hover:text-white z-[120] w-12 h-12 rounded-full bg-gray-900 border-2 border-gray-600 flex items-center justify-center transition hover:bg-red-600 hover:border-red-400 shadow-2xl">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -262,7 +262,7 @@
         <div id="achiev-booster-pack" class="pack cursor-pointer" onclick="window.triggerAchievPackOpening()">
             <div class="pack-cards-bg shadow-inner"></div>
             <div class="pack-top"></div>
-            <div class="pack-bottom flex-col gap-3 relative overflow-hidden">
+            <div class="pack-bottom flex-col gap-3 overflow-hidden">
                 <div id="achiev-pack-bg" class="absolute inset-0 bg-gradient-to-t from-red-600/30 to-transparent hidden"></div>
                 
                 <!-- Ícone Shuriken (Para Premium) -->
