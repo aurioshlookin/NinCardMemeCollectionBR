@@ -190,6 +190,7 @@
     <button onclick="window.switchTab('explore')" id="tab-explore" class="px-6 py-3 font-semibold tab-active hover:bg-gray-700 transition text-yellow-500 border-b-2 border-yellow-500">Comunidade 🔍</button>
     <button onclick="window.switchTab('gacha')" id="tab-gacha" class="hidden px-6 py-3 font-semibold tab-inactive hover:bg-gray-700 transition border-b-2 border-transparent">Roleta</button>
     <button onclick="window.switchTab('album')" id="tab-album" class="hidden px-6 py-3 font-semibold tab-inactive hover:bg-gray-700 transition border-b-2 border-transparent">Meu Álbum</button>
+    <button onclick="window.switchTab('rarity')" id="tab-rarity" class="hidden px-6 py-3 font-semibold tab-inactive hover:bg-gray-700 transition text-purple-400 border-b-2 border-transparent">Raridade 📊</button>
     <button onclick="window.switchTab('achievements')" id="tab-achievements" class="hidden px-6 py-3 font-semibold tab-inactive hover:bg-gray-700 transition text-blue-400 border-b-2 border-transparent">Conquistas 🏆</button>
     <button onclick="window.switchTab('trade')" id="tab-trade" class="hidden px-6 py-3 font-semibold tab-inactive hover:bg-gray-700 transition text-green-500 border-b-2 border-transparent">Trocas 🤝</button>
     <button onclick="window.switchTab('admin')" id="tab-admin" class="hidden px-6 py-3 font-semibold tab-inactive hover:bg-gray-700 transition text-red-500 border-b-2 border-transparent">⚙️ Painel Admin</button>
@@ -464,6 +465,22 @@
           VOLTAR PARA OS PACOTES
         </button>
       </div>
+    </section>
+
+    <section id="section-rarity" class="w-full max-w-6xl hidden flex-col gap-6">
+      <div class="flex flex-col md:flex-row justify-between items-center gap-4 bg-gray-800 p-4 rounded-xl border border-gray-700 shadow-md">
+        <div class="flex items-center gap-3">
+          <h2 class="text-2xl font-bold text-purple-400">Cartas Mais Raras (Global) 📊</h2>
+          <span class="text-xs bg-gray-900 text-gray-400 px-2 py-1 rounded border border-gray-600">Baseado em <span id="rarity-total-players" class="font-bold text-purple-400">0</span> jogadores</span>
+        </div>
+        <div>
+          <button onclick="window.refreshRarity()" class="bg-purple-600 hover:bg-purple-500 text-white font-bold py-2 px-6 rounded-lg transition text-sm shadow-md border border-purple-400">🔄 Atualizar Estatísticas</button>
+        </div>
+      </div>
+      
+      <div id="rarity-loading" class="text-center p-8 text-gray-400 hidden animate-pulse">Calculando estatísticas globais e acessando coleções...</div>
+      
+      <div id="rarity-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6"></div>
     </section>
 
     <section id="section-achievements" class="w-full max-w-5xl hidden flex-col gap-8">
@@ -860,20 +877,21 @@
       }
     };
 
-    window.switchTab = (tabName) => {
-      ['gacha', 'album', 'explore', 'trade', 'admin', 'achievements'].forEach(t => {
+    window.switchTab = async (tabName) => {
+      ['gacha', 'album', 'explore', 'trade', 'admin', 'achievements', 'rarity'].forEach(t => {
         const sec = document.getElementById(`section-${t}`);
         const btn = document.getElementById(`tab-${t}`);
         if(!btn || !sec) return;
 
         if (t === tabName) {
           sec.classList.remove('hidden'); sec.classList.add('flex');
-          btn.classList.remove('tab-inactive', 'text-yellow-600', 'text-green-500', 'text-red-600', 'text-blue-400', 'border-transparent');
+          btn.classList.remove('tab-inactive', 'text-yellow-600', 'text-green-500', 'text-red-600', 'text-blue-400', 'text-purple-400', 'border-transparent');
           btn.classList.add('tab-active');
           if(t === 'explore') btn.classList.add('text-yellow-500', 'border-yellow-500');
           if(t === 'trade') btn.classList.add('text-green-500', 'border-green-500');
           if(t === 'admin') btn.classList.add('text-red-500', 'border-red-500');
           if(t === 'achievements') btn.classList.add('text-blue-400', 'border-blue-400');
+          if(t === 'rarity') btn.classList.add('text-purple-400', 'border-purple-400');
 
           if (t === 'explore') {
             if (window.loadGlobalStats) window.loadGlobalStats(); 
@@ -894,14 +912,28 @@
           if (t === 'achievements' && window.renderAchievements) window.renderAchievements();
         } else {
           sec.classList.add('hidden'); sec.classList.remove('flex');
-          btn.classList.remove('tab-active', 'text-yellow-500', 'border-yellow-500', 'text-green-500', 'border-green-500', 'text-red-500', 'border-red-500', 'text-blue-400', 'border-blue-400');
+          btn.classList.remove('tab-active', 'text-yellow-500', 'border-yellow-500', 'text-green-500', 'border-green-500', 'text-red-500', 'border-red-500', 'text-blue-400', 'border-blue-400', 'text-purple-400', 'border-purple-400');
           btn.classList.add('tab-inactive', 'border-transparent');
           if(t === 'explore') btn.classList.add('text-yellow-600');
           if(t === 'trade') btn.classList.add('text-green-500');
           if(t === 'admin') btn.classList.add('text-red-600');
           if(t === 'achievements') btn.classList.add('text-blue-400');
+          if(t === 'rarity') btn.classList.add('text-purple-400');
         }
       });
+
+      if (tabName === 'rarity') {
+        const rarityLoading = document.getElementById('rarity-loading');
+        const rarityGrid = document.getElementById('rarity-grid');
+        if (!window.allPlayersCache || window.allPlayersCache.length === 0) {
+          if (rarityLoading) rarityLoading.classList.remove('hidden');
+          if (rarityGrid) rarityGrid.classList.add('hidden');
+          await window.loadAllPlayers(false, true);
+        }
+        if (rarityLoading) rarityLoading.classList.add('hidden');
+        if (rarityGrid) rarityGrid.classList.remove('hidden');
+        if (window.renderRarityBoard) window.renderRarityBoard();
+      }
     };
 
     window.setAlbumViewMode = (mode) => {
@@ -1288,6 +1320,9 @@
         window.updateTradeOptions();
         window.renderAchievements();
         window.renderTradeBoard();
+        if(!document.getElementById('section-rarity').classList.contains('hidden')){
+          window.renderRarityBoard();
+        }
       }
     };
 
@@ -1509,11 +1544,13 @@
         
         const tabGacha = document.getElementById('tab-gacha');
         const tabAlbum = document.getElementById('tab-album');
+        const tabRarity = document.getElementById('tab-rarity');
         const tabTrade = document.getElementById('tab-trade');
         const tabAchievements = document.getElementById('tab-achievements');
 
         if (tabGacha) tabGacha.classList.remove('hidden');
         if (tabAlbum) tabAlbum.classList.remove('hidden');
+        if (tabRarity) tabRarity.classList.remove('hidden');
         if (tabTrade) tabTrade.classList.remove('hidden');
         if (tabAchievements) tabAchievements.classList.remove('hidden');
 
@@ -1554,6 +1591,9 @@
             window.updateTradeLimitsUI(); 
             window.renderAchievements();
             window.renderNotifications(userData.notifications);
+            if(!document.getElementById('section-rarity').classList.contains('hidden')){
+               window.renderRarityBoard();
+            }
 
             const tabAdmin = document.getElementById('tab-admin');
             if (userData.role === 'admin') {
@@ -1573,6 +1613,7 @@
         const tabAchievements = document.getElementById('tab-achievements');
         const tabGacha = document.getElementById('tab-gacha');
         const tabAlbum = document.getElementById('tab-album');
+        const tabRarity = document.getElementById('tab-rarity');
 
         if (loggedOutView) loggedOutView.classList.remove('hidden');
         if (loggedInView) { loggedInView.classList.add('hidden'); loggedInView.classList.remove('flex'); }
@@ -1581,6 +1622,7 @@
         if (tabAchievements) tabAchievements.classList.add('hidden');
         if (tabGacha) tabGacha.classList.add('hidden');
         if (tabAlbum) tabAlbum.classList.add('hidden');
+        if (tabRarity) tabRarity.classList.add('hidden');
         
         if(unsubUser) { unsubUser(); unsubUser = null; }
         window.applyGlobalSettingsUI(); 
@@ -2462,27 +2504,28 @@
       }
     };
 
-    window.loadAllPlayers = async (forceRefresh = false) => {
+    window.loadAllPlayers = async (forceRefresh = false, silent = false) => {
       const errorEl = document.getElementById('explore-error');
       const loadingEl = document.getElementById('loading-players');
       const tbody = document.getElementById('players-table-body');
       const tableContainer = document.getElementById('explore-table-container');
       const searchArea = document.getElementById('explore-search-area');
       
-      if(errorEl) errorEl.classList.add('hidden');
-      if(tableContainer) tableContainer.classList.remove('hidden');
-      if(searchArea) { searchArea.classList.remove('hidden'); searchArea.classList.add('flex'); }
+      if (!silent) {
+        if(errorEl) errorEl.classList.add('hidden');
+        if(tableContainer) tableContainer.classList.remove('hidden');
+        if(searchArea) { searchArea.classList.remove('hidden'); searchArea.classList.add('flex'); }
+        if(tbody) tbody.innerHTML = '';
+        if(loadingEl) loadingEl.classList.remove('hidden');
+      }
       
       const now = Date.now();
       const lastFetch = localStorage.getItem('community_fetch_time');
       
       if (!forceRefresh && lastFetch && (now - lastFetch < 4 * 60 * 60 * 1000) && window.allPlayersCache.length > 0) {
-        window.renderPlayersTable(window.allPlayersCache);
+        if (!silent) window.renderPlayersTable(window.allPlayersCache);
         return;
       }
-
-      if(tbody) tbody.innerHTML = '';
-      if(loadingEl) loadingEl.classList.remove('hidden');
 
       try {
         const querySnapshot = await getDocs(collection(db, "users"));
@@ -2500,14 +2543,14 @@
         });
         
         localStorage.setItem('community_fetch_time', now);
-        window.renderPlayersTable(window.allPlayersCache);
+        if (!silent) window.renderPlayersTable(window.allPlayersCache);
       } catch (err) {
-        if(errorEl) {
+        if(!silent && errorEl) {
           errorEl.innerText = "Erro ao carregar ranking. Tente novamente.";
           errorEl.classList.remove('hidden');
         }
       } finally {
-        if(loadingEl) loadingEl.classList.add('hidden');
+        if(!silent && loadingEl) loadingEl.classList.add('hidden');
       }
     };
 
@@ -2594,6 +2637,84 @@
       }
       if (exploreTable) exploreTable.classList.remove('hidden');
       if (searchArea) { searchArea.classList.remove('hidden'); searchArea.classList.add('flex'); }
+    };
+
+    window.refreshRarity = async () => {
+      document.getElementById('rarity-loading').classList.remove('hidden');
+      document.getElementById('rarity-grid').classList.add('hidden');
+      await window.loadAllPlayers(true, true);
+      document.getElementById('rarity-loading').classList.add('hidden');
+      document.getElementById('rarity-grid').classList.remove('hidden');
+      window.renderRarityBoard();
+    };
+
+    window.renderRarityBoard = () => {
+      const grid = document.getElementById('rarity-grid');
+      const countEl = document.getElementById('rarity-total-players');
+      if (!grid) return;
+
+      const totalPlayers = window.allPlayersCache.length;
+      if (countEl) countEl.innerText = totalPlayers;
+
+      if (totalPlayers === 0) {
+        grid.innerHTML = '<p class="text-gray-400 col-span-full text-center">Nenhum dado de jogador encontrado no momento.</p>';
+        return;
+      }
+
+      const ownershipStats = {};
+      window.cardDatabase.forEach(c => ownershipStats[c.id] = 0);
+
+      window.allPlayersCache.forEach(player => {
+        const inv = player.inventory || {};
+        Object.keys(inv).forEach(cardId => {
+          if (inv[cardId] > 0 && ownershipStats[cardId] !== undefined) {
+            ownershipStats[cardId]++;
+          }
+        });
+      });
+
+      const statsArray = window.cardDatabase.map(c => {
+        const ownedCount = ownershipStats[c.id];
+        const percent = ((ownedCount / totalPlayers) * 100).toFixed(1);
+        return { ...c, ownedBy: ownedCount, percent: percent };
+      });
+
+      statsArray.sort((a, b) => b.ownedBy - a.ownedBy);
+
+      grid.innerHTML = '';
+      const myInv = userData.inventory || {};
+
+      statsArray.forEach(stat => {
+        const iOwnIt = (myInv[stat.id] || 0) > 0;
+        const wrapper = document.createElement('div');
+        wrapper.className = "flex flex-col items-center gap-3";
+
+        if (iOwnIt) {
+          wrapper.innerHTML = `
+            <div class="w-full aspect-[2/3] relative rounded-xl transition transform hover:scale-105 shadow-lg cursor-pointer" onclick="window.showCardDetail('${stat.id}')">
+              <div id="rarity-card-${stat.id}" class="w-full h-full"></div>
+            </div>
+            <div class="bg-gray-800 border border-gray-600 rounded-lg p-2 w-full text-center shadow-inner">
+              <span class="text-sm text-gray-200 font-bold block">${stat.ownedBy} <span class="text-[10px] text-gray-500 font-normal">/ ${totalPlayers} jogadores</span></span>
+              <div class="text-xs font-bold text-green-400 mt-1">${stat.percent}% possuem</div>
+            </div>
+          `;
+          grid.appendChild(wrapper);
+          window.renderCardHTML(`rarity-card-${stat.id}`, stat, false, true, myInv);
+        } else {
+          wrapper.innerHTML = `
+            <div class="w-full aspect-[2/3] relative rounded-xl transition shadow-lg bg-gray-800 border-2 border-gray-700 flex flex-col items-center justify-center opacity-70">
+              <span class="text-gray-500 font-bold text-5xl mb-3 drop-shadow-md">?</span>
+              <span class="text-[10px] text-gray-400 font-bold bg-gray-900 px-2 py-1 rounded border border-gray-700 uppercase tracking-widest">Não Descoberta</span>
+            </div>
+            <div class="bg-gray-800 border border-gray-600 rounded-lg p-2 w-full text-center shadow-inner">
+              <span class="text-sm text-gray-200 font-bold block">${stat.ownedBy} <span class="text-[10px] text-gray-500 font-normal">/ ${totalPlayers} jogadores</span></span>
+              <div class="text-xs font-bold text-purple-400 mt-1">${stat.percent}% possuem</div>
+            </div>
+          `;
+          grid.appendChild(wrapper);
+        }
+      });
     };
 
     window.loadTradesBoard = async (manualClick = false) => {
