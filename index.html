@@ -824,6 +824,7 @@
         window.currentAlbumSort = 'tier-desc';
         window.currentAlbumView = 'grid';
         window.adminCardState = { transX: 0, transY: 0 }; 
+        window.allPlayersCache = []; // Declarado globalmente aqui!
         
         window.showModal = (mode) => {
             window.authMode = mode;
@@ -884,7 +885,7 @@
                         if (window.loadGlobalStats) window.loadGlobalStats(); 
                         const searchArea = document.getElementById('explore-search-area');
                         const tableContainer = document.getElementById('explore-table-container');
-                        if (allPlayersCache && allPlayersCache.length > 0) {
+                        if (window.allPlayersCache && window.allPlayersCache.length > 0) {
                              if(searchArea) searchArea.classList.remove('hidden');
                              if(searchArea) searchArea.classList.add('flex');
                              if(tableContainer) tableContainer.classList.remove('hidden');
@@ -1730,7 +1731,7 @@
             isOpeningAchiev = true;
             
             const btn = document.getElementById(`btn-claim-${achievId}`);
-            if(btn) { btn.disabled = true; btn.innerText = "Processando..."; }
+            if(btn) { btn.disabled = true; btn.innerText = "A Processar..."; }
 
             const newClaimed = { ...userData.claimedAchievements };
             if (achievId === 'tens') {
@@ -2476,7 +2477,6 @@
         };
 
         // --- RANKING GERAL OTIMIZADO (IDEIA B - ATUALIZAÇÃO MANUAL APENAS) ---
-        let allPlayersCache = [];
         window.loadAllPlayers = async (forceRefresh = false) => {
             const errorEl = document.getElementById('explore-error');
             const loadingEl = document.getElementById('loading-players');
@@ -2492,8 +2492,8 @@
             const lastFetch = localStorage.getItem('community_fetch_time');
             
             // CACHE AUMENTADO PARA 4 HORAS!
-            if (!forceRefresh && lastFetch && (now - lastFetch < 4 * 60 * 60 * 1000) && allPlayersCache.length > 0) {
-                window.renderPlayersTable(allPlayersCache);
+            if (!forceRefresh && lastFetch && (now - lastFetch < 4 * 60 * 60 * 1000) && window.allPlayersCache.length > 0) {
+                window.renderPlayersTable(window.allPlayersCache);
                 return;
             }
 
@@ -2502,21 +2502,21 @@
 
             try {
                 const querySnapshot = await getDocs(collection(db, "users"));
-                allPlayersCache = [];
+                window.allPlayersCache = [];
                 querySnapshot.forEach(doc => {
                     let data = doc.data();
                     data.inventory = data.inventory || {};
-                    allPlayersCache.push({ uid: doc.id, ...data });
+                    window.allPlayersCache.push({ uid: doc.id, ...data });
                 });
                 
-                allPlayersCache.sort((a, b) => {
+                window.allPlayersCache.sort((a, b) => {
                     let stA = 0, stB = 0;
                     window.cardDatabase.forEach(c => { if(a.inventory[c.id]>0) stA++; if(b.inventory[c.id]>0) stB++; });
                     return stB - stA;
                 });
                 
                 localStorage.setItem('community_fetch_time', now);
-                window.renderPlayersTable(allPlayersCache);
+                window.renderPlayersTable(window.allPlayersCache);
             } catch (err) {
                 if(errorEl) {
                     errorEl.innerText = "Erro ao carregar ranking. Pode ter excedido a quota do Firebase.";
@@ -2570,12 +2570,12 @@
             const inputEl = document.getElementById('search-input');
             if(!inputEl) return;
             const searchVal = inputEl.value.trim().toLowerCase();
-            if (!searchVal) return window.renderPlayersTable(allPlayersCache);
-            window.renderPlayersTable(allPlayersCache.filter(p => p.displayNameLower && p.displayNameLower.includes(searchVal)));
+            if (!searchVal) return window.renderPlayersTable(window.allPlayersCache);
+            window.renderPlayersTable(window.allPlayersCache.filter(p => p.displayNameLower && p.displayNameLower.includes(searchVal)));
         };
 
         window.viewPlayerAlbum = (uid) => {
-            const player = allPlayersCache.find(p => p.uid === uid);
+            const player = window.allPlayersCache.find(p => p.uid === uid);
             if (!player) return;
             
             const container = document.getElementById('explore-table-container');
