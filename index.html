@@ -317,21 +317,15 @@
         </div>
       </div>
       
-      <div class="flex flex-col sm:flex-row w-full gap-4 justify-between items-center bg-gray-900/50 p-4 rounded-xl border border-yellow-500/30">
-        <p class="text-sm text-yellow-400 font-bold text-center sm:text-left">
-          ⚠️ O ranking exige carregamento manual e tem cache de 4 horas.
-        </p>
-        <button onclick="window.loadAllPlayers(true)" class="w-full sm:w-auto bg-yellow-600 hover:bg-yellow-500 text-black font-bold px-6 py-3 rounded-lg transition shadow-[0_0_15px_rgba(250,204,21,0.3)] transform hover:scale-105">
-          CARREGAR RANKING GLOBAL
+      <div id="explore-search-area" class="w-full flex flex-col sm:flex-row gap-4 justify-between items-center bg-gray-900/50 p-4 rounded-xl border border-gray-700 shadow-inner">
+        <button onclick="window.loadAllPlayers(true)" class="w-full sm:w-auto bg-gray-700 hover:bg-gray-600 text-gray-300 font-bold px-4 py-2 rounded-lg transition text-sm flex items-center justify-center gap-2 border border-gray-600 shadow-md">
+          <span>🔄 Atualizar Lista</span>
         </button>
-      </div>
-      
-      <div id="explore-search-area" class="hidden w-full gap-2 justify-end">
-        <input type="text" id="search-input" oninput="window.filterPlayers()" placeholder="Nick do Ninja..." class="w-full sm:w-64 bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-green-500">
+        <input type="text" id="search-input" oninput="window.filterPlayers()" placeholder="Nick do Ninja..." class="w-full sm:w-64 bg-gray-800 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-green-500">
       </div>
       
       <p id="explore-error" class="text-red-400 text-center hidden font-bold"></p>
-      <div id="explore-table-container" class="w-full overflow-x-auto bg-gray-800 rounded-xl border border-gray-700 shadow-md hidden">
+      <div id="explore-table-container" class="w-full overflow-x-auto bg-gray-800 rounded-xl border border-gray-700 shadow-md">
         <table class="w-full text-left border-collapse whitespace-nowrap">
           <thead>
             <tr class="bg-gray-900 text-gray-400 text-sm border-b border-gray-700">
@@ -350,6 +344,12 @@
           <tbody id="players-table-body" class="divide-y divide-gray-700"></tbody>
         </table>
         <div id="loading-players" class="p-8 text-center text-gray-400 hidden">Carregando lista de ninjas...</div>
+        
+        <div id="explore-pagination" class="w-full flex justify-between items-center p-4 border-t border-gray-700 hidden bg-gray-800 rounded-b-xl">
+          <button onclick="window.changeExplorePage(-1)" id="btn-prev-page" class="bg-gray-700 hover:bg-gray-600 border border-gray-600 text-white px-4 py-2 rounded disabled:opacity-50 transition font-bold text-sm shadow">Anterior</button>
+          <span id="explore-page-info" class="text-gray-400 font-bold text-sm bg-gray-900 px-3 py-1 rounded-full border border-gray-700">Página 1 de 1</span>
+          <button onclick="window.changeExplorePage(1)" id="btn-next-page" class="bg-gray-700 hover:bg-gray-600 border border-gray-600 text-white px-4 py-2 rounded disabled:opacity-50 transition font-bold text-sm shadow">Próxima</button>
+        </div>
       </div>
       
       <div id="explore-results" class="hidden flex-col gap-6 w-full">
@@ -804,8 +804,15 @@
     window.currentAlbumView = 'grid';
     window.adminCardState = { transX: 0, transY: 0 }; 
     window.allPlayersCache = []; 
+    window.currentFilteredPlayers = [];
+    window.currentExplorePage = 1;
+    window.explorePlayersPerPage = 10;
     window.showOnlyOwned = false;
     window.currentViewedPlayerInventory = null;
+    window.lastSyncDataStr = "";
+
+    // Stub para ser sobrescrito pelo module script
+    window.syncLeaderboard = () => {};
 
     window.getTradePeriod = () => {
       const d = new Date();
@@ -884,13 +891,7 @@
 
           if (t === 'explore') {
             if (window.loadGlobalStats) window.loadGlobalStats(); 
-            const searchArea = document.getElementById('explore-search-area');
-            const tableContainer = document.getElementById('explore-table-container');
-            if (window.allPlayersCache && window.allPlayersCache.length > 0) {
-              if(searchArea) searchArea.classList.remove('hidden');
-              if(searchArea) searchArea.classList.add('flex');
-              if(tableContainer) tableContainer.classList.remove('hidden');
-            }
+            if (window.loadAllPlayers) window.loadAllPlayers(false);
           }
           if (t === 'trade') {
             if (window.loadTradesBoard) window.loadTradesBoard();
@@ -1111,8 +1112,11 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
+    window.currentUser = null;
+    window.userData = { pullsAvailable: 0, premiumPullsAvailable: 0, inventory: {}, role: 'player', tradesToday: 0, lastTradeDate: "", lastPullTimestamp: null, totalPacksOpened: 0, totalTradesCompleted: 0, claimedAchievements: {}, notifications: [] };
     let currentUser = null;
-    let userData = { pullsAvailable: 0, premiumPullsAvailable: 0, inventory: {}, role: 'player', tradesToday: 0, lastTradeDate: "", lastPullTimestamp: null, totalPacksOpened: 0, totalTradesCompleted: 0, claimedAchievements: {}, notifications: [] };
+    let userData = window.userData;
+    
     let globalSettings = { registrationsOpen: true, cardsVersion: 0, maintenanceMode: false };
     let unsubUser = null; 
     let allOpenTrades = [];
@@ -1127,6 +1131,24 @@
     const TIER_ORDER = ['SS', 'S', 'A', 'B', 'C'];
     let currentOfferQty = 1; 
     let currentReqQty = 1;
+
+    window.syncLeaderboard = async () => {
+      if (!window.currentUser || !window.userData) return;
+      const userSummary = {
+         displayName: window.userData.displayName,
+         displayNameLower: window.userData.displayNameLower,
+         totalPacksOpened: window.userData.totalPacksOpened || 0,
+         totalTradesCompleted: window.userData.totalTradesCompleted || 0,
+         inventory: window.userData.inventory || {}
+      };
+      try {
+         await setDoc(doc(db, "community", "leaderboard"), {
+            players: { [window.currentUser.uid]: userSummary }
+         }, { merge: true });
+      } catch (e) {
+         console.warn("Sync do Leaderboard falhou", e);
+      }
+    };
 
     onSnapshot(doc(db, "settings", "global"), (docSnap) => {
       if (docSnap.exists()) {
@@ -1520,6 +1542,8 @@
 
     onAuthStateChanged(auth, (user) => {
       currentUser = user;
+      window.currentUser = user;
+      
       if (user) {
         const loggedOutView = document.getElementById('logged-out-view');
         const loggedInView = document.getElementById('logged-in-view');
@@ -1551,6 +1575,7 @@
         unsubUser = onSnapshot(doc(db, "users", user.uid), async (docSnap) => {
           if (docSnap.exists()) {
             userData = docSnap.data();
+            window.userData = userData;
             
             userData.inventory = userData.inventory || {};
             userData.claimedAchievements = userData.claimedAchievements || {};
@@ -1590,6 +1615,14 @@
               window.suggestNextCardNumber();
             } else {
               if (tabAdmin) tabAdmin.classList.add('hidden');
+            }
+            
+            // Sincroniza com o documento único do Placar sempre que o inventário mudar
+            const currentSyncData = { p: userData.totalPacksOpened, t: userData.totalTradesCompleted, i: userData.inventory };
+            const currentSyncStr = JSON.stringify(currentSyncData);
+            if (currentSyncStr !== window.lastSyncDataStr) {
+               window.lastSyncDataStr = currentSyncStr;
+               window.syncLeaderboard();
             }
           }
         });
@@ -2496,44 +2529,78 @@
     window.loadAllPlayers = async (forceRefresh = false, silent = false) => {
       const errorEl = document.getElementById('explore-error');
       const loadingEl = document.getElementById('loading-players');
-      const tbody = document.getElementById('players-table-body');
       const tableContainer = document.getElementById('explore-table-container');
-      const searchArea = document.getElementById('explore-search-area');
       
       if (!silent) {
         if(errorEl) errorEl.classList.add('hidden');
         if(tableContainer) tableContainer.classList.remove('hidden');
-        if(searchArea) { searchArea.classList.remove('hidden'); searchArea.classList.add('flex'); }
-        if(tbody) tbody.innerHTML = '';
         if(loadingEl) loadingEl.classList.remove('hidden');
       }
       
       const now = Date.now();
       const lastFetch = localStorage.getItem('community_fetch_time');
       
-      if (!forceRefresh && lastFetch && (now - lastFetch < 4 * 60 * 60 * 1000) && window.allPlayersCache.length > 0) {
-        if (!silent) window.renderPlayersTable(window.allPlayersCache);
+      if (!forceRefresh && lastFetch && (now - lastFetch < 2 * 60 * 1000) && window.allPlayersCache.length > 0) {
+        if (!silent) {
+          window.currentFilteredPlayers = [...window.allPlayersCache];
+          window.currentExplorePage = 1;
+          window.renderPlayersTable();
+        }
+        if(!silent && loadingEl) loadingEl.classList.add('hidden');
         return;
       }
 
       try {
-        const querySnapshot = await getDocs(collection(db, "users"));
-        window.allPlayersCache = [];
-        querySnapshot.forEach(doc => {
-          let data = doc.data();
-          data.inventory = data.inventory || {};
-          window.allPlayersCache.push({ uid: doc.id, ...data });
-        });
+        if (window.currentUser && window.userData && window.userData.role === 'admin' && forceRefresh) {
+            const querySnapshot = await getDocs(collection(db, "users"));
+            const playersData = {};
+            window.allPlayersCache = [];
+            querySnapshot.forEach(docSnap => {
+               const d = docSnap.data();
+               d.inventory = d.inventory || {};
+               playersData[docSnap.id] = {
+                  displayName: d.displayName,
+                  displayNameLower: d.displayNameLower,
+                  totalPacksOpened: d.totalPacksOpened || 0,
+                  totalTradesCompleted: d.totalTradesCompleted || 0,
+                  inventory: d.inventory
+               };
+               window.allPlayersCache.push({ uid: docSnap.id, ...d });
+            });
+            await setDoc(doc(db, "community", "leaderboard"), { players: playersData }, { merge: true });
+        } else {
+            const lbSnap = await getDoc(doc(db, "community", "leaderboard"));
+            window.allPlayersCache = [];
+            if (lbSnap.exists() && lbSnap.data().players) {
+                const pData = lbSnap.data().players;
+                Object.keys(pData).forEach(uid => {
+                    window.allPlayersCache.push({ uid: uid, ...pData[uid] });
+                });
+            } else if (!silent) {
+                 const querySnapshot = await getDocs(collection(db, "users"));
+                 querySnapshot.forEach(docSnap => {
+                   let data = docSnap.data();
+                   data.inventory = data.inventory || {};
+                   window.allPlayersCache.push({ uid: docSnap.id, ...data });
+                 });
+            }
+        }
         
         window.allPlayersCache.sort((a, b) => {
           let stA = 0, stB = 0;
-          window.cardDatabase.forEach(c => { if(a.inventory[c.id]>0) stA++; if(b.inventory[c.id]>0) stB++; });
+          window.cardDatabase.forEach(c => { if(a.inventory && a.inventory[c.id]>0) stA++; if(b.inventory && b.inventory[c.id]>0) stB++; });
           return stB - stA;
         });
         
         localStorage.setItem('community_fetch_time', now);
-        if (!silent) window.renderPlayersTable(window.allPlayersCache);
+        
+        if (!silent) {
+          window.currentFilteredPlayers = [...window.allPlayersCache];
+          window.currentExplorePage = 1;
+          window.renderPlayersTable();
+        }
       } catch (err) {
+        console.error(err);
         if(!silent && errorEl) {
           errorEl.innerText = "Erro ao carregar ranking. Tente novamente.";
           errorEl.classList.remove('hidden');
@@ -2543,14 +2610,37 @@
       }
     };
 
-    window.renderPlayersTable = (players) => {
+    window.renderPlayersTable = () => {
+      const players = window.currentFilteredPlayers || [];
       const tbody = document.getElementById('players-table-body');
+      const pagContainer = document.getElementById('explore-pagination');
+      const pageInfo = document.getElementById('explore-page-info');
+      const btnPrev = document.getElementById('btn-prev-page');
+      const btnNext = document.getElementById('btn-next-page');
+
       if(!tbody) return;
       
       tbody.innerHTML = '';
-      if (players.length === 0) { tbody.innerHTML = `<tr><td colspan="10" class="p-4 text-center text-gray-500">Nenhum ninja encontrado.</td></tr>`; return; }
+      if (players.length === 0) { 
+        tbody.innerHTML = `<tr><td colspan="10" class="p-4 text-center text-gray-500">Nenhum ninja encontrado.</td></tr>`; 
+        if(pagContainer) pagContainer.classList.add('hidden');
+        return; 
+      }
 
-      players.forEach(player => {
+      if(pagContainer) pagContainer.classList.remove('hidden');
+
+      const totalPages = Math.ceil(players.length / window.explorePlayersPerPage);
+      if (window.currentExplorePage > totalPages) window.currentExplorePage = totalPages;
+      if (window.currentExplorePage < 1) window.currentExplorePage = 1;
+
+      if (pageInfo) pageInfo.innerText = `Página ${window.currentExplorePage} de ${totalPages}`;
+      if (btnPrev) btnPrev.disabled = window.currentExplorePage === 1;
+      if (btnNext) btnNext.disabled = window.currentExplorePage === totalPages;
+
+      const startIndex = (window.currentExplorePage - 1) * window.explorePlayersPerPage;
+      const paginatedPlayers = players.slice(startIndex, startIndex + window.explorePlayersPerPage);
+
+      paginatedPlayers.forEach((player, index) => {
         let stats = { Total: 0, C: 0, B: 0, A: 0, S: 0, SS: 0 };
         const inv = player.inventory || {};
         window.cardDatabase.forEach(c => { if(inv[c.id]>0) { stats.Total++; stats[c.tier]++; } });
@@ -2558,10 +2648,17 @@
         const medalHTML = window.getUserMedals(inv);
         const packsOpened = player.totalPacksOpened || 0;
         const tradesCompleted = player.totalTradesCompleted || 0;
+        
+        const rankPos = startIndex + index + 1;
+        let rankMedal = `<span class="text-gray-500 font-black text-sm w-8 text-center bg-gray-900 rounded-lg py-1 border border-gray-700">#${rankPos}</span>`;
+        if (rankPos === 1) rankMedal = `<span class="text-yellow-400 font-black text-xl w-8 text-center drop-shadow-md" title="1º Lugar">🥇</span>`;
+        if (rankPos === 2) rankMedal = `<span class="text-gray-300 font-black text-xl w-8 text-center drop-shadow-md" title="2º Lugar">🥈</span>`;
+        if (rankPos === 3) rankMedal = `<span class="text-orange-400 font-black text-xl w-8 text-center drop-shadow-md" title="3º Lugar">🥉</span>`;
 
         tbody.innerHTML += `
           <tr class="hover:bg-gray-700 transition duration-150 ease-in-out">
-            <td class="p-4 flex items-center gap-3 min-w-[150px]">
+            <td class="p-4 flex items-center gap-3 min-w-[200px]">
+              ${rankMedal}
               <img src="https://api.dicebear.com/7.x/pixel-art/svg?seed=${player.displayName || player.uid}" class="w-8 h-8 rounded-full border border-gray-600 bg-gray-800">
               <span class="font-bold text-white">${player.displayName || 'Ninja Oculto'}</span>
               ${medalHTML ? `<div class="ml-1 cursor-help">${medalHTML}</div>` : ''}
@@ -2581,12 +2678,23 @@
       });
     };
 
+    window.changeExplorePage = (dir) => {
+      window.currentExplorePage += dir;
+      window.renderPlayersTable();
+    };
+
     window.filterPlayers = () => {
       const inputEl = document.getElementById('search-input');
       if(!inputEl) return;
       const searchVal = inputEl.value.trim().toLowerCase();
-      if (!searchVal) return window.renderPlayersTable(window.allPlayersCache);
-      window.renderPlayersTable(window.allPlayersCache.filter(p => p.displayNameLower && p.displayNameLower.includes(searchVal)));
+      
+      if (!searchVal) {
+        window.currentFilteredPlayers = [...window.allPlayersCache];
+      } else {
+        window.currentFilteredPlayers = window.allPlayersCache.filter(p => p.displayNameLower && p.displayNameLower.includes(searchVal));
+      }
+      window.currentExplorePage = 1;
+      window.renderPlayersTable();
     };
 
     window.viewPlayerAlbum = (uid) => {
@@ -3546,69 +3654,56 @@
           const adminNameSizeEl = document.getElementById('admin-name-size');
           const adminDescSizeEl = document.getElementById('admin-desc-size');
 
-          const layoutVal = adminLayoutEl ? adminLayoutEl.value : 'standard';
-
-          const cardData = {
-            name: adminNameEl ? adminNameEl.value : 'Nome da Carta',
-            cardNumber: adminCardNumEl ? adminCardNumEl.value : '000',
-            cardVersion: adminCardVersionEl ? adminCardVersionEl.value : 'Vol.1',
-            tier: adminTierEl ? adminTierEl.value : 'C',
-            layout: layoutVal,
-            desc: adminDescEl ? adminDescEl.value : '',
+          const newCard = {
+            name: adminNameEl.value,
+            cardNumber: adminCardNumEl.value,
+            cardVersion: adminCardVersionEl.value,
+            tier: adminTierEl.value,
+            layout: adminLayoutEl.value,
+            desc: adminDescEl.value,
             img: selectedAdminImage,
-            imageZoom: adminZoomEl ? (parseFloat(adminZoomEl.value) || 1) : 1,
-            imageTransX: window.adminCardState ? window.adminCardState.transX : 0, 
-            imageTransY: window.adminCardState ? window.adminCardState.transY : 0,
-            nameFontSize: adminNameSizeEl ? (parseInt(adminNameSizeEl.value) || (layoutVal === 'full-art' ? 14 : 12)) : (layoutVal === 'full-art' ? 14 : 12),
-            descFontSize: adminDescSizeEl ? (parseInt(adminDescSizeEl.value) || (layoutVal === 'full-art' ? 10 : 9)) : (layoutVal === 'full-art' ? 10 : 9)
+            imageZoom: parseFloat(adminZoomEl.value) || 1,
+            imageTransX: window.adminCardState.transX || 0,
+            imageTransY: window.adminCardState.transY || 0,
+            nameFontSize: parseInt(adminNameSizeEl.value) || 12,
+            descFontSize: parseInt(adminDescSizeEl.value) || 9
           };
 
           if (editingCardId) {
-            await updateDoc(doc(db, "cards", editingCardId), cardData);
-            await updateDoc(doc(db, "settings", "global"), { cardsVersion: Date.now() }); 
-            msg.innerText = "Carta atualizada com sucesso!";
-            editingCardId = null;
-            if(btn) btn.innerText = "CRIAR CARTA E ADICIONAR AO JOGO";
-            const cancelBtn = document.getElementById('admin-cancel-btn');
-            if(cancelBtn) cancelBtn.classList.add('hidden');
+            await updateDoc(doc(db, "cards", editingCardId), newCard);
+            msg.innerText = "Carta editada com sucesso!";
+            window.cancelEdit(); 
           } else {
-            cardData.createdAt = serverTimestamp();
-            await addDoc(collection(db, "cards"), cardData);
-            await updateDoc(doc(db, "settings", "global"), { cardsVersion: Date.now() }); 
-            msg.innerText = "Carta criada!";
+            await addDoc(collection(db, "cards"), newCard);
+            msg.innerText = "Carta criada e adicionada com sucesso!";
+            adminFormGlobal.reset();
+            window.adminCardState = { transX: 0, transY: 0 };
+            selectedAdminImage = "";
+            const grid = document.getElementById('github-images-grid');
+            if(grid) {
+              Array.from(grid.children).forEach(child => child.classList.remove('border-green-500', 'ring-2', 'border-transparent'));
+            }
+            window.suggestNextCardNumber();
+            window.updateAdminPreview();
           }
-          
-          msg.className = "text-center font-bold text-sm mt-2 text-green-400";
-          msg.classList.remove('hidden'); 
-          
-          const adminForm = document.getElementById('admin-form');
-          if(adminForm) adminForm.reset();
-          
-          selectedAdminImage = ""; 
-          if(adminZoomEl) adminZoomEl.value = 1;
-          if(adminNameSizeEl) adminNameSizeEl.value = 12;
-          if(adminDescSizeEl) adminDescSizeEl.value = 9;
-          
-          window.adminCardState = { transX: 0, transY: 0 };
-          
-          if(window.updateAdminPreview) window.updateAdminPreview(); 
-          if(window.loadGitHubImages) window.loadGitHubImages(); 
-          if(window.suggestNextCardNumber) window.suggestNextCardNumber();
-          window.loadCardsCache(); 
 
-        } catch (err) {
-          msg.innerText = "Erro: " + err.message;
+          await updateDoc(doc(db, "settings", "global"), { cardsVersion: Date.now() });
+
+          msg.className = "text-center font-bold text-sm mt-2 text-green-400";
+          msg.classList.remove('hidden');
+          setTimeout(() => msg.classList.add('hidden'), 3000);
+
+        } catch (error) {
+          msg.innerText = "Erro ao processar a carta: " + error.message;
           msg.className = "text-center font-bold text-sm mt-2 text-red-400";
           msg.classList.remove('hidden');
         } finally {
-          if(btn) {
-            btn.disabled = false;
-            if(!editingCardId) btn.innerText = "CRIAR CARTA E ADICIONAR AO JOGO";
-          }
-          setTimeout(() => { if(msg) msg.classList.add('hidden'); }, 5000);
+          btn.disabled = false;
+          btn.innerText = editingCardId ? "SALVAR ALTERAÇÕES" : "CRIAR CARTA E ADICIONAR AO JOGO";
         }
       });
     }
+
   </script>
 </body>
 </html>
