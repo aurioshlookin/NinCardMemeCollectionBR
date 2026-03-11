@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-PT">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -171,7 +171,7 @@
                     <div class="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center overflow-hidden border border-gray-500">
                         <img id="user-avatar" src="" alt="avatar" class="w-full h-full">
                     </div>
-                    <span id="user-display-name" class="text-sm font-semibold hidden sm:inline text-gray-200">Carregando...</span>
+                    <span id="user-display-name" class="text-sm font-semibold hidden sm:inline text-gray-200">A carregar...</span>
                     <button id="btn-logout" class="text-xs text-red-400 hover:text-red-300 ml-2 transition">Sair</button>
                 </div>
             </div>
@@ -196,11 +196,11 @@
             
             <form id="auth-form" class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-300 mb-1">Usuário (Nick no Jogo)</label>
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Utilizador (Nick no Jogo)</label>
                     <input type="text" id="auth-username" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-green-500 transition" placeholder="Ex: Auriosh" required>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-300 mb-1">Senha</label>
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Palavra-passe</label>
                     <input type="password" id="auth-password" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-green-500 transition" required>
                 </div>
                 <p id="auth-error" class="text-red-400 text-sm hidden"></p>
@@ -226,7 +226,7 @@
     <div id="trade-accept-modal" class="fixed inset-0 bg-black/90 flex items-center justify-center z-[90] hidden backdrop-blur-sm p-4" onclick="if(event.target === this) this.classList.add('hidden')">
         <div class="bg-gray-800 p-6 rounded-xl shadow-2xl max-w-5xl w-full border border-green-500/50 flex flex-col max-h-[90vh]">
             <h2 class="text-2xl font-bold text-green-400 mb-2">Escolha as cartas para enviar</h2>
-            <p id="trade-accept-desc" class="text-sm text-gray-400 mb-4">Abaixo estão listadas apenas as cartas <strong class="text-white">repetidas</strong> que você possui e que o jogador ainda não tem.</p>
+            <p id="trade-accept-desc" class="text-sm text-gray-400 mb-4">Abaixo estão listadas apenas as cartas <strong class="text-white">repetidas</strong> que tem e que o jogador ainda não tem.</p>
             
             <div id="trade-accept-grid" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3 overflow-y-auto p-4 bg-gray-900 rounded-lg flex-grow mb-4 border border-gray-700"></div>
             
@@ -279,7 +279,7 @@
 
     <!-- OVERLAY GERAL DE ABERTURA DE PACOTE (USADO PARA CONQUISTAS E INVENTÁRIO) -->
     <div id="achiev-pack-overlay" class="fixed inset-0 bg-black/95 z-[200] hidden flex-col items-center justify-center p-4 backdrop-blur-md">
-        <h2 id="achiev-overlay-title" class="text-3xl font-bold text-white mb-8 drop-shadow-md animate-pulse">Abra sua Recompensa!</h2>
+        <h2 id="achiev-overlay-title" class="text-3xl font-bold text-white mb-8 drop-shadow-md animate-pulse">Abra a sua Recompensa!</h2>
         <div id="achiev-pack-flash" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full h-full bg-white z-[250] pointer-events-none opacity-0 hidden transition-opacity duration-300 rounded-full blur-[80px] mix-blend-overlay"></div>
         
         <!-- O Pacote que será clicado -->
@@ -316,8 +316,8 @@
         <!-- ABA: GACHA -->
         <section id="section-gacha" class="w-full max-w-5xl flex flex-col items-center gap-8">
             <div id="gacha-locked" class="text-center bg-gray-800 p-8 rounded-xl border border-gray-700 w-full shadow-lg">
-                <h3 class="text-2xl font-bold mb-2 text-white">Faça Login para Jogar!</h3>
-                <p class="text-gray-400 mb-4">Você precisa de uma conta para abrir pacotes e salvar sua coleção.</p>
+                <h3 class="text-2xl font-bold mb-2 text-white">Faça Início de Sessão para Jogar!</h3>
+                <p class="text-gray-400 mb-4">Precisa de uma conta para abrir pacotes e guardar a sua coleção.</p>
                 <button onclick="window.showModal('register')" class="bg-green-600 hover:bg-green-500 text-white font-bold py-2 px-6 rounded-lg shadow-lg shadow-green-900/30 transition">Criar Conta Agora</button>
             </div>
 
@@ -358,7 +358,7 @@
                 <!-- ALERTA DE PACOTE PREMIUM NO INVENTÁRIO -->
                 <div id="inventory-premium-alert" class="hidden w-full max-w-md bg-gradient-to-r from-red-900 to-black border-2 border-yellow-400 p-4 rounded-xl shadow-[0_0_30px_rgba(250,204,21,0.3)] relative overflow-hidden flex-col items-center text-center">
                     <div class="absolute top-0 right-0 p-2 opacity-20 text-5xl pointer-events-none">⭐</div>
-                    <h3 class="text-yellow-400 font-black text-lg mb-1 drop-shadow-md uppercase tracking-wider">Você tem Pacotes Premium!</h3>
+                    <h3 class="text-yellow-400 font-black text-lg mb-1 drop-shadow-md uppercase tracking-wider">Tem Pacotes Premium!</h3>
                     <p class="text-gray-300 text-sm mb-4">Adquiridos em eventos ou presentes do Admin.</p>
                     <button onclick="window.openInventoryPremiumPack()" class="bg-yellow-500 hover:bg-yellow-400 text-black font-black py-3 px-8 rounded-full transition shadow-[0_0_15px_rgba(250,204,21,0.5)] transform hover:scale-105">
                         ABRIR PACOTE PREMIUM (<span id="inventory-premium-count">0</span>)
@@ -366,7 +366,7 @@
                 </div>
 
                 <div class="text-center space-y-2">
-                    <h2 class="text-3xl font-bold text-gray-100">Abra seu Pacote!</h2>
+                    <h2 class="text-3xl font-bold text-gray-100">Abra o seu Pacote!</h2>
                     <p class="text-gray-400">Cada pacote traz <span class="text-green-400 font-bold">8 cartas</span>. Escolha <span class="text-green-400 font-bold">2</span> para a sua coleção!</p>
                 </div>
 
@@ -391,7 +391,7 @@
                     <div id="out-of-pulls-container" class="hidden flex-col items-center justify-center bg-gray-800 p-8 rounded-xl border border-gray-700 w-full max-w-md mx-auto shadow-2xl">
                         <div class="text-6xl mb-4 opacity-30">⏳</div>
                         <h3 class="text-2xl font-bold text-gray-200 mb-2">Sem Pacotes Básicos!</h3>
-                        <p class="text-gray-400 text-center mb-6">Sua energia acabou. Aguarde a recarga para voltar a abrir pacotes.</p>
+                        <p class="text-gray-400 text-center mb-6">A sua energia acabou. Aguarde a recarga para voltar a abrir pacotes.</p>
                         <div class="bg-gray-900 px-8 py-4 rounded-lg border border-gray-700 text-center shadow-inner">
                             <span class="block text-xs text-gray-500 uppercase font-bold mb-1">Próximo pacote em:</span>
                             <span id="large-pull-timer" class="text-4xl font-black text-green-400 tracking-wider">--:--:--</span>
@@ -411,7 +411,7 @@
         <section id="section-achievements" class="w-full max-w-5xl hidden flex-col gap-8">
             <div class="text-center space-y-2 mb-4">
                 <h2 class="text-4xl font-bold text-blue-400 drop-shadow-md">Conquistas Ninja 🏆</h2>
-                <p class="text-gray-400">Complete missões e resgate prêmios exclusivos. Alguns pacotes resgatados aqui são abertos imediatamente!</p>
+                <p class="text-gray-400">Complete missões e resgate prémios exclusivos. Alguns pacotes resgatados aqui são abertos imediatamente!</p>
             </div>
             
             <div id="achievements-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
@@ -423,7 +423,7 @@
         <section id="section-album" class="w-full max-w-6xl hidden flex-col gap-6">
             <div id="album-locked" class="text-center bg-gray-800 p-8 rounded-xl border border-gray-700">
                 <h3 class="text-2xl font-bold text-white">Álbum Vazio</h3>
-                <p class="text-gray-400">Faça login para visualizar sua coleção.</p>
+                <p class="text-gray-400">Faça login para visualizar a sua coleção.</p>
             </div>
 
             <div id="album-content" class="hidden flex-col gap-6 w-full">
@@ -455,7 +455,7 @@
             </div>
         </section>
 
-        <!-- ABA: COMUNIDADE -->
+        <!-- ABA: COMUNIDADE (Otimizada) -->
         <section id="section-explore" class="w-full max-w-6xl hidden flex-col gap-6">
             <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 flex flex-col md:flex-row gap-4 items-center justify-between shadow-md relative overflow-hidden">
                 <div class="absolute right-0 top-0 opacity-5 text-8xl pointer-events-none transform translate-x-4 -translate-y-4">🌍</div>
@@ -477,13 +477,21 @@
                 </div>
             </div>
             
-            <div class="flex w-full gap-2 justify-end">
+            <div class="flex flex-col sm:flex-row w-full gap-4 justify-between items-center bg-gray-900/50 p-4 rounded-xl border border-yellow-500/30">
+                <p class="text-sm text-yellow-400 font-bold text-center sm:text-left">
+                    ⚠️ Para economizar leituras no servidor, o ranking agora exige carregamento manual e tem cache de 4 horas.
+                </p>
+                <button onclick="window.loadAllPlayers(true)" class="w-full sm:w-auto bg-yellow-600 hover:bg-yellow-500 text-black font-bold px-6 py-3 rounded-lg transition shadow-[0_0_15px_rgba(250,204,21,0.3)] transform hover:scale-105">
+                    CARREGAR RANKING GLOBAL
+                </button>
+            </div>
+            
+            <div id="explore-search-area" class="hidden w-full gap-2 justify-end">
                 <input type="text" id="search-input" oninput="window.filterPlayers()" placeholder="Nick do Ninja..." class="w-full sm:w-64 bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-green-500">
-                <button onclick="window.loadAllPlayers(true)" class="bg-gray-700 hover:bg-gray-600 border border-gray-600 text-white font-bold px-4 py-2 rounded-lg transition" title="Forçar Atualização da Lista">🔄</button>
             </div>
             
             <p id="explore-error" class="text-red-400 text-center hidden font-bold"></p>
-            <div id="explore-table-container" class="w-full overflow-x-auto bg-gray-800 rounded-xl border border-gray-700 shadow-md">
+            <div id="explore-table-container" class="w-full overflow-x-auto bg-gray-800 rounded-xl border border-gray-700 shadow-md hidden">
                 <table class="w-full text-left border-collapse whitespace-nowrap">
                     <thead>
                         <tr class="bg-gray-900 text-gray-400 text-sm border-b border-gray-700">
@@ -501,7 +509,7 @@
                     </thead>
                     <tbody id="players-table-body" class="divide-y divide-gray-700"></tbody>
                 </table>
-                <div id="loading-players" class="p-8 text-center text-gray-400 hidden">Carregando lista de ninjas...</div>
+                <div id="loading-players" class="p-8 text-center text-gray-400 hidden">A carregar lista de ninjas...</div>
             </div>
             <div id="explore-results" class="hidden flex-col gap-6 w-full">
                 <div class="flex items-center justify-between border-b border-gray-700 pb-4">
@@ -526,9 +534,14 @@
                     <h2 class="text-2xl font-bold text-green-400">Centro de Trocas 🤝</h2>
                     <p class="text-sm text-gray-400">Só é permitido realizar <strong class="text-gray-200">2 trocas concluídas por dia</strong> (Criando ou Aceitando).</p>
                 </div>
-                <div class="text-right">
-                    <span class="text-gray-400 block text-sm">Trocas hoje: <span id="trade-limit-count" class="font-bold text-green-400">0</span>/2</span>
-                    <span class="text-[10px] text-gray-500">Reseta 00:00</span>
+                <div class="text-right flex flex-col items-end gap-2">
+                    <button onclick="window.loadTradesBoard(true)" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-1 px-4 rounded transition text-xs shadow-md border border-blue-400">
+                        🔄 Atualizar Mural Agora
+                    </button>
+                    <div>
+                        <span class="text-gray-400 block text-sm">Trocas hoje: <span id="trade-limit-count" class="font-bold text-green-400">0</span>/2</span>
+                        <span class="text-[10px] text-gray-500">Reseta 00:00</span>
+                    </div>
                 </div>
             </div>
 
@@ -537,11 +550,11 @@
                 <div class="w-full lg:w-1/3 flex flex-col gap-6">
                     <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-md relative overflow-hidden">
                         <div id="trade-form-blocker" class="absolute inset-0 bg-gray-900/80 backdrop-blur-sm z-10 flex flex-col items-center justify-center hidden">
-                            <p id="trade-form-blocker-msg" class="text-green-400 font-bold text-center px-4">Você já tem uma oferta ativa ou já concluiu suas trocas de hoje.</p>
+                            <p id="trade-form-blocker-msg" class="text-green-400 font-bold text-center px-4">Já tem uma oferta ativa ou já concluiu as suas trocas de hoje.</p>
                         </div>
                         
                         <h3 class="text-xl font-bold mb-4 text-gray-100">Criar Nova Oferta</h3>
-                        <p class="text-xs text-gray-400 mb-4">Ofereça uma carta e peça uma raridade. O jogador que aceitar enviará cartas que você <span class="text-green-400 font-bold">ainda não possui</span>.</p>
+                        <p class="text-xs text-gray-400 mb-4">Ofereça uma carta e peça uma raridade. O jogador que aceitar enviará cartas que <span class="text-green-400 font-bold">ainda não tem</span>.</p>
                         
                         <form id="trade-form" class="space-y-4">
                             <div>
@@ -578,7 +591,7 @@
                 <div class="w-full lg:w-2/3 bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-md">
                     <h3 class="text-xl font-bold text-yellow-500 mb-4">Mural Global de Trocas</h3>
                     <div id="global-trades-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="p-8 text-center text-gray-400 w-full col-span-full">Carregando mural...</div>
+                        <div class="p-8 text-center text-gray-400 w-full col-span-full">A carregar mural...</div>
                     </div>
                 </div>
             </div>
@@ -671,7 +684,7 @@
                                 <tr><th>Nick</th><th>Cargo</th><th>Packs Básicos</th><th>Packs Premium</th><th>Abertos (Total)</th><th>Última Troca</th></tr>
                             </thead>
                             <tbody id="admin-players-list" class="divide-y divide-gray-700">
-                                <tr><td colspan="6" class="p-4 text-center text-gray-500">Carregando...</td></tr>
+                                <tr><td colspan="6" class="p-4 text-center text-gray-500">A carregar...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -747,7 +760,7 @@
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-300 mb-1">Escolha a Imagem (Arquivos no GitHub)</label>
-                            <div id="github-images-loading" class="text-green-400 text-sm animate-pulse hidden">Buscando imagens no GitHub...</div>
+                            <div id="github-images-loading" class="text-green-400 text-sm animate-pulse hidden">A procurar imagens no GitHub...</div>
                             <div id="github-images-grid" class="grid grid-cols-3 sm:grid-cols-4 gap-2 max-h-40 overflow-y-auto p-2 bg-gray-900 border border-gray-600 rounded-lg">
                                 <!-- Imagens injetadas via JS -->
                             </div>
@@ -866,9 +879,19 @@
                     if(t === 'admin') btn.classList.add('text-red-500', 'border-red-500');
                     if(t === 'achievements') btn.classList.add('text-blue-400', 'border-blue-400');
 
+                    // MODIFICADO: Não carrega mais a comunidade automaticamente!
                     if (t === 'explore') {
-                        if (window.loadAllPlayers) window.loadAllPlayers(); 
                         if (window.loadGlobalStats) window.loadGlobalStats(); 
+                        const searchArea = document.getElementById('explore-search-area');
+                        const tableContainer = document.getElementById('explore-table-container');
+                        if (allPlayersCache && allPlayersCache.length > 0) {
+                             if(searchArea) searchArea.classList.remove('hidden');
+                             if(searchArea) searchArea.classList.add('flex');
+                             if(tableContainer) tableContainer.classList.remove('hidden');
+                        }
+                    }
+                    if (t === 'trade') {
+                        if (window.loadTradesBoard) window.loadTradesBoard();
                     }
                     if (t === 'admin') {
                         if (window.loadGitHubImages) { window.loadGitHubImages(); window.updateAdminPreview(); }
@@ -1088,7 +1111,8 @@
             claimedAchievements: {}, notifications: []
         };
         let globalSettings = { registrationsOpen: true, cardsVersion: 0 };
-        let unsubUser = null; let unsubTrades = null;
+        let unsubUser = null; 
+        // REMOVIDO: unsubTrades (chega de tempo real cobrando o Firebase!)
         let allOpenTrades = [];
         
         window.cardDatabase = [];
@@ -1257,7 +1281,7 @@
                 window.renderAlbumHTML('album-grid', userData.inventory);
                 window.updateTradeOptions();
                 window.renderAchievements();
-                window.renderTradeBoard(); // Atualiza a renderização das cartas do mural global
+                window.renderTradeBoard(); // Renderiza usando o array atual
             }
         };
 
@@ -1404,7 +1428,7 @@
                 
                 const safeUsername = username.toLowerCase().replace(/[^a-z0-9]/g, '');
                 if(safeUsername.length < 3) {
-                    errorEl.innerText = "Seu usuário deve ter pelo menos 3 letras.";
+                    errorEl.innerText = "O seu utilizador deve ter pelo menos 3 letras.";
                     errorEl.classList.remove('hidden'); return;
                 }
                 const fakeEmail = `${safeUsername}@nincard.com`;
@@ -1414,7 +1438,7 @@
                 try {
                     if (window.authMode === 'register') {
                         if (!globalSettings.registrationsOpen && safeUsername !== 'auriosh' && safeUsername !== 'vilao') throw new Error("Os cadastros estão desativados no momento.");
-                        if (localStorage.getItem('nin_ccg_registered') && safeUsername !== 'auriosh' && safeUsername !== 'vilao') throw new Error("Você já registrou uma conta neste dispositivo.");
+                        if (localStorage.getItem('nin_ccg_registered') && safeUsername !== 'auriosh' && safeUsername !== 'vilao') throw new Error("Já registrou uma conta neste dispositivo.");
 
                         let userIp = 'unknown';
                         try { const ipRes = await fetch('https://api.ipify.org?format=json'); const ipData = await ipRes.json(); userIp = ipData.ip; } catch(err) { }
@@ -1423,7 +1447,7 @@
                         let ipInUse = false;
                         allUsersSnap.forEach(doc => { if (doc.data().ip === userIp && userIp !== 'unknown') ipInUse = true; });
 
-                        if (ipInUse && safeUsername !== 'auriosh' && safeUsername !== 'vilao') throw new Error("Limite atingido: Já existe uma conta registrada na sua rede/IP.");
+                        if (ipInUse && safeUsername !== 'auriosh' && safeUsername !== 'vilao') throw new Error("Limite atingido: Já existe uma conta registada na sua rede/IP.");
 
                         const userCredential = await createUserWithEmailAndPassword(auth, fakeEmail, pass);
                         await updateProfile(userCredential.user, { displayName: username });
@@ -1444,8 +1468,8 @@
                     window.closeModal();
                 } catch (error) {
                     let errorMsg = error.message.replace('Firebase: ', '');
-                    if (error.code === 'auth/email-already-in-use') errorMsg = "Este usuário já está em uso!";
-                    if (error.code === 'auth/invalid-credential') errorMsg = "Usuário ou senha incorretos!";
+                    if (error.code === 'auth/email-already-in-use') errorMsg = "Este utilizador já está em uso!";
+                    if (error.code === 'auth/invalid-credential') errorMsg = "Utilizador ou palavra-passe incorretos!";
                     errorEl.innerText = errorMsg; errorEl.classList.remove('hidden');
                 } finally {
                     submitBtn.disabled = false;
@@ -1541,13 +1565,6 @@
                     }
                 });
 
-                if(unsubTrades) unsubTrades();
-                unsubTrades = onSnapshot(query(collection(db, "trades"), where("status", "==", "open")), (snapshot) => {
-                    allOpenTrades = [];
-                    snapshot.forEach(doc => allOpenTrades.push({ id: doc.id, ...doc.data() }));
-                    window.renderTradeBoard(); window.updateTradeLimitsUI();
-                });
-
             } else {
                 const loggedOutView = document.getElementById('logged-out-view');
                 const loggedInView = document.getElementById('logged-in-view');
@@ -1572,7 +1589,6 @@
                 if (albumContent) { albumContent.classList.add('hidden'); albumContent.classList.remove('flex'); }
                 
                 if(unsubUser) { unsubUser(); unsubUser = null; }
-                if(unsubTrades) { unsubTrades(); unsubTrades = null; }
             }
         });
 
@@ -1632,33 +1648,33 @@
 
             const achievements = [
                 { 
-                    id: 'first5', title: 'Primeiros Passos', desc: 'Abra 5 pacotes básicos. <br><span class="text-[10px] text-gray-500">Prêmio: +5 Pacotes Básicos (Na Roleta)</span>', 
+                    id: 'first5', title: 'Primeiros Passos', desc: 'Abra 5 pacotes básicos. <br><span class="text-[10px] text-gray-500">Prémio: +5 Pacotes Básicos (Na Roleta)</span>', 
                     isReady: totalOpened >= 5, isClaimed: userData.claimedAchievements?.first5, 
                     type: 'basic_pulls', progress: `${Math.min(5, totalOpened)}/5`
                 },
                 { 
-                    id: 'tens', title: 'Veterano Constante', desc: 'A cada 10 pacotes abertos, ganhe 1 Premium.<br><span class="text-[10px] text-gray-500">Prêmio: Pacote Shuriken Premium (S/SS)</span>', 
+                    id: 'tens', title: 'Veterano Constante', desc: 'A cada 10 pacotes abertos, ganhe 1 Premium.<br><span class="text-[10px] text-gray-500">Prémio: Pacote Shuriken Premium (S/SS)</span>', 
                     isReady: tensIsReady, isClaimed: false, 
                     type: 'premium', progress: `${totalOpened % 10}/10`, isRepeatable: true
                 },
                 { 
-                    id: 'tierC', title: 'Colecionador Rank C 🥉', desc: 'Obtenha todas as cartas Rank C.<br><span class="text-[10px] text-gray-500">Prêmio: Pacote Premium</span>', 
+                    id: 'tierC', title: 'Colecionador Rank C 🥉', desc: 'Obtenha todas as cartas Rank C.<br><span class="text-[10px] text-gray-500">Prémio: Pacote Premium</span>', 
                     isReady: window.checkTierComplete('C'), isClaimed: userData.claimedAchievements?.tierC, type: 'premium'
                 },
                 { 
-                    id: 'tierB', title: 'Colecionador Rank B 🥈', desc: 'Obtenha todas as cartas Rank B.<br><span class="text-[10px] text-gray-500">Prêmio: Pacote Premium</span>', 
+                    id: 'tierB', title: 'Colecionador Rank B 🥈', desc: 'Obtenha todas as cartas Rank B.<br><span class="text-[10px] text-gray-500">Prémio: Pacote Premium</span>', 
                     isReady: window.checkTierComplete('B'), isClaimed: userData.claimedAchievements?.tierB, type: 'premium'
                 },
                 { 
-                    id: 'tierA', title: 'Colecionador Rank A 🥇', desc: 'Obtenha todas as cartas Rank A.<br><span class="text-[10px] text-gray-500">Prêmio: Pacote Premium</span>', 
+                    id: 'tierA', title: 'Colecionador Rank A 🥇', desc: 'Obtenha todas as cartas Rank A.<br><span class="text-[10px] text-gray-500">Prémio: Pacote Premium</span>', 
                     isReady: window.checkTierComplete('A'), isClaimed: userData.claimedAchievements?.tierA, type: 'premium'
                 },
                 { 
-                    id: 'tierS', title: 'Colecionador Rank S 💎', desc: 'Obtenha todas as cartas Rank S.<br><span class="text-[10px] text-gray-500">Prêmio: Pacote Premium</span>', 
+                    id: 'tierS', title: 'Colecionador Rank S 💎', desc: 'Obtenha todas as cartas Rank S.<br><span class="text-[10px] text-gray-500">Prémio: Pacote Premium</span>', 
                     isReady: window.checkTierComplete('S'), isClaimed: userData.claimedAchievements?.tierS, type: 'premium'
                 },
                 { 
-                    id: 'tierSS', title: 'Colecionador Rank SS 🌟', desc: 'Obtenha todas as cartas Rank SS.<br><span class="text-[10px] text-gray-500">Prêmio: Pacote Premium</span>', 
+                    id: 'tierSS', title: 'Colecionador Rank SS 🌟', desc: 'Obtenha todas as cartas Rank SS.<br><span class="text-[10px] text-gray-500">Prémio: Pacote Premium</span>', 
                     isReady: window.checkTierComplete('SS'), isClaimed: userData.claimedAchievements?.tierSS, type: 'premium'
                 }
             ];
@@ -1733,7 +1749,7 @@
                 await updateDoc(doc(db, "users", currentUser.uid), updateObj);
                 
                 if (achievId === 'first5') {
-                    window.showMessage("Parabéns! Você resgatou +5 Pacotes Básicos! Volte à aba Roleta para abri-los.");
+                    window.showMessage("Parabéns! Resgatou +5 Pacotes Básicos! Volte à aba Roleta para abri-los.");
                     isOpeningAchiev = false;
                     if(btn) btn.innerText = "Já Resgatado";
                     window.updateGachaUI();
@@ -1776,7 +1792,7 @@
                 btnClose.classList.add('hidden');
                 
                 const overlayTitle = document.getElementById('achiev-overlay-title');
-                if (overlayTitle) overlayTitle.innerText = "Abra sua Recompensa!";
+                if (overlayTitle) overlayTitle.innerText = "Abra a sua Recompensa!";
 
                 overlay.classList.remove('hidden');
                 overlay.classList.add('flex');
@@ -1836,7 +1852,7 @@
                 btnClose.classList.add('hidden');
                 
                 const overlayTitle = document.getElementById('achiev-overlay-title');
-                if (overlayTitle) overlayTitle.innerText = "Abra seu Pacote Premium!";
+                if (overlayTitle) overlayTitle.innerText = "Abra o seu Pacote Premium!";
 
                 overlay.classList.remove('hidden');
                 overlay.classList.add('flex');
@@ -2459,19 +2475,24 @@
             }
         };
 
-        // --- RANKING GERAL OTIMIZADO (IDEIA B) ---
+        // --- RANKING GERAL OTIMIZADO (IDEIA B - ATUALIZAÇÃO MANUAL APENAS) ---
         let allPlayersCache = [];
         window.loadAllPlayers = async (forceRefresh = false) => {
             const errorEl = document.getElementById('explore-error');
             const loadingEl = document.getElementById('loading-players');
             const tbody = document.getElementById('players-table-body');
+            const tableContainer = document.getElementById('explore-table-container');
+            const searchArea = document.getElementById('explore-search-area');
             
             if(errorEl) errorEl.classList.add('hidden');
+            if(tableContainer) tableContainer.classList.remove('hidden');
+            if(searchArea) { searchArea.classList.remove('hidden'); searchArea.classList.add('flex'); }
             
             const now = Date.now();
             const lastFetch = localStorage.getItem('community_fetch_time');
-            // Cache de 10 minutos para economizar leituras no Firebase
-            if (!forceRefresh && lastFetch && (now - lastFetch < 10 * 60 * 1000) && allPlayersCache.length > 0) {
+            
+            // CACHE AUMENTADO PARA 4 HORAS!
+            if (!forceRefresh && lastFetch && (now - lastFetch < 4 * 60 * 60 * 1000) && allPlayersCache.length > 0) {
                 window.renderPlayersTable(allPlayersCache);
                 return;
             }
@@ -2498,7 +2519,7 @@
                 window.renderPlayersTable(allPlayersCache);
             } catch (err) {
                 if(errorEl) {
-                    errorEl.innerText = "Erro de permissão ou falha ao carregar ranking.";
+                    errorEl.innerText = "Erro ao carregar ranking. Pode ter excedido a quota do Firebase.";
                     errorEl.classList.remove('hidden');
                 }
                 console.warn(err);
@@ -2558,11 +2579,13 @@
             if (!player) return;
             
             const container = document.getElementById('explore-table-container');
+            const searchArea = document.getElementById('explore-search-area');
             const exploreName = document.getElementById('explore-name');
             const exploreAvatar = document.getElementById('explore-avatar');
             const exploreResults = document.getElementById('explore-results');
             
             if (container) container.classList.add('hidden');
+            if (searchArea) searchArea.classList.add('hidden');
             if (exploreName) exploreName.innerText = player.displayName;
             if (exploreAvatar) exploreAvatar.src = `https://api.dicebear.com/7.x/pixel-art/svg?seed=${player.displayName || player.uid}`;
             
@@ -2577,14 +2600,31 @@
         window.closePlayerAlbum = () => {
             const exploreResults = document.getElementById('explore-results');
             const exploreTable = document.getElementById('explore-table-container');
+            const searchArea = document.getElementById('explore-search-area');
             if (exploreResults) {
                 exploreResults.classList.add('hidden');
                 exploreResults.classList.remove('flex');
             }
             if (exploreTable) exploreTable.classList.remove('hidden');
+            if (searchArea) { searchArea.classList.remove('hidden'); searchArea.classList.add('flex'); }
         };
 
-        // --- TROCAS (TRADE) ---
+        // --- MURAL DE TROCAS (CARREGAMENTO MANUAL - CORTAMOS O ONSNAPSHOT AQUI) ---
+        window.loadTradesBoard = async (manualClick = false) => {
+            if(manualClick) window.showMessage("A atualizar o mural...", false);
+            try {
+                const snap = await getDocs(query(collection(db, "trades"), where("status", "==", "open")));
+                allOpenTrades = [];
+                snap.forEach(doc => allOpenTrades.push({ id: doc.id, ...doc.data() }));
+                window.renderTradeBoard(); 
+                window.updateTradeLimitsUI();
+                if(manualClick) document.getElementById('msg-modal')?.classList.add('hidden');
+            } catch (err) {
+                console.error("Erro a ler trocas", err);
+                if(manualClick) window.showMessage("Erro ao atualizar o mural.");
+            }
+        };
+
         window.updateTradeLimitsUI = () => {
             if(!currentUser || !userData) return;
             const today = new Date().toDateString();
@@ -2600,10 +2640,10 @@
                 const msg = document.getElementById('trade-form-blocker-msg');
                 if (tradesToday >= 2) {
                     blocker.classList.remove('hidden');
-                    if(msg) msg.innerText = "Você já concluiu suas trocas de hoje. Volte amanhã à 00:00!";
+                    if(msg) msg.innerText = "Já concluiu as suas trocas de hoje. Volte amanhã à 00:00!";
                 } else if (hasActiveTrade) {
                     blocker.classList.remove('hidden');
-                    if(msg) msg.innerText = "Você já tem uma oferta ativa no mural. Cancele-a antes de criar outra.";
+                    if(msg) msg.innerText = "Já tem uma oferta ativa no mural. Cancele-a antes de criar outra.";
                 } else {
                     blocker.classList.add('hidden');
                 }
@@ -2681,7 +2721,7 @@
             const reqVal = TIER_VALUES[reqTier];
             currentOfferQty = 1; 
             currentReqQty = (offerVal - reqVal) + 1; 
-            infoEl.innerText = `Você dá 1x [${offerCard.tier}] ⇄ O outro jogador escolherá ${currentReqQty}x [${reqTier}] que você não tem para te enviar.`;
+            infoEl.innerText = `Você dá 1x [${offerCard.tier}] ⇄ O outro jogador escolherá ${currentReqQty}x [${reqTier}] que não tem para lhe enviar.`;
         };
 
         const tradeFormEl = document.getElementById('trade-form');
@@ -2694,13 +2734,13 @@
 
                 if(!offerId || !reqTier) return window.showMessage("Selecione a carta e a raridade desejada!");
                 const inv = userData.inventory || {};
-                if((inv[offerId] || 0) <= currentOfferQty) return window.showMessage("Você não possui cartas suficientes para criar a oferta e manter 1 cópia.");
+                if((inv[offerId] || 0) <= currentOfferQty) return window.showMessage("Não possui cartas suficientes para criar a oferta e manter 1 cópia.");
 
                 const today = new Date().toDateString();
                 const tradesToday = userData.lastTradeDate === today ? (userData.tradesToday || 0) : 0;
-                if (tradesToday >= 2) return window.showMessage("Você já concluiu suas trocas diárias.");
+                if (tradesToday >= 2) return window.showMessage("Já concluiu as suas trocas diárias.");
 
-                if(btn) { btn.disabled = true; btn.innerText = "Publicando..."; }
+                if(btn) { btn.disabled = true; btn.innerText = "A publicar..."; }
 
                 try {
                     await runTransaction(db, async (transaction) => {
@@ -2726,10 +2766,13 @@
                         });
                     });
 
-                    window.showMessage("Sua oferta foi para o Mural! Suas cartas foram separadas com sucesso.");
+                    window.showMessage("A sua oferta foi para o Mural! As suas cartas foram separadas com sucesso.");
                     const offerInput = document.getElementById('trade-offer');
                     if(offerInput) offerInput.value = "";
                     if(window.updateRequestTierOptions) window.updateRequestTierOptions();
+                    
+                    // ATUALIZAR MURAL APÓS CRIAR A TROCA
+                    if(window.loadTradesBoard) await window.loadTradesBoard();
                 } catch (err) {
                     window.showMessage("Erro ao publicar: " + err);
                 } finally {
@@ -2774,7 +2817,7 @@
                 if (isMyTrade) {
                     actionBtnHTML = `<button onclick="window.cancelTrade('${trade.id}')" class="w-full py-2 font-bold text-sm transition bg-red-600 hover:bg-red-500 text-white">Cancelar Minha Oferta</button>`;
                 } else if (alreadyHaveOffered) {
-                    actionBtnHTML = `<button disabled class="w-full py-2 font-bold text-[11px] uppercase transition bg-gray-700 text-gray-400 cursor-not-allowed">Você já tem esta carta</button>`;
+                    actionBtnHTML = `<button disabled class="w-full py-2 font-bold text-[11px] uppercase transition bg-gray-700 text-gray-400 cursor-not-allowed">Já tem esta carta</button>`;
                 } else {
                     actionBtnHTML = `<button onclick="window.openAcceptTradeModal('${trade.id}', '${trade.fromUserId}', '${offerCard.id}', '${trade.requestTier}', ${trade.requestQuantity})" class="w-full py-2 font-bold text-sm transition bg-green-600 hover:bg-green-500 text-white shadow-[0_0_10px_rgba(34,197,94,0.3)]">Aceitar Troca</button>`;
                 }
@@ -2808,15 +2851,15 @@
         };
 
         window.cancelTrade = (tradeId) => {
-            window.showMessage("Deseja cancelar esta oferta e recuperar suas cartas?", true, async () => {
+            window.showMessage("Deseja cancelar esta oferta e recuperar as suas cartas?", true, async () => {
                 try {
                     await runTransaction(db, async (transaction) => {
                         const tradeRef = doc(db, "trades", tradeId);
                         const tradeSnap = await transaction.get(tradeRef);
-                        if (!tradeSnap.exists() || tradeSnap.data().status !== 'open') throw "Esta oferta não está mais disponível.";
+                        if (!tradeSnap.exists() || tradeSnap.data().status !== 'open') throw "Esta oferta já não está disponível.";
                         
                         const tradeData = tradeSnap.data();
-                        if (tradeData.fromUserId !== currentUser.uid) throw "Você não é o dono desta oferta.";
+                        if (tradeData.fromUserId !== currentUser.uid) throw "Não é o dono desta oferta.";
 
                         const userRef = doc(db, "users", currentUser.uid);
                         const userSnap = await transaction.get(userRef);
@@ -2828,6 +2871,9 @@
                         transaction.update(tradeRef, { status: 'cancelled' });
                     });
                     window.showMessage("Oferta cancelada e cartas devolvidas ao seu álbum!");
+                    
+                    // ATUALIZAR MURAL APÓS CANCELAR
+                    if(window.loadTradesBoard) await window.loadTradesBoard();
                 } catch (e) {
                     window.showMessage("Erro ao cancelar: " + e);
                 }
@@ -2838,7 +2884,7 @@
             try {
                 const today = new Date().toDateString();
                 const tradesToday = userData.lastTradeDate === today ? (userData.tradesToday || 0) : 0;
-                if (tradesToday >= 2) return window.showMessage("Você já atingiu seu limite diário de trocas hoje (2/dia).");
+                if (tradesToday >= 2) return window.showMessage("Já atingiu o seu limite diário de trocas hoje (2/dia).");
 
                 const userASnap = await getDoc(doc(db, "users", fromUserId));
                 if(!userASnap.exists()) throw "O criador da oferta não foi encontrado.";
@@ -2859,7 +2905,7 @@
                 });
 
                 if (totalSupplyable < reqQty) {
-                    return window.showMessage(`Você não possui as cartas necessárias. É necessário ter cópias repetidas de ${reqQty}x cartas Rank ${reqTier} que o outro jogador ainda não tenha no álbum.`);
+                    return window.showMessage(`Não possui as cartas necessárias. É necessário ter cópias repetidas de ${reqQty}x cartas Rank ${reqTier} que o outro jogador ainda não tenha no álbum.`);
                 }
 
                 window.currentTradeAccept = { tradeId, fromUserId, offerId, reqTier, reqQty, selectedIds: [] };
@@ -2925,7 +2971,7 @@
             const finalCardsToSend = state.selectedIds.map(item => item.cardId);
 
             const btn = document.getElementById('btn-confirm-accept');
-            if(btn) { btn.disabled = true; btn.innerText = "Processando Troca..."; }
+            if(btn) { btn.disabled = true; btn.innerText = "A Processar Troca..."; }
 
             try {
                 await runTransaction(db, async (transaction) => {
@@ -2947,7 +2993,7 @@
                     let tradesB = userBSnap.data().lastTradeDate === today ? (userBSnap.data().tradesToday || 0) : 0;
                     
                     if (tradesA >= 2) throw "O criador da oferta já atingiu o limite de trocas de hoje.";
-                    if (tradesB >= 2) throw "Você atingiu seu limite diário de trocas.";
+                    if (tradesB >= 2) throw "Atingiu o seu limite diário de trocas.";
 
                     let totalTradesA = (userASnap.data().totalTradesCompleted || 0) + 1;
                     let totalTradesB = (userBSnap.data().totalTradesCompleted || 0) + 1;
@@ -2976,7 +3022,7 @@
                     const newNotif = {
                         id: 'notif_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
                         type: 'trade_accepted',
-                        message: `🎉 <strong class="text-green-400">${currentUser.displayName}</strong> aceitou sua troca! Levou <strong class="text-red-400">${offQty}x ${offerCardName}</strong> e enviou: <strong class="text-yellow-400">${sentCardNamesString}</strong>.`,
+                        message: `🎉 <strong class="text-green-400">${currentUser.displayName}</strong> aceitou a sua troca! Levou <strong class="text-red-400">${offQty}x ${offerCardName}</strong> e enviou: <strong class="text-yellow-400">${sentCardNamesString}</strong>.`,
                         read: false,
                         timestamp: Date.now()
                     };
@@ -2994,6 +3040,9 @@
                 const modal = document.getElementById('trade-accept-modal');
                 if(modal) modal.classList.add('hidden');
                 window.showMessage("MUITO BEM! A troca foi realizada com sucesso.");
+                
+                // ATUALIZAR MURAL APÓS CONCLUIR
+                if(window.loadTradesBoard) await window.loadTradesBoard();
             } catch (e) {
                 window.showMessage("Falha na transação. Alguém já pode ter aceitado ou as cartas não estão mais disponíveis.");
             } finally {
@@ -3063,8 +3112,8 @@
 
             const typeName = type === 'premium' ? 'Premium' : 'Básicos';
 
-            window.showMessage(`Atenção: Você vai enviar ${amount} pacotes ${typeName} para TODOS os jogadores registrados. Deseja continuar?`, true, async () => {
-                if(btn) { btn.disabled = true; btn.innerText = "Processando Lotes..."; }
+            window.showMessage(`Atenção: Vai enviar ${amount} pacotes ${typeName} para TODOS os jogadores registados. Deseja continuar?`, true, async () => {
+                if(btn) { btn.disabled = true; btn.innerText = "A Processar Lotes..."; }
                 try {
                     const usersSnap = await getDocs(collection(db, "users"));
                     const batches = [];
@@ -3125,7 +3174,7 @@
                 return window.showMessage(`Nenhuma carta encontrada para a coleção ${version}.`);
             }
 
-            window.showMessage(`Isso vai re-numerar e ordenar (por Rank e Nome) as ${cardsToUpdate.length} cartas da coleção "${version}" automaticamente. Tem certeza?`, true, async () => {
+            window.showMessage(`Isto vai renumerar e ordenar (por Rank e Nome) as ${cardsToUpdate.length} cartas da coleção "${version}" automaticamente. Tem certeza?`, true, async () => {
                 try {
                     cardsToUpdate.sort((a, b) => {
                         if (TIER_VALUES[b.tier] !== TIER_VALUES[a.tier]) {
@@ -3156,7 +3205,7 @@
         window.loadAdminPlayersLog = async () => {
             const list = document.getElementById('admin-players-list');
             if(!list) return;
-            list.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-gray-400">Carregando log...</td></tr>';
+            list.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-gray-400">A carregar log...</td></tr>';
             
             try {
                 const querySnapshot = await getDocs(collection(db, "users"));
@@ -3385,7 +3434,7 @@
                     msg.classList.remove('hidden'); setTimeout(() => msg.classList.add('hidden'), 3000); return;
                 }
 
-                btn.disabled = true; btn.innerText = "Processando...";
+                btn.disabled = true; btn.innerText = "A Processar...";
 
                 try {
                     const adminNameEl = document.getElementById('admin-name');
