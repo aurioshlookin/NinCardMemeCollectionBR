@@ -467,11 +467,11 @@
                 <!-- Estatísticas Globais -->
                 <div class="flex gap-4 md:border-l border-gray-700 md:pl-6">
                     <div class="text-center bg-gray-900 px-4 py-2 rounded-lg border border-gray-700">
-                        <div class="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Packs Abertos</div>
+                        <div class="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Packs Abertos (Servidor)</div>
                         <div id="explore-total-packs" class="text-xl font-black text-green-400">0</div>
                     </div>
                     <div class="text-center bg-gray-900 px-4 py-2 rounded-lg border border-gray-700">
-                        <div class="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Trocas Feitas</div>
+                        <div class="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Trocas (Servidor)</div>
                         <div id="explore-total-trades" class="text-xl font-black text-blue-400">0</div>
                     </div>
                 </div>
@@ -488,12 +488,14 @@
                     <thead>
                         <tr class="bg-gray-900 text-gray-400 text-sm border-b border-gray-700">
                             <th class="p-4 font-semibold">Ninja</th>
-                            <th class="p-4 font-semibold text-center">Únicas</th>
+                            <th class="p-4 font-semibold text-center border-r border-gray-700">Únicas</th>
                             <th class="p-4 font-semibold text-center text-green-400">C</th>
                             <th class="p-4 font-semibold text-center text-blue-400">B</th>
                             <th class="p-4 font-semibold text-center text-purple-400">A</th>
                             <th class="p-4 font-semibold text-center text-yellow-400">S</th>
-                            <th class="p-4 font-semibold text-center text-red-400">SS</th>
+                            <th class="p-4 font-semibold text-center text-red-400 border-r border-gray-700">SS</th>
+                            <th class="p-4 font-semibold text-center" title="Total de Pacotes Abertos">Abertos</th>
+                            <th class="p-4 font-semibold text-center" title="Total de Trocas Realizadas">Trocas</th>
                             <th class="p-4 font-semibold text-center">Ação</th>
                         </tr>
                     </thead>
@@ -1082,7 +1084,7 @@
         let currentUser = null;
         let userData = { 
             pullsAvailable: 0, premiumPullsAvailable: 0, inventory: {}, role: 'player', tradesToday: 0, 
-            lastTradeDate: "", lastPullTimestamp: null, totalPacksOpened: 0, 
+            lastTradeDate: "", lastPullTimestamp: null, totalPacksOpened: 0, totalTradesCompleted: 0,
             claimedAchievements: {}, notifications: []
         };
         let globalSettings = { registrationsOpen: true, cardsVersion: 0 };
@@ -1431,7 +1433,7 @@
                         await setDoc(doc(db, "users", userCredential.user.uid), {
                             displayName: username, displayNameLower: username.toLowerCase(),
                             pullsAvailable: 5, premiumPullsAvailable: 0, lastPullTimestamp: null, inventory: {}, role: userRole,
-                            tradesToday: 0, lastTradeDate: new Date().toDateString(), totalPacksOpened: 0, 
+                            tradesToday: 0, lastTradeDate: new Date().toDateString(), totalPacksOpened: 0, totalTradesCompleted: 0,
                             claimedAchievements: {}, notifications: [], ip: userIp 
                         });
                         
@@ -1509,6 +1511,10 @@
                         if(userData.premiumPullsAvailable === undefined) {
                             await updateDoc(doc(db, "users", user.uid), { premiumPullsAvailable: 0 });
                             userData.premiumPullsAvailable = 0;
+                        }
+                        if(userData.totalTradesCompleted === undefined) {
+                            await updateDoc(doc(db, "users", user.uid), { totalTradesCompleted: 0 });
+                            userData.totalTradesCompleted = 0;
                         }
 
                         if (userData.pullsAvailable < 5 && !userData.lastPullTimestamp) {
@@ -2506,7 +2512,7 @@
             if(!tbody) return;
             
             tbody.innerHTML = '';
-            if (players.length === 0) { tbody.innerHTML = `<tr><td colspan="9" class="p-4 text-center text-gray-500">Nenhum ninja encontrado.</td></tr>`; return; }
+            if (players.length === 0) { tbody.innerHTML = `<tr><td colspan="10" class="p-4 text-center text-gray-500">Nenhum ninja encontrado.</td></tr>`; return; }
 
             players.forEach(player => {
                 let stats = { Total: 0, C: 0, B: 0, A: 0, S: 0, SS: 0 };
@@ -2514,6 +2520,8 @@
                 window.cardDatabase.forEach(c => { if(inv[c.id]>0) { stats.Total++; stats[c.tier]++; } });
                 
                 const medalHTML = window.getUserMedals(inv);
+                const packsOpened = player.totalPacksOpened || 0;
+                const tradesCompleted = player.totalTradesCompleted || 0;
 
                 tbody.innerHTML += `
                     <tr class="hover:bg-gray-700 transition duration-150 ease-in-out">
@@ -2522,12 +2530,14 @@
                             <span class="font-bold text-white">${player.displayName || 'Ninja Oculto'}</span>
                             ${medalHTML ? `<div class="ml-1 cursor-help">${medalHTML}</div>` : ''}
                         </td>
-                        <td class="p-4 text-center font-bold text-lg">${stats.Total}</td>
+                        <td class="p-4 text-center font-bold text-lg border-r border-gray-700">${stats.Total}</td>
                         <td class="p-4 text-center text-green-400 font-semibold">${stats.C}</td>
                         <td class="p-4 text-center text-blue-400 font-semibold">${stats.B}</td>
                         <td class="p-4 text-center text-purple-400 font-semibold">${stats.A}</td>
                         <td class="p-4 text-center text-yellow-400 font-semibold">${stats.S}</td>
-                        <td class="p-4 text-center text-red-400 font-bold">${stats.SS}</td>
+                        <td class="p-4 text-center text-red-400 font-bold border-r border-gray-700">${stats.SS}</td>
+                        <td class="p-4 text-center font-bold text-gray-300">${packsOpened}</td>
+                        <td class="p-4 text-center font-bold text-gray-300">${tradesCompleted}</td>
                         <td class="p-4 text-center">
                             <button onclick="window.viewPlayerAlbum('${player.uid}')" class="bg-green-600 hover:bg-green-500 text-white px-3 py-1 rounded-lg text-xs font-bold transition shadow">Ver Álbum</button>
                         </td>
@@ -2939,6 +2949,9 @@
                     if (tradesA >= 2) throw "O criador da oferta já atingiu o limite de trocas de hoje.";
                     if (tradesB >= 2) throw "Você atingiu seu limite diário de trocas.";
 
+                    let totalTradesA = (userASnap.data().totalTradesCompleted || 0) + 1;
+                    let totalTradesB = (userBSnap.data().totalTradesCompleted || 0) + 1;
+
                     finalCardsToSend.forEach(id => {
                         if((invB[id] || 0) < 1) throw "Inventário insuficiente! Alguém já usou essa carta.";
                         invB[id]--; invA[id] = (invA[id] || 0) + 1;
@@ -2972,8 +2985,8 @@
                     notifsA.unshift(newNotif);
                     if(notifsA.length > 30) notifsA.pop(); 
 
-                    transaction.update(userARef, { inventory: invA, tradesToday: tradesA + 1, lastTradeDate: today, notifications: notifsA });
-                    transaction.update(userBRef, { inventory: invB, tradesToday: tradesB + 1, lastTradeDate: today });
+                    transaction.update(userARef, { inventory: invA, tradesToday: tradesA + 1, lastTradeDate: today, totalTradesCompleted: totalTradesA, notifications: notifsA });
+                    transaction.update(userBRef, { inventory: invB, tradesToday: tradesB + 1, lastTradeDate: today, totalTradesCompleted: totalTradesB });
                     transaction.update(tradeRef, { status: 'completed', acceptedBy: currentUser.uid });
                 });
 
