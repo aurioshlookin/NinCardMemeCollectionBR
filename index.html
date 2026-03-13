@@ -126,12 +126,12 @@
 
     /* ESTILO PARA CARTAS NÃO OBTIDAS NA ABA DE RARIDADE */
     .locked-grayscale {
-      filter: grayscale(1) brightness(0.65);
-      opacity: 0.85;
+      filter: grayscale(1) brightness(0.4);
+      opacity: 0.9;
       transition: all 0.4s ease;
     }
     .locked-grayscale:hover {
-      filter: grayscale(1) brightness(0.75);
+      filter: grayscale(1) brightness(0.6);
     }
     .lock-overlay {
       position: absolute;
@@ -957,6 +957,17 @@
         if (rarityGrid) rarityGrid.classList.remove('hidden');
         if (window.renderRarityBoard) window.renderRarityBoard();
       }
+    };
+
+    window.refreshRarity = async () => {
+      const rarityLoading = document.getElementById('rarity-loading');
+      const rarityGrid = document.getElementById('rarity-grid');
+      if (rarityLoading) rarityLoading.classList.remove('hidden');
+      if (rarityGrid) rarityGrid.classList.add('hidden');
+      await window.loadAllPlayers(true, true);
+      if (rarityLoading) rarityLoading.classList.add('hidden');
+      if (rarityGrid) rarityGrid.classList.remove('hidden');
+      if (window.renderRarityBoard) window.renderRarityBoard();
     };
 
     window.setAlbumViewMode = (mode) => {
@@ -1809,7 +1820,7 @@
     let isOpeningAchiev = false;
 
     window.claimAchievement = async (achievId, type) => {
-      if(isOpeningAchiev) return;
+      if(isOpeningAchiev || isProcessingPackTransaction) return;
       
       const totalOpened = userData.totalPacksOpened || 0;
       if (achievId === 'tens') {
@@ -3723,7 +3734,7 @@
       });
     }
 
-    // --- NOVA LÓGICA DO RARITY BOARD (Estatísticas Globais) ---
+    // --- LÓGICA DO RARITY BOARD (Estatísticas Globais) ---
     window.renderRarityBoard = () => {
       const grid = document.getElementById('rarity-grid');
       const totalPlayersSpan = document.getElementById('rarity-total-players');
@@ -3734,7 +3745,6 @@
 
       const myInv = (window.userData && window.userData.inventory) ? window.userData.inventory : {};
 
-      // 1. Calcular estatísticas baseadas no cache de jogadores
       const stats = {};
       window.cardDatabase.forEach(c => { stats[c.id] = 0; });
       
@@ -3745,12 +3755,11 @@
          });
       });
 
-      // 2. Ordenar cartas da mais comum para a mais rara (baseado na % de jogadores que tem)
       const sortedCards = [...window.cardDatabase].sort((a, b) => {
          const aHave = stats[a.id] || 0;
          const bHave = stats[b.id] || 0;
-         if (bHave !== aHave) return bHave - aHave; // Descrescente
-         return TIER_VALUES[a.tier] - TIER_VALUES[b.tier]; // Fallback para Rank
+         if (bHave !== aHave) return bHave - aHave; 
+         return TIER_VALUES[a.tier] - TIER_VALUES[b.tier]; 
       });
 
       grid.innerHTML = '';
@@ -3764,9 +3773,8 @@
          const wrapper = document.createElement('div');
          wrapper.className = "flex flex-col gap-2 bg-gray-800/40 p-2 rounded-xl border border-gray-700 relative";
 
-         // Barra HTML informando estatísticas
          const statsHtml = `
-            <div class="text-[9px] sm:text-[10px] text-gray-300 flex justify-between items-center bg-gray-900 px-2 py-1.5 rounded border border-gray-600 mb-1">
+            <div class="text-[9px] sm:text-[10px] text-gray-300 flex justify-between items-center bg-gray-900 px-2 py-1.5 rounded border border-gray-600 mb-1 z-10 relative">
                <span><span class="text-green-400 font-bold">${ownersCount}</span> têm (${pct}%)</span>
                <span><span class="text-red-400 font-bold">${notOwnersCount}</span> n/ têm</span>
             </div>
@@ -3775,7 +3783,7 @@
          if (hasCard) {
             wrapper.innerHTML = `
                ${statsHtml}
-               <div class="aspect-[2/3] w-full cursor-pointer hover:scale-105 transition duration-300 shadow-xl" onclick="window.showCardDetail('${card.id}')">
+               <div class="aspect-[2/3] w-full cursor-pointer hover:scale-105 transition duration-300 shadow-xl relative z-10" onclick="window.showCardDetail('${card.id}')">
                   <div id="rarity-item-${card.id}" class="w-full h-full"></div>
                </div>
                <p class="text-[10px] text-center font-bold text-green-400 uppercase tracking-tighter mt-1">Desbloqueada</p>
@@ -3783,72 +3791,27 @@
             grid.appendChild(wrapper);
             window.renderCardHTML(`rarity-item-${card.id}`, card, false, true, myInv);
          } else {
-            const fullImageUrl = card.img ? (GITHUB_RAW_URL + card.img) : '';
-            const layout = card.layout || 'standard';
-            const isFullArt = layout === 'full-art';
-            const zoom = card.imageZoom || 1;
-            const transX = card.imageTransX ?? 0;
-            const transY = card.imageTransY ?? 0;
+            // Clona a carta e oculta nome/descrição para cartas não possuídas
+            const lockedCardData = { ...card, name: '???', desc: '???' };
             
-            const imgStyle = `width: 100%; height: 100%; object-fit: contain; transform: translate(${transX}px, ${transY}px) scale(${zoom}); transform-origin: center; filter: grayscale(100%) brightness(35%) blur(1.5px);`;
-            
-            let cardSkeletonHTML = '';
-            
-            if (isFullArt) {
-                cardSkeletonHTML = `
-                   <div class="absolute inset-0 z-0 overflow-hidden flex items-center justify-center bg-black">
-                      <img src="${fullImageUrl}" style="${imgStyle}" onerror="this.onerror=null; this.src='https://via.placeholder.com/150/cbd5e0/4a5568?text=Sem+Imagem';">
-                      <div class="absolute inset-0 flex items-center justify-center">
-                         <div class="bg-black/80 p-3 rounded-full border border-gray-600 backdrop-blur-sm shadow-2xl">
-                            <svg class="w-8 h-8 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8" />
-                            </svg>
-                         </div>
-                      </div>
-                   </div>
-                   <div class="absolute bottom-0 left-0 right-0 p-2 sm:p-3 bg-gradient-to-t from-black to-transparent z-10 opacity-50">
-                      <h3 class="font-black text-gray-400" style="font-size: 14px;">???</h3>
-                   </div>
-                `;
-            } else {
-                cardSkeletonHTML = `
-                   <div class="relative z-10 p-1 sm:p-2 h-full flex flex-col opacity-50">
-                      <div class="flex justify-between items-center mb-1">
-                         <h3 class="font-bold text-gray-400" style="font-size: 12px;">???</h3>
-                      </div>
-                      <div class="w-full aspect-[4/3] bg-black border-2 border-gray-700 overflow-hidden flex items-center justify-center relative">
-                         <img src="${fullImageUrl}" style="${imgStyle}" onerror="this.onerror=null; this.src='https://via.placeholder.com/150/cbd5e0/4a5568?text=Sem+Imagem';">
-                         <div class="absolute inset-0 flex items-center justify-center">
-                            <svg class="w-6 h-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8" />
-                            </svg>
-                         </div>
-                      </div>
-                   </div>
-                `;
-            }
-
             wrapper.innerHTML = `
-               <div class="aspect-[2/3] w-full rounded-xl border-4 border-gray-700 bg-gray-900 shadow-inner relative overflow-hidden">
-                  ${cardSkeletonHTML}
+               ${statsHtml}
+               <div class="aspect-[2/3] w-full relative transition duration-300 shadow-xl locked-grayscale z-10 border-2 border-gray-600 rounded-xl overflow-hidden">
+                  <div id="rarity-item-${card.id}" class="w-full h-full pointer-events-none"></div>
+                  <div class="lock-overlay">
+                     <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 text-white/50 drop-shadow-md" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                       <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                     </svg>
+                  </div>
                </div>
-               <p class="text-[10px] text-center font-bold text-gray-500 uppercase tracking-tighter">Não Obtida</p>
+               <p class="text-[10px] text-center font-bold text-gray-500 uppercase tracking-tighter mt-1">Bloqueada</p>
             `;
             grid.appendChild(wrapper);
+            window.renderCardHTML(`rarity-item-${card.id}`, lockedCardData, false, true, {});
          }
       });
     };
 
-    window.refreshRarity = async () => {
-       const rarityLoading = document.getElementById('rarity-loading');
-       const rarityGrid = document.getElementById('rarity-grid');
-       if (rarityLoading) rarityLoading.classList.remove('hidden');
-       if (rarityGrid) rarityGrid.classList.add('hidden');
-       await window.loadAllPlayers(true, true);
-       if (rarityLoading) rarityLoading.classList.add('hidden');
-       if (rarityGrid) rarityGrid.classList.remove('hidden');
-       window.renderRarityBoard();
-    };
   </script>
 </body>
 </html>
