@@ -200,7 +200,8 @@
             <img id="user-avatar" src="" alt="avatar" class="w-full h-full">
           </div>
           <span id="user-display-name" class="text-sm font-semibold hidden sm:inline text-gray-200">Carregando...</span>
-          <button id="btn-logout" class="text-xs text-red-400 hover:text-red-300 ml-2 transition">Sair</button>
+          <button onclick="window.showPasswordModal()" class="text-xs text-yellow-400 hover:text-yellow-300 ml-3 transition font-bold">Mudar Senha</button>
+          <button id="btn-logout" class="text-xs text-red-400 hover:text-red-300 ml-2 transition font-bold">Sair</button>
         </div>
       </div>
     </div>
@@ -271,6 +272,20 @@
         <button onclick="document.getElementById('trade-accept-modal').classList.add('hidden')" class="bg-gray-700 hover:bg-gray-600 border border-gray-600 text-white px-4 py-2 rounded-lg font-bold transition">Cancelar</button>
         <button id="btn-confirm-accept" class="bg-green-600 hover:bg-green-500 text-white px-6 py-2 rounded-lg font-bold disabled:opacity-50 transition" disabled>Confirmar Envio</button>
       </div>
+    </div>
+  </div>
+
+  <!-- Modal de Mudar Senha -->
+  <div id="password-modal" class="fixed inset-0 bg-black/80 flex items-center justify-center z-[200] hidden backdrop-blur-sm p-4">
+    <div class="bg-gray-800 p-6 rounded-xl shadow-2xl max-w-sm w-full border border-yellow-500/50">
+       <h3 class="text-xl font-bold text-gray-200 mb-2">Mudar Senha</h3>
+       <p class="text-xs text-gray-400 mb-4">A nova senha deve ter no mínimo 6 caracteres.</p>
+       <input type="password" id="new-password" placeholder="Nova Senha" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white mb-3 focus:outline-none focus:border-yellow-500">
+       <input type="password" id="confirm-password" placeholder="Confirmar Nova Senha" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white mb-4 focus:outline-none focus:border-yellow-500">
+       <div class="flex justify-end gap-3">
+         <button onclick="document.getElementById('password-modal').classList.add('hidden')" class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg text-white font-bold transition">Cancelar</button>
+         <button onclick="window.changePassword()" class="bg-yellow-600 hover:bg-yellow-500 px-4 py-2 rounded-lg text-white font-bold transition shadow-lg">Salvar</button>
+       </div>
     </div>
   </div>
 
@@ -1140,7 +1155,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, updateProfile, updatePassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import { getFirestore, doc, getDoc, setDoc, updateDoc, addDoc, onSnapshot, collection, query, where, getDocs, serverTimestamp, runTransaction, deleteDoc, writeBatch, increment } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -1246,6 +1261,33 @@
       const statRef = doc(db, "settings", "globalStats");
       const updateData = type === 'pack' ? { totalPacks: increment(1) } : { totalTrades: increment(1) };
       setDoc(statRef, updateData, { merge: true }).catch(err => console.warn(err));
+    };
+
+    window.showPasswordModal = () => {
+      document.getElementById('new-password').value = '';
+      document.getElementById('confirm-password').value = '';
+      document.getElementById('password-modal').classList.remove('hidden');
+    };
+
+    window.changePassword = async () => {
+      const p1 = document.getElementById('new-password').value;
+      const p2 = document.getElementById('confirm-password').value;
+      if (p1 !== p2) return window.showMessage("As senhas não coincidem!");
+      if (p1.length < 6) return window.showMessage("A senha deve ter pelo menos 6 caracteres.");
+
+      if (window.currentUser) {
+        try {
+          await updatePassword(window.currentUser, p1);
+          window.showMessage("Senha atualizada com sucesso!");
+          document.getElementById('password-modal').classList.add('hidden');
+        } catch (error) {
+          if (error.code === 'auth/requires-recent-login') {
+            window.showMessage("Por segurança, você precisa sair e entrar novamente na conta antes de mudar a senha.");
+          } else {
+            window.showMessage("Erro ao mudar senha: " + error.message);
+          }
+        }
+      }
     };
 
     window.loadGlobalStats = async () => {
@@ -3148,22 +3190,20 @@
         if(!userASnap.exists()) throw "O criador da oferta não foi encontrado.";
         const invA = userASnap.data().inventory || {};
 
-        let validCardsForB = []; let totalSupplyable = 0;
+        let validCardsForB = []; 
         const myInv = userData.inventory || {};
 
         window.cardDatabase.forEach(c => {
           if (c.tier === reqTier && (invA[c.id] || 0) === 0) {
             const myQty = myInv[c.id] || 0;
             if (myQty > 1) { 
-              const tradableQty = myQty - 1;
-              validCardsForB.push({ ...c, myQty: tradableQty });
-              totalSupplyable += tradableQty;
+              validCardsForB.push(c);
             }
           }
         });
 
-        if (totalSupplyable < reqQty) {
-          return window.showMessage(`Você não possui as cartas necessárias. É necessário ter cópias repetidas de ${reqQty}x cartas Rank ${reqTier} que o outro jogador ainda não tenha no álbum.`);
+        if (validCardsForB.length < reqQty) {
+          return window.showMessage(`Você não possui cartas diferentes suficientes. É necessário ter cópias repetidas de ${reqQty} cartas diferentes de Rank ${reqTier} que o outro jogador ainda não tenha no álbum.`);
         }
 
         window.currentTradeAccept = { tradeId, fromUserId, offerId, reqTier, reqQty, selectedIds: [] };
@@ -3173,18 +3213,16 @@
         grid.innerHTML = '';
         
         validCardsForB.forEach(c => {
-          for(let i=0; i < c.myQty; i++) {
-            const instanceId = `${c.id}_${i}`; 
-            grid.innerHTML += `
-              <div id="accept-card-${instanceId}" onclick="window.toggleAcceptCard('${c.id}', '${instanceId}')" class="cursor-pointer border-2 border-transparent p-1 rounded bg-gray-800 flex flex-col items-center transition relative shadow-lg">
-                <img src="${GITHUB_RAW_URL + c.img}" class="w-16 h-20 sm:w-20 sm:h-28 object-cover pointer-events-none rounded border border-gray-600">
-                <span class="text-[9px] sm:text-[11px] mt-1 text-center font-bold truncate w-full text-white pointer-events-none">${c.name}</span>
-                <div id="check-${instanceId}" class="absolute inset-0 bg-green-500/50 hidden items-center justify-center pointer-events-none rounded">
-                  <span class="text-white text-3xl font-black drop-shadow-md">✓</span>
-                </div>
+          const instanceId = c.id; 
+          grid.innerHTML += `
+            <div id="accept-card-${instanceId}" onclick="window.toggleAcceptCard('${c.id}', '${instanceId}')" class="cursor-pointer border-2 border-transparent p-1 rounded bg-gray-800 flex flex-col items-center transition relative shadow-lg hover:border-green-500/50">
+              <img src="${GITHUB_RAW_URL + c.img}" class="w-16 h-20 sm:w-20 sm:h-28 object-cover pointer-events-none rounded border border-gray-600">
+              <span class="text-[9px] sm:text-[11px] mt-1 text-center font-bold truncate w-full text-white pointer-events-none">${c.name}</span>
+              <div id="check-${instanceId}" class="absolute inset-0 bg-green-500/50 hidden items-center justify-center pointer-events-none rounded">
+                <span class="text-white text-3xl font-black drop-shadow-md">✓</span>
               </div>
-            `;
-          }
+            </div>
+          `;
         });
 
         const confirmBtn = document.getElementById('btn-confirm-accept');
