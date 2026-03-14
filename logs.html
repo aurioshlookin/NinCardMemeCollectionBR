@@ -344,6 +344,19 @@
         try {
           const userDoc = await getDoc(doc(db, "users", user.uid));
           if (userDoc.exists() && userDoc.data().role === 'admin') {
+            
+            // === DUPLA VERIFICAÇÃO COM PIN ===
+            // Mesmo sendo admin no banco, pede uma senha extra para exibir a página
+            const pin = prompt("🔒 ÁREA RESTRITA: Digite a Senha Master de Segurança:");
+            
+            // Troque 'Nin@2026' pela senha que você quiser!
+            if (pin !== "Nin@2026") {
+              alert("Senha Incorreta! Acesso Negado.");
+              window.location.href = "index.html"; 
+              return;
+            }
+            
+            console.log("Acesso Admin Autorizado.");
             document.getElementById('auth-guard').classList.add('hidden');
             window.iniciarLeituraEmTempoReal();
           } else {
@@ -596,7 +609,7 @@
       );
     };
 
-    // --- SISTEMA DE BANIMENTO DE IP (COM MODAL) ---
+    // --- SISTEMA DE BANIMENTO DE IP (COM MODAL E BACKUP) ---
     window.banirJogadorPorIP = (nickOverride = null) => {
         const input = document.getElementById('ban-nick-input');
         const nick = nickOverride || input.value.trim();
@@ -610,8 +623,8 @@
         }
 
         window.mostrarModalConfirmacao(
-            "Punição Severa (BANIMENTO)",
-            `ATENÇÃO CRÍTICA!\nIsso vai EXCLUIR permanentemente a conta do jogador "${nick}" e aplicar um Bloqueio de IP.\n\nDeseja realmente BANIR este jogador da existência?`,
+            "Punição Severa (BANIMENTO COM BACKUP)",
+            `ATENÇÃO CRÍTICA!\nIsso vai EXCLUIR a conta ativa do jogador "${nick}" e aplicar um Bloqueio de IP.\n\nUm BACKUP de segurança será gerado no banco de dados antes da exclusão. Deseja continuar?`,
             async () => {
                 const btn = document.getElementById('btn-ban-ip');
                 if(btn) {
@@ -633,7 +646,15 @@
                     const userData = userDoc.data();
                     const userIp = userData.ip || 'unknown';
 
-                    // Bloquear IP
+                    // === 1. SALVAR BACKUP ANTES DE DELETAR ===
+                    await setDoc(doc(db, "banned_users", uid), {
+                        ...userData,
+                        bannedAt: new Date().getTime(),
+                        bannedBy: auth.currentUser.displayName,
+                        reason: "Banimento por IP / Auditoria Manual"
+                    });
+
+                    // === 2. Bloquear IP ===
                     if (userIp !== 'unknown') {
                         await setDoc(doc(db, "banned_ips", userIp), {
                             timestamp: new Date(),
@@ -642,10 +663,10 @@
                             reason: "Banimento Administrativo Manual via Auditoria"
                         });
                     } else {
-                        window.mostrarModalInfo("Aviso", `O IP de "${userData.displayName}" é desconhecido. A conta será apagada, mas ele poderá criar outra conta.`);
+                        window.mostrarModalInfo("Aviso", `O IP de "${userData.displayName}" é desconhecido. A conta será apagada (com backup), mas ele poderá criar outra conta.`);
                     }
 
-                    // Deletar Conta
+                    // === 3. Deletar Conta Ativa ===
                     await deleteDoc(doc(db, "users", uid));
 
                     // Tentar remover do Placar Global
@@ -659,11 +680,11 @@
                     }
 
                     await addDoc(collection(db, "system_logs"), {
-                        action: `Admin ${auth.currentUser.displayName} BANIU permanentemente o jogador ${userData.displayName} por IP e excluiu sua conta.`,
+                        action: `Admin ${auth.currentUser.displayName} BANIU o jogador ${userData.displayName} por IP e gerou um BACKUP de segurança.`,
                         timestamp: new Date()
                     });
 
-                    window.mostrarToast(`A justiça foi feita! Conta "${userData.displayName}" apagada e banida.`, "sucesso");
+                    window.mostrarToast(`A justiça foi feita! Conta "${userData.displayName}" banida e salva no backup.`, "sucesso");
                     if(input) input.value = ""; 
                     if(document.getElementById('section-antihack').classList.contains('flex')) window.escanearHackers(); 
 
