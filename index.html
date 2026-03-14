@@ -1156,6 +1156,20 @@
       }
     };
 
+    // --- FUNÇÃO GLOBAL DE LOGS DE SISTEMA ---
+    window.logSystemAction = async (actionText) => {
+      if (!window.currentUser) return;
+      try {
+        await addDoc(collection(db, "system_logs"), {
+          action: actionText,
+          timestamp: new Date()
+        });
+      } catch (e) {
+        console.warn("Falha ao registrar log de sistema no Firebase:", e);
+      }
+    };
+    // ----------------------------------------
+
     onSnapshot(doc(db, "settings", "global"), (docSnap) => {
       if (docSnap.exists()) {
         globalSettings = docSnap.data();
@@ -1537,6 +1551,8 @@
               claimedAchievements: {}, notifications: [], ip: userIp 
             });
             
+            await window.logSystemAction(`${username} registrou uma nova conta no jogo.`);
+            
             localStorage.setItem('nin_ccg_registered', 'true'); 
           } else {
             await signInWithEmailAndPassword(auth, fakeEmail, pass);
@@ -1670,7 +1686,6 @@
             if (userData.role === 'admin') {
               if (tabAdmin) tabAdmin.classList.remove('hidden');
               window.suggestNextCardNumber();
-              // --- CORREÇÃO DE BUG (Cartas no Sistema): Roda a atualização agora que sabemos que o player é Admin ---
               if (window.updateAllCardDependentUI) window.updateAllCardDependentUI();
             } else {
               if (tabAdmin) tabAdmin.classList.add('hidden');
@@ -2001,6 +2016,7 @@
         overlay.classList.add('flex');
         
         logGlobalStat('pack');
+        await window.logSystemAction(`${currentUser.displayName} abriu um Pacote Premium do inventário.`);
 
       } catch(e) {
         window.showMessage("Erro: " + e.message);
@@ -2238,6 +2254,7 @@
         }, suspenseTime);
         
         logGlobalStat('pack');
+        await window.logSystemAction(`${currentUser.displayName} abriu um Pacote Básico e a melhor raridade revelada foi Rank ${highestTierStr}.`);
       } catch (error) {
         window.showMessage("Erro: " + error.message);
       } finally {
@@ -3038,6 +3055,7 @@
           if(window.updateRequestTierOptions) window.updateRequestTierOptions();
           
           if(window.loadTradesBoard) await window.loadTradesBoard();
+          await window.logSystemAction(`${currentUser.displayName} publicou uma oferta de troca no Mural.`);
         } catch (err) {
           window.showMessage("Erro ao publicar: " + err);
         } finally {
@@ -3302,6 +3320,7 @@
         window.showMessage("Troca realizada com sucesso!");
         
         if(window.loadTradesBoard) await window.loadTradesBoard();
+        await window.logSystemAction(`${currentUser.displayName} concluiu uma troca no Mural.`);
       } catch (e) {
         window.showMessage("Falha na transação. Alguém já pode ter aceitado ou as cartas não estão mais disponíveis.");
       } finally {
@@ -3314,6 +3333,7 @@
       const newState = !globalSettings.registrationsOpen;
       try {
         await setDoc(doc(db, "settings", "global"), { registrationsOpen: newState }, { merge: true });
+        await window.logSystemAction(`Admin ${currentUser.displayName} ${newState ? 'ATIVOU' : 'DESATIVOU'} os cadastros do servidor.`);
         window.showMessage(newState ? "Cadastros LIGADOS com sucesso." : "Cadastros DESLIGADOS com sucesso.");
       } catch (e) {
         window.showMessage("Erro ao alterar: " + e.message);
@@ -3325,6 +3345,7 @@
       const newState = !globalSettings.maintenanceMode;
       try {
         await setDoc(doc(db, "settings", "global"), { maintenanceMode: newState }, { merge: true });
+        await window.logSystemAction(`Admin ${currentUser.displayName} ${newState ? 'ATIVOU' : 'DESATIVOU'} o modo manutenção.`);
         window.showMessage(newState ? "Modo Manutenção LIGADO. Os jogadores estão bloqueados." : "Modo Manutenção DESLIGADO.");
       } catch (e) {
         window.showMessage("Erro ao alterar: " + e.message);
@@ -3342,6 +3363,7 @@
           ? { premiumPullsAvailable: increment(amount) }
           : { pullsAvailable: increment(amount) };
         await updateDoc(doc(db, "users", uid), updateObj);
+        await window.logSystemAction(`Admin ${currentUser.displayName} ${amount > 0 ? 'adicionou' : 'removeu'} ${Math.abs(amount)} pacotes ${type} de um jogador.`);
         await window.loadAdminPlayersLog();
       } catch (err) {
         window.showMessage("Erro ao alterar pacotes: " + err.message);
@@ -3390,6 +3412,7 @@
           }
 
           await Promise.all(batches);
+          await window.logSystemAction(`Admin ${currentUser.displayName} distribuiu em massa ${amount} pacotes ${typeName} para todos os jogadores.`);
           window.showMessage(`SENSACIONAL! ${amount} pacotes ${typeName} foram enviados para todos os ${usersSnap.docs.length} ninjas!`);
           document.getElementById('admin-bulk-amount').value = '';
           if(window.loadAdminPlayersLog) window.loadAdminPlayersLog();
@@ -3406,6 +3429,7 @@
         try {
           await deleteDoc(doc(db, "cards", id));
           await updateDoc(doc(db, "settings", "global"), { cardsVersion: Date.now() }); 
+          await window.logSystemAction(`Admin ${currentUser.displayName} deletou a carta: ${name}`);
           window.showMessage("Carta excluída com sucesso.");
         } catch (err) {
           window.showMessage("Erro ao excluir carta: " + err.message);
@@ -3443,6 +3467,7 @@
 
           await batch.commit();
           await updateDoc(doc(db, "settings", "global"), { cardsVersion: Date.now() }); 
+          await window.logSystemAction(`Admin ${currentUser.displayName} renumerou as cartas da coleção: ${version}`);
           window.showMessage(`Numeração da coleção "${version}" aplicada com sucesso!`);
         } catch (err) {
           window.showMessage("Erro ao renumerar: " + err.message);
@@ -3741,6 +3766,7 @@
           }
 
           await updateDoc(doc(db, "settings", "global"), { cardsVersion: Date.now() });
+          await window.logSystemAction(`Admin ${currentUser.displayName} ${editingCardId ? 'editou' : 'criou'} a carta: ${newCard.name} (${newCard.tier})`);
 
           msg.className = "text-center font-bold text-sm mt-2 text-green-400";
           msg.classList.remove('hidden');
