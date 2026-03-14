@@ -668,8 +668,7 @@
               </tbody>
             </table>
           </div>
-        </div>
-      </details>
+      </div>
 
       <div class="bg-gray-800 p-8 rounded-xl border border-red-900/50 shadow-2xl">
         <h3 class="text-xl font-bold mb-4 text-white">Criar ou Editar Carta</h3>
@@ -889,6 +888,7 @@
           }
           if (t === 'admin') {
             if (window.loadGitHubImages) { window.loadGitHubImages(); window.updateAdminPreview(); }
+            if (window.loadAdminPlayersLog) window.loadAdminPlayersLog();
           }
           if (t === 'achievements' && window.renderAchievements) window.renderAchievements();
         } else {
@@ -3817,50 +3817,24 @@
          const hasCard = (myInv[card.id] || 0) > 0;
          const ownersCount = stats[card.id] || 0;
          const notOwnersCount = totalPlayers - ownersCount;
-         const pct = totalPlayers > 0 ? ((ownersCount / totalPlayers) * 100).toFixed(1) : 0;
-
+         const pct = totalPlayers > 0 ? ((ownersCount / totalPlayers) * 100).toFixed(1) : "0.0";
+         
          const wrapper = document.createElement('div');
-         wrapper.className = "flex flex-col gap-2 bg-gray-800/40 p-2 rounded-xl border border-gray-700 relative";
-
-         const statsHtml = `
-            <div class="text-[9px] sm:text-[10px] text-gray-300 flex justify-between items-center bg-gray-900 px-2 py-1.5 rounded border border-gray-600 mb-1 z-10 relative">
-               <span><span class="text-green-400 font-bold">${ownersCount}</span> têm (${pct}%)</span>
-               <span><span class="text-red-400 font-bold">${notOwnersCount}</span> n/ têm</span>
-            </div>
+         wrapper.className = `flex flex-col items-center p-3 rounded-xl border ${hasCard ? 'bg-gray-800 border-purple-500/30' : 'bg-gray-900 border-gray-700 opacity-60 grayscale'} transition hover:opacity-100 cursor-pointer`;
+         wrapper.onclick = () => window.showCardDetail(card.id);
+         
+         wrapper.innerHTML = `
+           <img src="${GITHUB_RAW_URL + card.img}" class="w-full aspect-[2/3] object-cover rounded shadow mb-2 border border-gray-600">
+           <span class="text-xs font-bold text-center w-full truncate mb-1 text-white">${card.name}</span>
+           <span class="text-[10px] bg-gray-900 border border-gray-600 px-2 py-0.5 rounded text-gray-400 mb-1">R.${card.tier}</span>
+           <div class="flex flex-col items-center w-full bg-black/40 p-1.5 rounded">
+             <span class="text-xs font-black text-purple-400">${ownersCount} <span class="text-[9px] font-normal text-gray-400">ninjas têm</span></span>
+             <span class="text-[9px] text-gray-500">${pct}% do servidor</span>
+           </div>
          `;
-
-         if (hasCard) {
-            wrapper.innerHTML = `
-               ${statsHtml}
-               <div class="aspect-[2/3] w-full cursor-pointer hover:scale-105 transition duration-300 shadow-xl relative z-10" onclick="window.showCardDetail('${card.id}')">
-                  <div id="rarity-item-${card.id}" class="w-full h-full"></div>
-               </div>
-               <p class="text-[10px] text-center font-bold text-green-400 uppercase tracking-tighter mt-1">Desbloqueada</p>
-            `;
-            grid.appendChild(wrapper);
-            window.renderCardHTML(`rarity-item-${card.id}`, card, false, true, myInv);
-         } else {
-            // Clona a carta e oculta nome/descrição para cartas não possuídas
-            const lockedCardData = { ...card, name: '???', desc: '???' };
-            
-            wrapper.innerHTML = `
-               ${statsHtml}
-               <div class="aspect-[2/3] w-full relative transition duration-300 shadow-xl locked-grayscale z-10 border-2 border-gray-600 rounded-xl overflow-hidden">
-                  <div id="rarity-item-${card.id}" class="w-full h-full pointer-events-none"></div>
-                  <div class="lock-overlay">
-                     <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 text-white/50 drop-shadow-md" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                       <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                     </svg>
-                  </div>
-               </div>
-               <p class="text-[10px] text-center font-bold text-gray-500 uppercase tracking-tighter mt-1">Bloqueada</p>
-            `;
-            grid.appendChild(wrapper);
-            window.renderCardHTML(`rarity-item-${card.id}`, lockedCardData, false, true, {});
-         }
+         grid.appendChild(wrapper);
       });
     };
-
   </script>
 </body>
 </html>
