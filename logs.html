@@ -384,16 +384,26 @@
         formattedAction = formattedAction.replace(/(Admin)/g, '<strong class="text-red-400">$1</strong>');
         formattedAction = formattedAction.replace(/(BANIU)/g, '<strong class="text-red-500 font-black drop-shadow-md text-lg">$1</strong>');
         
-        // Destacar Ranks (Ex: (R.SS), (R.S))
-        formattedAction = formattedAction.replace(/\(R\.SS\)/g, '<span class="inline-block text-red-500 font-black border border-red-500/50 bg-red-900/40 px-1.5 py-0.5 rounded shadow-[0_0_8px_rgba(239,68,68,0.6)] mx-1">Rank SS</span>');
-        formattedAction = formattedAction.replace(/\(R\.S\)/g, '<span class="inline-block text-yellow-400 font-black border border-yellow-400/50 bg-yellow-900/40 px-1.5 py-0.5 rounded shadow-[0_0_8px_rgba(250,204,21,0.6)] mx-1">Rank S</span>');
-        formattedAction = formattedAction.replace(/\(R\.A\)/g, '<span class="inline-block text-purple-400 font-bold bg-purple-900/20 px-1 rounded mx-1">Rank A</span>');
-        formattedAction = formattedAction.replace(/\(R\.B\)/g, '<span class="inline-block text-blue-400 font-bold bg-blue-900/20 px-1 rounded mx-1">Rank B</span>');
-        formattedAction = formattedAction.replace(/\(R\.C\)/g, '<span class="inline-block text-green-400 font-bold bg-green-900/20 px-1 rounded mx-1">Rank C</span>');
+        // Substituir por marcadores temporários para evitar duplicação de span no Rank S
+        formattedAction = formattedAction.replace(/\(R\.SS\)/g, '%%RANK_SS%%');
+        formattedAction = formattedAction.replace(/\(R\.S\)/g, '%%RANK_S%%');
+        formattedAction = formattedAction.replace(/\(R\.A\)/g, '%%RANK_A%%');
+        formattedAction = formattedAction.replace(/\(R\.B\)/g, '%%RANK_B%%');
+        formattedAction = formattedAction.replace(/\(R\.C\)/g, '%%RANK_C%%');
         
         // Destacar as cartas antigas
-        formattedAction = formattedAction.replace(/Rank SS(?!<)/g, '<span class="inline-block text-red-500 font-black border border-red-500/50 bg-red-900/40 px-1.5 py-0.5 rounded shadow-[0_0_8px_rgba(239,68,68,0.6)] mx-1">Rank SS</span>');
-        formattedAction = formattedAction.replace(/Rank S([^S]|$)(?!<)/g, '<span class="inline-block text-yellow-400 font-black border border-yellow-400/50 bg-yellow-900/40 px-1.5 py-0.5 rounded shadow-[0_0_8px_rgba(250,204,21,0.6)] mx-1">Rank S</span>$1');
+        formattedAction = formattedAction.replace(/Rank SS/g, '%%RANK_SS%%');
+        formattedAction = formattedAction.replace(/Rank S([^S]|$)/g, '%%RANK_S%%$1');
+        formattedAction = formattedAction.replace(/Rank A/g, '%%RANK_A%%');
+        formattedAction = formattedAction.replace(/Rank B/g, '%%RANK_B%%');
+        formattedAction = formattedAction.replace(/Rank C/g, '%%RANK_C%%');
+        
+        // Aplicar o HTML final a partir dos marcadores temporários
+        formattedAction = formattedAction.replace(/%%RANK_SS%%/g, '<span class="inline-block text-red-500 font-black border border-red-500/50 bg-red-900/40 px-1.5 py-0.5 rounded shadow-[0_0_8px_rgba(239,68,68,0.6)] mx-1">Rank SS</span>');
+        formattedAction = formattedAction.replace(/%%RANK_S%%/g, '<span class="inline-block text-yellow-400 font-black border border-yellow-400/50 bg-yellow-900/40 px-1.5 py-0.5 rounded shadow-[0_0_8px_rgba(250,204,21,0.6)] mx-1">Rank S</span>');
+        formattedAction = formattedAction.replace(/%%RANK_A%%/g, '<span class="inline-block text-purple-400 font-bold bg-purple-900/20 px-1 rounded mx-1">Rank A</span>');
+        formattedAction = formattedAction.replace(/%%RANK_B%%/g, '<span class="inline-block text-blue-400 font-bold bg-blue-900/20 px-1 rounded mx-1">Rank B</span>');
+        formattedAction = formattedAction.replace(/%%RANK_C%%/g, '<span class="inline-block text-green-400 font-bold bg-green-900/20 px-1 rounded mx-1">Rank C</span>');
 
         tbody.innerHTML += `
           <tr class="hover:bg-slate-700/50 transition">
