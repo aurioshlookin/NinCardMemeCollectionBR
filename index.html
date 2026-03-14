@@ -636,7 +636,7 @@
     <section id="section-admin" class="w-full max-w-5xl hidden flex-col gap-8">
       <h2 class="text-3xl font-bold text-red-500 border-b border-red-900 pb-2 drop-shadow-md">Painel do Administrador</h2>
       
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-md relative overflow-hidden">
           <div class="absolute top-0 right-0 p-2 opacity-10 text-6xl pointer-events-none">⚙️</div>
           <h3 class="text-xl font-bold mb-2 text-white">Status do Servidor</h3>
@@ -649,18 +649,6 @@
           <h3 class="text-xl font-bold mb-2 text-white">Modo Manutenção</h3>
           <p class="text-sm text-gray-400 mb-4">Bloquear Jogadores: <span id="admin-maint-status" class="text-gray-400 font-bold">DESLIGADO</span></p>
           <button onclick="window.toggleMaintenance()" class="bg-purple-600 hover:bg-purple-500 shadow-lg shadow-purple-900/30 text-white font-bold py-2 px-4 rounded-lg transition w-full border border-purple-400 text-sm">Ligar/Desligar Bloqueio</button>
-        </div>
-        
-        <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-md relative overflow-hidden">
-          <div class="absolute top-0 right-0 p-2 opacity-10 text-6xl pointer-events-none">🎁</div>
-          <h3 class="text-xl font-bold mb-2 text-white">Presentear Ninja</h3>
-          <form id="admin-packs-form" class="space-y-3" onsubmit="window.managePacks(event)">
-            <div class="flex gap-2">
-              <input type="text" id="admin-target-user" placeholder="Nick..." class="w-2/3 bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-yellow-500" required>
-              <input type="number" id="admin-target-amount" placeholder="Qtd" class="w-1/3 bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-yellow-500 text-center" required>
-            </div>
-            <button type="submit" id="btn-manage-packs" class="bg-yellow-600 hover:bg-yellow-500 shadow-lg shadow-yellow-900/30 text-white font-bold py-2 px-4 rounded-lg transition w-full border border-yellow-400 text-sm">Aplicar Quantidade</button>
-          </form>
         </div>
 
         <div class="bg-gradient-to-br from-gray-800 to-gray-900 p-6 rounded-xl border border-green-500/50 shadow-[0_0_15px_rgba(34,197,94,0.1)] relative overflow-hidden">
@@ -1727,6 +1715,8 @@
             if (userData.role === 'admin') {
               if (tabAdmin) tabAdmin.classList.remove('hidden');
               window.suggestNextCardNumber();
+              // --- CORREÇÃO DE BUG (Cartas no Sistema): Roda a atualização agora que sabemos que o player é Admin ---
+              if (window.updateAllCardDependentUI) window.updateAllCardDependentUI();
             } else {
               if (tabAdmin) tabAdmin.classList.add('hidden');
             }
@@ -3367,39 +3357,22 @@
       }
     };
 
-    window.managePacks = async (e) => {
-      e.preventDefault();
+    window.addPacksToUser = async (uid, type, amount, event) => {
       if (!currentUser || userData.role !== 'admin') return;
-      
-      const btn = document.getElementById('btn-manage-packs');
-      const userEl = document.getElementById('admin-target-user');
-      const amountEl = document.getElementById('admin-target-amount');
-      
-      if(!userEl || !amountEl) return;
-
-      const targetNick = userEl.value.trim().toLowerCase();
-      const amount = parseInt(amountEl.value);
-      
-      if(!targetNick || isNaN(amount)) return window.showMessage("Preencha os dados corretamente.");
-      
-      if(btn) btn.disabled = true;
+      const btn = event.currentTarget;
+      const origText = btn.innerText;
+      btn.innerText = '...';
+      btn.disabled = true;
       try {
-        const q = query(collection(db, "users"), where("displayNameLower", "==", targetNick));
-        const snap = await getDocs(q);
-        if(snap.empty) throw new Error("Jogador não encontrado.");
-        
-        const targetDoc = snap.docs[0];
-        
-        // Usa incremento atômico no painel de admin também!
-        await updateDoc(doc(db, "users", targetDoc.id), { pullsAvailable: increment(amount) });
-        window.showMessage(`Sucesso! Foram enviados +${amount} pacotes para o jogador ${targetDoc.data().displayName}.`);
-        
-        userEl.value = ''; amountEl.value = '';
-        if(window.loadAdminPlayersLog) window.loadAdminPlayersLog();
+        const updateObj = type === 'premium' 
+          ? { premiumPullsAvailable: increment(amount) }
+          : { pullsAvailable: increment(amount) };
+        await updateDoc(doc(db, "users", uid), updateObj);
+        await window.loadAdminPlayersLog();
       } catch (err) {
-        window.showMessage(err.message);
-      } finally {
-        if(btn) btn.disabled = false;
+        window.showMessage("Erro ao alterar pacotes: " + err.message);
+        btn.innerText = origText;
+        btn.disabled = false;
       }
     };
 
@@ -3522,8 +3495,20 @@
             <tr class="hover:bg-gray-700">
               <td class="p-2 font-bold text-white">${p.displayName || 'Desconhecido'}</td>
               <td class="p-2 ${roleColor} font-bold">${p.role === 'admin' ? 'Admin' : 'Jogador'}</td>
-              <td class="p-2 text-green-400 font-bold">${p.pullsAvailable || 0}</td>
-              <td class="p-2 text-yellow-400 font-bold">${p.premiumPullsAvailable || 0}</td>
+              <td class="p-2 text-green-400 font-bold">
+                ${p.pullsAvailable || 0}
+                <div class="inline-flex gap-1 ml-2">
+                  <button onclick="window.addPacksToUser('${p.uid}', 'basic', 1, event)" class="bg-green-700 hover:bg-green-600 px-1.5 py-0.5 rounded text-white text-xs leading-none transition" title="Dar 1 Pacote Básico">+</button>
+                  <button onclick="window.addPacksToUser('${p.uid}', 'basic', -1, event)" class="bg-red-700 hover:bg-red-600 px-1.5 py-0.5 rounded text-white text-xs leading-none transition" title="Tirar 1 Pacote Básico">-</button>
+                </div>
+              </td>
+              <td class="p-2 text-yellow-400 font-bold">
+                ${p.premiumPullsAvailable || 0}
+                <div class="inline-flex gap-1 ml-2">
+                  <button onclick="window.addPacksToUser('${p.uid}', 'premium', 1, event)" class="bg-green-700 hover:bg-green-600 px-1.5 py-0.5 rounded text-white text-xs leading-none transition" title="Dar 1 Pacote Premium">+</button>
+                  <button onclick="window.addPacksToUser('${p.uid}', 'premium', -1, event)" class="bg-red-700 hover:bg-red-600 px-1.5 py-0.5 rounded text-white text-xs leading-none transition" title="Tirar 1 Pacote Premium">-</button>
+                </div>
+              </td>
               <td class="p-2 text-blue-400 font-bold">${p.totalPacksOpened || 0}</td>
               <td class="p-2 text-gray-400 text-xs">${p.lastTradeDate || 'Nunca'}</td>
             </tr>
