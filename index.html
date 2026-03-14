@@ -368,7 +368,16 @@
         <button onclick="window.loadAllPlayers(true)" class="w-full sm:w-auto bg-gray-700 hover:bg-gray-600 text-gray-300 font-bold px-4 py-2 rounded-lg transition text-sm flex items-center justify-center gap-2 border border-gray-600 shadow-md">
           <span>🔄 Atualizar Lista</span>
         </button>
-        <input type="text" id="search-input" oninput="window.filterPlayers()" placeholder="Nick do Ninja..." class="w-full sm:w-64 bg-gray-800 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-green-500">
+        <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto items-center">
+          <div class="relative w-full sm:w-48">
+            <span class="absolute left-3 top-2.5 text-gray-400">👤</span>
+            <input type="text" id="search-input" oninput="window.filterPlayers()" placeholder="Nick do Ninja..." class="w-full bg-gray-800 border border-gray-600 rounded-lg pl-10 pr-4 py-2 text-white focus:outline-none focus:border-green-500 shadow-inner">
+          </div>
+          <div class="relative w-full sm:w-72">
+            <span class="absolute left-3 top-2.5 text-gray-400">🃏</span>
+            <input type="text" id="search-card-input" oninput="window.filterPlayers()" placeholder="Pesquisar por carta na coleção..." class="w-full bg-gray-800 border border-gray-600 rounded-lg pl-10 pr-4 py-2 text-white focus:outline-none focus:border-green-500 shadow-inner">
+          </div>
+        </div>
       </div>
       
       <p id="explore-error" class="text-red-400 text-center hidden font-bold"></p>
@@ -411,9 +420,11 @@
           </div>
           
           <div class="flex items-center gap-4 w-full sm:w-auto justify-end">
-            <label class="flex items-center gap-2 text-sm text-gray-300 cursor-pointer hover:text-white transition">
-              <input type="checkbox" id="toggle-owned-explore" onchange="window.toggleShowOwned(this.checked)" class="accent-green-500 w-4 h-4 cursor-pointer">
-              Apenas Obtidas
+            <!-- TOGGLE APENAS OBTIDAS (Explore) -->
+            <label class="relative inline-flex items-center cursor-pointer group">
+              <input type="checkbox" id="toggle-owned-explore" onchange="window.toggleShowOwned(this.checked)" class="sr-only peer" checked>
+              <div class="w-11 h-6 bg-gray-700 rounded-full peer peer-focus:ring-2 peer-focus:ring-green-800 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500 shadow-inner"></div>
+              <span class="ml-3 text-sm font-bold text-gray-300 group-hover:text-white transition-colors">Apenas Obtidas</span>
             </label>
             <button onclick="window.closePlayerAlbum()" class="bg-gray-700 hover:bg-gray-600 border border-gray-600 px-4 py-2 rounded-lg text-sm font-bold transition text-white">Voltar à Lista</button>
           </div>
@@ -548,9 +559,11 @@
             </div>
             
             <div class="flex items-center">
-              <label class="flex items-center gap-2 text-sm text-gray-300 cursor-pointer hover:text-white transition">
-                <input type="checkbox" id="toggle-owned-album" onchange="window.toggleShowOwned(this.checked)" class="accent-green-500 w-4 h-4 cursor-pointer">
-                Apenas Obtidas
+              <!-- TOGGLE APENAS OBTIDAS (Album) -->
+              <label class="relative inline-flex items-center cursor-pointer group">
+                <input type="checkbox" id="toggle-owned-album" onchange="window.toggleShowOwned(this.checked)" class="sr-only peer" checked>
+                <div class="w-11 h-6 bg-gray-700 rounded-full peer peer-focus:ring-2 peer-focus:ring-green-800 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500 shadow-inner"></div>
+                <span class="ml-3 text-sm font-bold text-gray-300 group-hover:text-white transition-colors">Apenas Obtidas</span>
               </label>
             </div>
 
@@ -842,7 +855,7 @@
     window.currentFilteredPlayers = [];
     window.currentExplorePage = 1;
     window.explorePlayersPerPage = 10;
-    window.showOnlyOwned = false;
+    window.showOnlyOwned = true;
     window.currentViewedPlayerInventory = null;
     window.lastSyncDataStr = "";
 
@@ -2845,14 +2858,33 @@
 
     window.filterPlayers = () => {
       const inputEl = document.getElementById('search-input');
-      if(!inputEl) return;
-      const searchVal = inputEl.value.trim().toLowerCase();
+      const cardInputEl = document.getElementById('search-card-input');
+      if(!inputEl || !cardInputEl) return;
       
-      if (!searchVal) {
-        window.currentFilteredPlayers = [...window.allPlayersCache];
-      } else {
-        window.currentFilteredPlayers = window.allPlayersCache.filter(p => p.displayNameLower && p.displayNameLower.includes(searchVal));
-      }
+      const searchVal = inputEl.value.trim().toLowerCase();
+      const searchCardVal = cardInputEl.value.trim().toLowerCase();
+      
+      window.currentFilteredPlayers = window.allPlayersCache.filter(p => {
+        const matchesName = !searchVal || (p.displayNameLower && p.displayNameLower.includes(searchVal));
+        
+        let matchesCard = true;
+        if (searchCardVal) {
+          matchesCard = false;
+          const inv = p.inventory || {};
+          for (const cardId in inv) {
+            if (inv[cardId] > 0) {
+              const cardData = window.cardDatabase.find(c => c.id === cardId);
+              if (cardData && cardData.name && cardData.name.toLowerCase().includes(searchCardVal)) {
+                matchesCard = true;
+                break;
+              }
+            }
+          }
+        }
+        
+        return matchesName && matchesCard;
+      });
+      
       window.currentExplorePage = 1;
       window.renderPlayersTable();
     };
