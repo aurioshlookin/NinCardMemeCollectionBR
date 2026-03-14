@@ -345,13 +345,27 @@
           const userDoc = await getDoc(doc(db, "users", user.uid));
           if (userDoc.exists() && userDoc.data().role === 'admin') {
             
-            // === DUPLA VERIFICAÇÃO COM PIN ===
-            // Mesmo sendo admin no banco, pede uma senha extra para exibir a página
+            // === DUPLA VERIFICAÇÃO COM SEGURANÇA NO BANCO ===
             const pin = prompt("🔒 ÁREA RESTRITA: Digite a Senha Master de Segurança:");
             
-            // Troque 'Nin@2026' pela senha que você quiser!
-            if (pin !== "Nin@2026") {
-              alert("Senha Incorreta! Acesso Negado.");
+            if (!pin) {
+              window.location.href = "index.html"; 
+              return;
+            }
+
+            try {
+              // O código não tem a senha escrita! 
+              // Ele tenta buscar um documento no banco cujo NOME é a senha.
+              const securityRef = doc(db, "admin_security", pin);
+              const securitySnap = await getDoc(securityRef);
+
+              if (!securitySnap.exists()) {
+                alert("Senha Incorreta! Acesso Negado.");
+                window.location.href = "index.html"; 
+                return;
+              }
+            } catch (secError) {
+              alert("Senha Incorreta ou permissão negada.");
               window.location.href = "index.html"; 
               return;
             }
