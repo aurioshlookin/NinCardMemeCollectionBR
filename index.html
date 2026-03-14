@@ -3368,7 +3368,7 @@
       }
     };
 
-    window.addPacksToUser = async (uid, type, amount, event) => {
+    window.addPacksToUser = async (uid, playerName, type, amount, event) => {
       if (!currentUser || userData.role !== 'admin') return;
       const btn = event.currentTarget;
       const origText = btn.innerText;
@@ -3379,7 +3379,7 @@
           ? { premiumPullsAvailable: increment(amount) }
           : { pullsAvailable: increment(amount) };
         await updateDoc(doc(db, "users", uid), updateObj);
-        await window.logSystemAction(`Admin ${currentUser.displayName} ${amount > 0 ? 'adicionou' : 'removeu'} ${Math.abs(amount)} pacotes ${type} de um jogador.`);
+        await window.logSystemAction(`Admin ${currentUser.displayName} ${amount > 0 ? 'adicionou' : 'removeu'} ${Math.abs(amount)} pacotes ${type} do jogador ${playerName}.`);
         await window.loadAdminPlayersLog();
       } catch (err) {
         window.showMessage("Erro ao alterar pacotes: " + err.message);
@@ -3513,15 +3513,15 @@
               <td class="p-2 text-green-400 font-bold">
                 ${p.pullsAvailable || 0}
                 <div class="inline-flex gap-1 ml-2">
-                  <button onclick="window.addPacksToUser('${p.uid}', 'basic', 1, event)" class="bg-green-700 hover:bg-green-600 px-1.5 py-0.5 rounded text-white text-xs leading-none transition" title="Dar 1 Pacote Básico">+</button>
-                  <button onclick="window.addPacksToUser('${p.uid}', 'basic', -1, event)" class="bg-red-700 hover:bg-red-600 px-1.5 py-0.5 rounded text-white text-xs leading-none transition" title="Tirar 1 Pacote Básico">-</button>
+                  <button onclick="window.addPacksToUser('${p.uid}', '${(p.displayName || 'Desconhecido').replace(/'/g, "\\'")}', 'basic', 1, event)" class="bg-green-700 hover:bg-green-600 px-1.5 py-0.5 rounded text-white text-xs leading-none transition" title="Dar 1 Pacote Básico">+</button>
+                  <button onclick="window.addPacksToUser('${p.uid}', '${(p.displayName || 'Desconhecido').replace(/'/g, "\\'")}', 'basic', -1, event)" class="bg-red-700 hover:bg-red-600 px-1.5 py-0.5 rounded text-white text-xs leading-none transition" title="Tirar 1 Pacote Básico">-</button>
                 </div>
               </td>
               <td class="p-2 text-yellow-400 font-bold">
                 ${p.premiumPullsAvailable || 0}
                 <div class="inline-flex gap-1 ml-2">
-                  <button onclick="window.addPacksToUser('${p.uid}', 'premium', 1, event)" class="bg-green-700 hover:bg-green-600 px-1.5 py-0.5 rounded text-white text-xs leading-none transition" title="Dar 1 Pacote Premium">+</button>
-                  <button onclick="window.addPacksToUser('${p.uid}', 'premium', -1, event)" class="bg-red-700 hover:bg-red-600 px-1.5 py-0.5 rounded text-white text-xs leading-none transition" title="Tirar 1 Pacote Premium">-</button>
+                  <button onclick="window.addPacksToUser('${p.uid}', '${(p.displayName || 'Desconhecido').replace(/'/g, "\\'")}', 'premium', 1, event)" class="bg-green-700 hover:bg-green-600 px-1.5 py-0.5 rounded text-white text-xs leading-none transition" title="Dar 1 Pacote Premium">+</button>
+                  <button onclick="window.addPacksToUser('${p.uid}', '${(p.displayName || 'Desconhecido').replace(/'/g, "\\'")}', 'premium', -1, event)" class="bg-red-700 hover:bg-red-600 px-1.5 py-0.5 rounded text-white text-xs leading-none transition" title="Tirar 1 Pacote Premium">-</button>
                 </div>
               </td>
               <td class="p-2 text-blue-400 font-bold">${p.totalPacksOpened || 0}</td>
